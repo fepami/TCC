@@ -8,7 +8,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 
 export default class Header extends Component {
-	constructor(...args){
+	constructor(...args) {
 		super(...args);
 		this.state = {hasPreviousRoute: this.props.navigator.getCurrentRoutes().length !== 1}
 	}
@@ -64,7 +64,8 @@ class ItemWrapperIOS extends Component {
 				</Text>
 			);
 		} else if (icon) {
-			content = <Icon name={icon} color={style.color} size={24} />;
+			// content = <Icon name={icon} color={style.color} size={24} />;
+			content = <Icon name={icon} size={24} />;
 		}
 
 		return (

@@ -10,7 +10,7 @@ export default class DefaultNavigator extends Component {
 		return(
 			<Navigator
 				ref='navigator'
-				style={{flex: 1, backgroundColor: 'black'}}
+				style={{flex: 1}}
 				//mudar de NavigationManager para login
 				initialRoute={{component: NavigationManager}}
 				renderScene={this.renderScene}

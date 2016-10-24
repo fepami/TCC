@@ -9,8 +9,11 @@ import {
 import { connect } from 'react-redux';
 import { switchTab } from '../redux/actions/navigation';
 import MenuItem from './MenuItem';
-import ListaPoliticosScene from '../scenes/ListaPoliticosScene';
 import HomeScene from '../scenes/HomeScene';
+import ListaPoliticosScene from '../scenes/ListaPoliticosScene';
+import ListaPropostasScene from '../scenes/ListaPropostasScene';
+import SeguindoScene from '../scenes/SeguindoScene';
+import UsuarioPerfilScene from '../scenes/UsuarioPerfilScene';
 
 class NavigationManager extends Component {
 	constructor(props){
@@ -54,17 +57,32 @@ class NavigationManager extends Component {
 
 	renderNavigationView(){
 		return(
-			<View style={{flex: 1, backgroundColor: 'white'}}>
+			<View style={{flex: 1, backgroundColor: 'white', marginTop: StatusBar.currentHeight }}>
 				<MenuItem
 					icon='home'
 					title='Home'
 					selected={this.props.tab === 'home'}
 					onPress={this.onTabSelect.bind(this, 'home')} />
 				<MenuItem
-					icon='person'
+					icon='contacts'
 					title='Políticos'
 					selected={this.props.tab === 'politicos'}
 					onPress={this.onTabSelect.bind(this, 'politicos')} />
+				<MenuItem
+					icon='bookmarks'
+					title='Propostas'
+					selected={this.props.tab === 'propostas'}
+					onPress={this.onTabSelect.bind(this, 'propostas')} />
+				<MenuItem
+					icon='star'
+					title='Seguindo'
+					selected={this.props.tab === 'seguindo'}
+					onPress={this.onTabSelect.bind(this, 'seguindo')} />
+				<MenuItem
+					icon='person'
+					title='Perfil'
+					selected={this.props.tab === 'perfil'}
+					onPress={this.onTabSelect.bind(this, 'perfil')} />
 			</View>
 		)
 	}
@@ -75,6 +93,12 @@ class NavigationManager extends Component {
 				return <HomeScene navigator={this.props.navigator}/>
 			case 'politicos':
 				return <ListaPoliticosScene navigator={this.props.navigator}/>
+			case 'propostas':
+				return <ListaPropostasScene navigator={this.props.navigator}/>
+			case 'seguindo':
+				return <SeguindoScene navigator={this.props.navigator}/>
+			case 'perfil':
+				return <UsuarioPerfilScene navigator={this.props.navigator}/>
 			default: 
 				return (
 					<View style={{flex: 1, backgroundColor: 'white'}}>

@@ -19,15 +19,15 @@ export default class PoliticosListItem extends Component {
 	render() {
 		return(
 			<TouchableElement onPress={this.props.onPress}>
-				<View style={{flexDirection: 'row'}}>
+				<View style={styles.cell}>
 					<Image
-						style={{width: 50, height: 50}}
+						style={styles.roundedimage}
 						source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}}
 					/>
-					<View style={{flexDirection: 'column', flex: 1}}>
-						<Text>{this.props.politico.name}</Text>
-						<Text>{this.props.politico.position}</Text>
-						<Text>Partido</Text>
+					<View style={styles.info}>
+						<Text>{this.props.politico.nome}</Text>
+						<Text>{this.props.politico.cargo}</Text>
+						<Text>{this.props.politico.partido}</Text>
 					</View>
 					{this.renderIcon()}
 				</View>
@@ -37,7 +37,23 @@ export default class PoliticosListItem extends Component {
 }
 
 const styles = StyleSheet.create({
+	cell: {
+		paddingHorizontal: 15,
+		paddingVertical: 5,
+		flexDirection: 'row'
+	},
+	roundedimage: {
+		width: 50, 
+		height: 50, 
+		borderRadius: 25
+	},
+	info: {
+		flexDirection: 'column', 
+		flex: 1, 
+		paddingHorizontal: 15
+	},
 	icon: {
 		alignSelf: 'center'
 	}
+
 })
