@@ -104,7 +104,7 @@ var styles = StyleSheet.create({
 		alignItems: 'flex-start',
 	},
 	centerItem: {
-		flex: 2,
+		flex: 4,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},

@@ -6,9 +6,16 @@ import {
 } from 'react-native';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
+import ListaPoliticosScene from '../scenes/ListaPoliticosScene';
 
 export default class HomeScene extends Component {
+	constructor(props){
+		super(props);
+		this.onPressRankingPoliticos = this.onPressRankingPoliticos.bind(this);
+	}
+
 	render(){
+		console.log(this.props);
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
@@ -21,7 +28,7 @@ export default class HomeScene extends Component {
 					<TouchableElement style={styles.banner}  onPress={this.onPress}>
 						<Text>Propostas mais recentes</Text>
 					</TouchableElement>
-					<TouchableElement style={styles.banner}  onPress={this.onPress}>
+					<TouchableElement style={styles.banner}  onPress={this.onPressRankingPoliticos}>
 						<Text>Ranking de políticos</Text>
 					</TouchableElement>
 					<TouchableElement style={styles.banner}  onPress={this.onPress}>
@@ -35,6 +42,11 @@ export default class HomeScene extends Component {
 	onPress(data){
 		// console.log(data);
 		// this.props.navigator.push({component: PoliticoPerfilScene, passProps: {nome: data.nome}});
+	}
+
+	onPressRankingPoliticos(data){
+		// console.log(data);
+		this.props.navigator.push({component: ListaPoliticosScene, passProps: {type: 'ranking'}});
 	}
 }
 
