@@ -21,4 +21,4 @@ class TouchableElementIOS extends Component {
 	}
 }
 
-export default TouchableElement = Platform.OS === 'ios' ? TouchableElementIOS : TouchableElementAndroid;
+export default TouchableElement = Platform.OS === 'ios' ? TouchableElementIOS : TouchableElementIOS;

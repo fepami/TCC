@@ -45,7 +45,9 @@ const styles = StyleSheet.create({
 	roundedimage: {
 		width: 50, 
 		height: 50, 
-		borderRadius: 25
+		borderRadius: 25,
+		borderColor: 'black',
+		borderWidth: 1
 	},
 	info: {
 		flexDirection: 'column', 
