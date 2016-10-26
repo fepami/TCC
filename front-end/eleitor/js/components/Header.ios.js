@@ -113,7 +113,8 @@ var styles = StyleSheet.create({
 		alignItems: 'flex-end',
 	},
 	itemWrapper: {
-		padding: 11,
+		paddingVertical: 11,
+		paddingHorizontal: 15,
 	},
 	itemText: {
 		letterSpacing: 1,

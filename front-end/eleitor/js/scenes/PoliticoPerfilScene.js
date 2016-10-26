@@ -6,9 +6,11 @@ import {
 	Text,
 	Platform
 } from 'react-native';
+import Dimensions from 'Dimensions';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
+import ApprovalBar from '../components/ApprovalBar';
 
 export default class PoliticoPerfilScene extends Component {
 	constructor(props){
@@ -67,6 +69,8 @@ export default class PoliticoPerfilScene extends Component {
 		let like_icon_color = (this.state.like_icon === 'ios-thumbs-up-outline') ? 'white' : 'limegreen';
 		let dislike_bgcolor = (this.state.dislike_icon === 'ios-thumbs-down-outline') ? 'red' : 'white';
 		let dislike_icon_color = (this.state.dislike_icon === 'ios-thumbs-down-outline') ? 'white' : 'red';
+
+		const approval_width = Dimensions.get('window').width - 30;
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
@@ -84,7 +88,8 @@ export default class PoliticoPerfilScene extends Component {
 							</View>
 						</View>
 					</View>
-					<Text style={{paddingTop: 15}}>{this.props.nome}, {this.props.idade}</Text>
+					<ApprovalBar viewSize={approval_width} approvalPercentage={this.props.approval} />
+					<Text>{this.props.nome}, {this.props.idade}</Text>
 					<Text>{this.props.cargo}</Text>
 					<Text>{this.props.vigencia}</Text>
 					<Text style={{paddingBottom: 15}}>{this.props.partido}</Text>
