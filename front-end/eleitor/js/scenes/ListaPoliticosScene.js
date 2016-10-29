@@ -104,7 +104,9 @@ export default class ListaPoliticosScene extends Component {
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
                 	dataSource={fakeFilter}
                 	selectedFilters={this.state.selectedFilters}
-                	onSelectFilter={(option) => this.onSelectFilter(option)} />
+                	onSelectFilter={(option) => this.onSelectFilter(option)} 
+                	onClearActionSelected={() => this.onClearActionSelected()}
+                	onFilterActionSelected={() => this.onFilterActionSelected()} />
 			</View>
 		)
 	}
@@ -120,6 +122,17 @@ export default class ListaPoliticosScene extends Component {
 		}
 		this.setState({selectedFilters: newSelectedOptions});
 		console.log(this.state.selectedFilters);
+	}
+
+	onClearActionSelected() {
+		console.log('onClearActionSelected');
+		const emptyArray = ['empty'];
+		this.setState({selectedFilters: emptyArray});
+		console.log(this.state.selectedFilters);
+	}
+
+	onFilterActionSelected() {
+		this.onCloseFilter();
 	}
 
 	onPoliticoPress(data) {

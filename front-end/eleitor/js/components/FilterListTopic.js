@@ -57,7 +57,7 @@ export default class FilterListTopic extends Component {
 
 const styles = StyleSheet.create({
 	cell: {
-		paddingHorizontal: 15,
+		marginHorizontal: 15,
 		paddingVertical: 10,
 		borderBottomColor: 'rgba(0,0,0,.87)',
 		borderBottomWidth: 1

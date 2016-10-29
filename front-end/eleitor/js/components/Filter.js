@@ -42,6 +42,14 @@ export default class Filter extends Component {
 	                    							options={rowData.options}
 								                	selectedOptions={this.props.selectedFilters}
 								                	onSelectFilter={(option) => this.props.onSelectFilter(option)}/>} />
+					<View style={styles.box}>
+						<TouchableElement onPress={this.props.onClearActionSelected} style={styles.button}>
+							<Text>Limpar</Text>
+						</TouchableElement>
+						<TouchableElement onPress={this.props.onFilterActionSelected} style={styles.button}>
+							<Text>Filtrar</Text>
+						</TouchableElement>
+					</View>
 				</View>
 			</Modal>
 		)
@@ -51,5 +59,21 @@ export default class Filter extends Component {
 const styles = StyleSheet.create({
 	androidView: {
 		paddingTop: -25
+	},
+	box: {
+		height: 100,
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center'
+	},
+	button: {
+		width: 100,
+		height: 40,
+		margin: 15,
+		borderColor: 'black',
+		borderWidth: 1,
+		borderRadius: 3,
+		justifyContent: 'center',
+		alignItems: 'center'
 	}
 })
