@@ -19,7 +19,8 @@ export default class Header extends Component {
 	}
 
 	render() {
-		const icon = this.state.hasPreviousState ? 'md-arrow-back' : 'md-menu';
+		const {leftItem} = this.props;
+		const icon = leftItem ? leftItem.icon : this.state.hasPreviousState ? 'md-arrow-back' : 'md-menu';
 		const actions = this.props.actions;
 
 		const onActionSelected = position => {
@@ -50,7 +51,9 @@ export default class Header extends Component {
 	}
 
 	onIconClicked() {
-		if(this.state.hasPreviousState){
+		if(this.props.leftItem){
+			this.props.leftItem.onPress();
+		} else if(this.state.hasPreviousState){
 			this.props.navigator.pop();
 		} else {
 			this.context.openDrawer();

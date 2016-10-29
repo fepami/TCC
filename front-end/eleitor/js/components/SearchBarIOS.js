@@ -14,24 +14,24 @@ export default class SearchBar extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			show_cancel: false
+			showCancel: false
 		}
 		this.showCancel = this.showCancel.bind(this);
 		this.hideCancel = this.hideCancel.bind(this);
 	}
 
 	showCancel() {
-		this.setState({show_cancel: true});
+		this.setState({showCancel: true});
 	}
 
 	hideCancel() {
-		this.setState({show_cancel: false});
+		this.setState({showCancel: false});
 		dismissKeyboard();
 		this.refs['searchbar'].clear(0);
 	}
 
 	renderCancel() {
-		if(this.state.show_cancel === true) {
+		if(this.state.showCancel === true) {
 			return(
 				<TouchableElement onPress={this.hideCancel} style={{height: 50, alignItems: 'center', justifyContent: 'center', marginRight: 10}}>
 					<Text style={{alignSelf: 'center'}}>Cancelar</Text>
@@ -41,7 +41,7 @@ export default class SearchBar extends Component {
 	}
 
 	render() {
-		let deviceHeight = Platform.select({
+		const deviceHeight = Platform.select({
 			ios: 28,
 			android: 35
 		})

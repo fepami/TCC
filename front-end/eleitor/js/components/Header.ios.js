@@ -119,6 +119,6 @@ var styles = StyleSheet.create({
 	itemText: {
 		letterSpacing: 1,
 		fontSize: 12,
-		color: 'white',
+		color: 'black',
 	},
 });

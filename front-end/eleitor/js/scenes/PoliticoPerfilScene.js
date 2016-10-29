@@ -16,9 +16,9 @@ export default class PoliticoPerfilScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			star_icon: 'ios-star-outline',
-			like_icon: 'ios-thumbs-up',
-			dislike_icon: 'ios-thumbs-down'
+			starIcon: 'ios-star-outline',
+			likeIcon: 'ios-thumbs-up',
+			dislikeIcon: 'ios-thumbs-down'
 		}
 		this.onStarActionSelected = this.onStarActionSelected.bind(this);
 		this.onLikeActionSelected = this.onLikeActionSelected.bind(this);
@@ -26,49 +26,49 @@ export default class PoliticoPerfilScene extends Component {
 	}
 
 	onStarActionSelected(){
-		if(this.state.star_icon === 'ios-star-outline'){
-			this.setState({star_icon: 'ios-star'});	
+		if(this.state.starIcon === 'ios-star-outline'){
+			this.setState({starIcon: 'ios-star'});	
 		} else {
-			this.setState({star_icon: 'ios-star-outline'});
+			this.setState({starIcon: 'ios-star-outline'});
 		}
 	}
 
 	onLikeActionSelected(){
-		if(this.state.like_icon === 'ios-thumbs-up-outline'){
-			this.setState({like_icon: 'ios-thumbs-up'});	
+		if(this.state.likeIcon === 'ios-thumbs-up-outline'){
+			this.setState({likeIcon: 'ios-thumbs-up'});	
 		} else {
-			this.setState({like_icon: 'ios-thumbs-up-outline'});
-			this.setState({dislike_icon: 'ios-thumbs-down'});
+			this.setState({likeIcon: 'ios-thumbs-up-outline'});
+			this.setState({dislikeIcon: 'ios-thumbs-down'});
 		}
 	}
 
 	onDislikeActionSelected(){
-		if(this.state.dislike_icon === 'ios-thumbs-down-outline'){
-			this.setState({dislike_icon: 'ios-thumbs-down'});	
+		if(this.state.dislikeIcon === 'ios-thumbs-down-outline'){
+			this.setState({dislikeIcon: 'ios-thumbs-down'});	
 		} else {
-			this.setState({dislike_icon: 'ios-thumbs-down-outline'});
-			this.setState({like_icon: 'ios-thumbs-up'});	
+			this.setState({dislikeIcon: 'ios-thumbs-down-outline'});
+			this.setState({likeIcon: 'ios-thumbs-up'});	
 		}
 	}
 
 	renderIcon() {
 		return Platform.select({
-			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrow_icon}/>
+			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrowIcon}/>
 		})
 	}
 
 	render(){
 		const actions = [{
 			title: 'Seguir',
-			iconName: this.state.star_icon,
+			iconName: this.state.starIcon,
 			show: 'always',
 			onActionSelected: this.onStarActionSelected
 		}];
 
-		let like_bgcolor = (this.state.like_icon === 'ios-thumbs-up-outline') ? 'limegreen' : 'white';
-		let like_icon_color = (this.state.like_icon === 'ios-thumbs-up-outline') ? 'white' : 'limegreen';
-		let dislike_bgcolor = (this.state.dislike_icon === 'ios-thumbs-down-outline') ? 'red' : 'white';
-		let dislike_icon_color = (this.state.dislike_icon === 'ios-thumbs-down-outline') ? 'white' : 'red';
+		let like_bgcolor = (this.state.likeIcon === 'ios-thumbs-up-outline') ? 'limegreen' : 'white';
+		let likeIcon_color = (this.state.likeIcon === 'ios-thumbs-up-outline') ? 'white' : 'limegreen';
+		let dislike_bgcolor = (this.state.dislikeIcon === 'ios-thumbs-down-outline') ? 'red' : 'white';
+		let dislikeIcon_color = (this.state.dislikeIcon === 'ios-thumbs-down-outline') ? 'white' : 'red';
 
 		const approval_width = Dimensions.get('window').width - 30;
 		return(
@@ -81,7 +81,7 @@ export default class PoliticoPerfilScene extends Component {
 					<View style={{alignItems: 'center'}}>
 						<View style={{width: 120}}>
 							<Image
-								style={styles.rounded_image}
+								style={styles.roundedImage}
 								source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
 							<View style={styles.line}>
 								<Text style={{color: 'white'}}>{this.props.vote}</Text>
@@ -94,23 +94,23 @@ export default class PoliticoPerfilScene extends Component {
 					<Text>{this.props.vigencia}</Text>
 					<Text style={{paddingBottom: 15}}>{this.props.partido}</Text>
 					<TouchableElement onPress={this.onPressHistorico}>
-						<View style={styles.cell_top}>
-							<Text style={styles.cell_text}>Histórico de Propostas</Text>
+						<View style={styles.cellTop}>
+							<Text style={styles.cellText}>Histórico de Propostas</Text>
 							{this.renderIcon()}
 						</View>
 					</TouchableElement>
 					<TouchableElement onPress={this.onPressCarreira}>
-						<View style={styles.cell_bottom}>
-							<Text style={styles.cell_text}>Carreira Política</Text>
+						<View style={styles.cellBottom}>
+							<Text style={styles.cellText}>Carreira Política</Text>
 							{this.renderIcon()}
 						</View>
 					</TouchableElement>
 					<View style={styles.box}>
 						<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
-							<Icon name='md-thumbs-up' color={like_icon_color} size={30}/>
+							<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
 						</TouchableElement>
 						<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
-							<Icon name='md-thumbs-down' color={dislike_icon_color} size={30}/>
+							<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
 						</TouchableElement>
 					</View>
 				</View>
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 		flex: 1
 	},
-	rounded_image: {
+	roundedImage: {
 		width: 100, 
 		height: 100, 
 		borderRadius: 50,
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		backgroundColor: 'transparent'
 	},
-	cell_top: {
+	cellTop: {
 		paddingVertical: 15,
 		flexDirection: 'row', 
 		borderTopColor: 'rgba(0,0,0,.87)',
@@ -162,17 +162,17 @@ const styles = StyleSheet.create({
 		borderBottomColor: 'rgba(0,0,0,.87)',
 		borderBottomWidth: 1
 	},
-	cell_bottom: {
+	cellBottom: {
 		paddingVertical: 15,
 		flexDirection: 'row', 
 		borderBottomColor: 'rgba(0,0,0,.87)',
 		borderBottomWidth: 1
 	},
-	cell_text: {
+	cellText: {
 		flex: 1, 
 		alignSelf: 'center'
 	},
-	arrow_icon: {
+	arrowIcon: {
 		alignSelf: 'center'
 	},
 	box: {

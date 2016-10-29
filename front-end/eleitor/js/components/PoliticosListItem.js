@@ -17,7 +17,7 @@ export default class PoliticosListItem extends Component {
 	}
 
 	renderRanking() {
-		if (this.props.cell_type === 'ranking') {
+		if (this.props.cellType === 'ranking') {
 			return(
 				<Text style={styles.ranking}>{this.props.politico.ranking}</Text>
 			)

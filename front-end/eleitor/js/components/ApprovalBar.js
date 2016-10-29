@@ -5,16 +5,10 @@ import {
 } from 'react-native';
 
 export default class ApprovalBar extends Component {
-	static contextTypes = {
-		viewSize: React.PropTypes.number,
-		approvalPercentage: React.PropTypes.number
-	}
-
 	render() {
-		let container_size = this.props.viewSize - 2;
-		let green_size = container_size * this.props.approvalPercentage / 100;
-		let red_size = container_size - green_size;
-		console.log(container_size+'='+green_size+'+'+red_size);
+		const container_size = this.props.viewSize - 2;
+		const green_size = container_size * this.props.approvalPercentage / 100;
+		const red_size = container_size - green_size;
 		let green_style = styles.green;
 		let red_style = styles.red;
 
