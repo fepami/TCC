@@ -1,0 +1,8 @@
+# para criar um container do docker com cassandra:
+docker run --detach --name cassone poklet/cassandra
+
+# ou se jah existe esse container:
+sudo docker start cassone
+
+# para conectar o node com o container eh necessario ver qual eh o ip do docker usando ifconfig (docker0)
+# mudar "contactPoints" no cassandra_handler.js
