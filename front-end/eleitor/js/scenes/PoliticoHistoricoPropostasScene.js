@@ -2,20 +2,19 @@ import React, {Component} from 'react';
 import {
 	StyleSheet,
 	View,
+	Image,
 	Text,
-	TextInput,
 	ListView,
 	Platform
 } from 'react-native';
-import PropostasListItem from '../components/PropostasListItem';
-import SearchBarIOS from '../components/SearchBarIOS';
 import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
+import PropostasListItem from '../components/PropostasListItem';
 import PropostaDetalheScene from '../scenes/PropostaDetalheScene';
 import {fakePropostas, fakeFilter} from '../fakeData';
 
-export default class ListaPropostasScene extends Component {	
+export default class PoliticoHistoricoPropostasScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -25,12 +24,6 @@ export default class ListaPropostasScene extends Component {
 		this.onShowFilter = this.onShowFilter.bind(this);
 		this.onCloseFilter = this.onCloseFilter.bind(this);
 		this.onSubmitSearch = this.onSubmitSearch.bind(this);
-	}
-
-	renderSearchBarIOS() {
-		return Platform.select({
-			ios: <SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)}/>
-		})
 	}
 
 	chooseFilterIcon() {
@@ -56,7 +49,7 @@ export default class ListaPropostasScene extends Component {
 
 	}
 
-	render(){
+	render() {
 		let filterIcon = this.chooseFilterIcon();
 		const actions = [
 		{
@@ -64,33 +57,34 @@ export default class ListaPropostasScene extends Component {
 			iconName: filterIcon,
 			show: 'always',
 			onActionSelected: this.onShowFilter
-		},
-		// {
-		// 	title: 'Busca',
-		// 	iconName: 'md-search',
-		// 	show: 'always',
-		// 	on: this.onSubmitSearch
-		// }
-		];
-
+		}];
 		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-		let type = this.props.type ? this.props.type : 'lista';
-		let title = this.props.type ? 'Ranking de Propostas' : 'Propostas';
 		const propostasDataSource = ds.cloneWithRows(fakePropostas);
 		const filterDataSource = ds.cloneWithRows(fakeFilter);
 
 		return(
-			<View style={{flex: 1, backgroundColor: 'white'}}>
+			<View style={{flex: 1}}>
 				<Header
 					navigator={this.props.navigator}
-					title={title}
+					title='Histórico de Propostas'
 					actions={actions} />
-				<SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)} />
+				<View style={styles.cell}>
+					<Image
+						style={styles.roundedimage}
+						source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
+					<View style={styles.info}>
+						<Text style={styles.h1}>{this.props.nome}</Text>
+						<Text>{this.props.cargo}</Text>
+						<Text>{this.props.partido}</Text>
+					</View>
+				</View>
+				<View style={{height: 3, borderBottomWidth: 1, borderColor: 'black'}}></View>
 				<ListView
+					style={{flex: 1}}
                     enableEmptySections={true}
                     automaticallyAdjustContentInsets={false}
                     dataSource={propostasDataSource} 
-                    renderRow={(rowData) => <PropostasListItem onPress={()=>this.onPropostaPress(rowData)} proposta={rowData} cellType={type}/>} />
+                    renderRow={(rowData) => <PropostasListItem onPress={()=>this.onPropostaPress(rowData)} proposta={rowData} cellType={'lista'}/>} />
                 <Filter 
                 	navigator={this.props.navigator} 
                 	modalVisible={this.state.modalVisible} 
@@ -133,5 +127,36 @@ export default class ListaPropostasScene extends Component {
 }
 
 const styles = StyleSheet.create({
-
+	cell: {
+		paddingHorizontal: 15,
+		paddingVertical: 10,
+		flexDirection: 'row',
+		borderBottomWidth: 1,
+		borderColor: 'black'
+	},
+	h1: {
+		fontWeight: 'bold'
+	},
+	roundedimage: {
+		width: 50, 
+		height: 50, 
+		borderRadius: 25,
+		borderColor: 'black',
+		borderWidth: 1,
+		alignSelf: 'center'
+	},
+	info: {
+		flexDirection: 'column', 
+		flex: 1, 
+		paddingHorizontal: 15
+	},
+	icon: {
+		alignSelf: 'center'
+	},
+	ranking: {
+		width: 20,
+		color: 'black', 
+		paddingRight: 15, 
+		alignSelf: 'center'
+	}
 })

@@ -13,7 +13,6 @@ export default class FilterListTopic extends Component {
 		super(props);
 		this.state = {
 			showOptions: false,
-			selectedOptions: this.props.selectedOptions
 		}
 		this.showFilterListItems = this.showFilterListItems.bind(this);
 	}
@@ -24,7 +23,7 @@ export default class FilterListTopic extends Component {
 			<FilterListItem
 				title={option}
 				key={ii}
-				isChecked={this.state.selectedOptions.includes(option)}
+				isChecked={this.props.selectedOptions.includes(option)}
 				onSelectFilter={(option) => this.props.onSelectFilter(option)}
 			/>
 		));

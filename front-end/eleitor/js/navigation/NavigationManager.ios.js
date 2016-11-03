@@ -42,22 +42,24 @@ class NavigationManager extends Component{
 							onPress={this.onTabSelect.bind(this, tab.tab)}
 							iconName={`ios-${tab.icon}-outline`}
 							selectedIconName={`ios-${tab.icon}`}>
-							<Navigator
-								ref='navigator'
-								style={{flex: 1}}
-								initialRoute={{component: tab.component}}
-								renderScene={this.renderScene}
-								configureScene={route => {
-									if(Platform.OS === 'android'){
-										return Navigator.SceneConfigs.FloatFromBottomAndroid;
-									}
-									if(route.modal){
-										return Navigator.SceneConfigs.FloatFromBottom;
-									} else {
-										return Navigator.SceneConfigs.FloatFromRight;
-									}
-								}}
-							/>
+							<View style={styles.container} >
+								<Navigator
+									ref='navigator'
+									style={{flex: 1}}
+									initialRoute={{component: tab.component}}
+									renderScene={this.renderScene}
+									configureScene={route => {
+										if(Platform.OS === 'android'){
+											return Navigator.SceneConfigs.FloatFromBottomAndroid;
+										}
+										if(route.modal){
+											return Navigator.SceneConfigs.FloatFromBottom;
+										} else {
+											return Navigator.SceneConfigs.FloatFromRight;
+										}
+									}}
+								/>
+							</View>
 						</Icon.TabBarItem>
 					)
 				})}

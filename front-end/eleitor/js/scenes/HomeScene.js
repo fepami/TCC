@@ -7,11 +7,13 @@ import {
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
 import ListaPoliticosScene from '../scenes/ListaPoliticosScene';
+import ListaPropostasScene from '../scenes/ListaPropostasScene';
 
 export default class HomeScene extends Component {
 	constructor(props){
 		super(props);
 		this.onPressRankingPoliticos = this.onPressRankingPoliticos.bind(this);
+		this.onPressRankingPropostas = this.onPressRankingPropostas.bind(this);
 	}
 
 	render(){
@@ -31,7 +33,7 @@ export default class HomeScene extends Component {
 					<TouchableElement style={styles.banner}  onPress={this.onPressRankingPoliticos}>
 						<Text>Ranking de políticos</Text>
 					</TouchableElement>
-					<TouchableElement style={styles.banner}  onPress={this.onPress}>
+					<TouchableElement style={styles.banner}  onPress={this.onPressRankingPropostas}>
 						<Text>Ranking de propostas</Text>
 					</TouchableElement>
 				</View>
@@ -39,14 +41,19 @@ export default class HomeScene extends Component {
 		)
 	}
 
-	onPress(data){
+	onPress(){
 		// console.log(data);
 		// this.props.navigator.push({component: PoliticoPerfilScene, passProps: {nome: data.nome}});
 	}
 
-	onPressRankingPoliticos(data){
+	onPressRankingPoliticos(){
 		// console.log(data);
 		this.props.navigator.push({component: ListaPoliticosScene, passProps: {type: 'ranking'}});
+	}
+
+	onPressRankingPropostas(){
+		// console.log(data);
+		this.props.navigator.push({component: ListaPropostasScene, passProps: {type: 'ranking'}});
 	}
 }
 

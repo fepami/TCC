@@ -11,27 +11,19 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
 import ApprovalBar from '../components/ApprovalBar';
-import PoliticoHistoricoPropostasScene from '../scenes/PoliticoHistoricoPropostasScene';
+import PoliticosListItem from '../components/PoliticosListItem';
+import PoliticoPerfilScene from '../scenes/PoliticoPerfilScene';
+import {fakePolitico0, fakePolitico1, fakePolitico2} from '../fakeData';
 
-export default class PoliticoPerfilScene extends Component {
+export default class PropostaDetalheScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			starIcon: 'ios-star-outline',
 			likeIcon: 'ios-thumbs-up',
 			dislikeIcon: 'ios-thumbs-down'
 		}
-		this.onStarActionSelected = this.onStarActionSelected.bind(this);
 		this.onLikeActionSelected = this.onLikeActionSelected.bind(this);
 		this.onDislikeActionSelected = this.onDislikeActionSelected.bind(this);
-	}
-
-	onStarActionSelected(){
-		if(this.state.starIcon === 'ios-star-outline'){
-			this.setState({starIcon: 'ios-star'});	
-		} else {
-			this.setState({starIcon: 'ios-star-outline'});
-		}
 	}
 
 	onLikeActionSelected(){
@@ -58,54 +50,43 @@ export default class PoliticoPerfilScene extends Component {
 		})
 	}
 
-	render(){
-		const actions = [{
-			title: 'Seguir',
-			iconName: this.state.starIcon,
-			show: 'always',
-			onActionSelected: this.onStarActionSelected
-		}];
+	getPoliticoByID(id) {
+		switch(id) {
+			case 0:
+				return fakePolitico0;
+			case 1:
+				return fakePolitico1;
+			case 2:
+				return fakePolitico2;
+			default:
+				return fakePolitico0;
+				break;
+		}
+	}
 
+	render(){
 		let like_bgcolor = (this.state.likeIcon === 'ios-thumbs-up-outline') ? 'limegreen' : 'white';
 		let likeIcon_color = (this.state.likeIcon === 'ios-thumbs-up-outline') ? 'white' : 'limegreen';
 		let dislike_bgcolor = (this.state.dislikeIcon === 'ios-thumbs-down-outline') ? 'red' : 'white';
 		let dislikeIcon_color = (this.state.dislikeIcon === 'ios-thumbs-down-outline') ? 'white' : 'red';
 
 		const approval_width = Dimensions.get('window').width - 30;
+		const politicoData = this.getPoliticoByID(this.props.politicoID);
+		
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 					navigator={this.props.navigator}
-					title={this.props.nome} 
-					actions={actions}/>
+					title={this.props.categoria} />
 				<View style={styles.view}>
-					<View style={{alignItems: 'center'}}>
-						<View style={{width: 120}}>
-							<Image
-								style={styles.roundedImage}
-								source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
-							<View style={styles.line}>
-								<Text style={{color: 'white'}}>{this.props.vote}</Text>
-							</View>
-						</View>
-					</View>
+					<Text style={styles.h1}>{this.props.nome}</Text>
+					<Text>Categoria: {this.props.categoria}</Text>
+					<Text>Proposta em: {this.props.data}</Text>
+					<Text>Por: {this.props.nomePolitico}</Text>
 					<ApprovalBar viewSize={approval_width} approvalPercentage={this.props.approval} />
-					<Text style={styles.h1}>{this.props.nome}, {this.props.idade}</Text>
-					<Text>{this.props.cargo}</Text>
-					<Text>{this.props.vigencia}</Text>
-					<Text style={{paddingBottom: 15}}>{this.props.partido}</Text>
-					<TouchableElement onPress={this.onPressHistorico.bind(this)}>
-						<View style={styles.cellTop}>
-							<Text style={styles.cellText}>Histórico de Propostas</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressCarreira.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Carreira Política</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
+					<Text>Descrição:</Text>
+					<Text style={{paddingBottom: 15}}>{this.props.descricao}</Text>
+					<PoliticosListItem style={styles.cell} onPress={()=>this.onPoliticoPress(politicoData)} politico={politicoData} cellType='lista'/>
 					<View style={styles.box}>
 						<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
 							<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
@@ -119,14 +100,9 @@ export default class PoliticoPerfilScene extends Component {
 		)
 	}
 
-	onPressHistorico(){
+	onPoliticoPress(data){
 		// console.log(data);
-		this.props.navigator.push({component: PoliticoHistoricoPropostasScene, passProps: this.props});
-	}
-
-	onPressCarreira(){
-		// console.log(data);
-		// this.props.navigator.push({component: PoliticoPerfilScene, passProps: {nome: data.nome}});
+		this.props.navigator.push({component: PoliticoPerfilScene, passProps: data});
 	}
 }
 
@@ -140,42 +116,11 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: 'bold'
 	},
-	roundedImage: {
-		width: 100, 
-		height: 100, 
-		borderRadius: 50,
-		alignSelf: 'center',
-		borderColor: 'red', // trocar para preto
-		borderWidth: 1
-	},
-	line: {
-		position: 'absolute',
-		bottom: 0,
-		width: 120,
-		height: 30,
-		borderTopColor: 'red', // trocar para preto
-		borderTopWidth: 1,
-		alignItems: 'center',
-		justifyContent: 'center',
-		backgroundColor: 'transparent'
-	},
-	cellTop: {
-		paddingVertical: 15,
-		flexDirection: 'row', 
-		borderTopColor: 'rgba(0,0,0,.87)',
-		borderTopWidth: 1,
-		borderBottomColor: 'rgba(0,0,0,.87)',
-		borderBottomWidth: 1
-	},
-	cellBottom: {
-		paddingVertical: 15,
-		flexDirection: 'row', 
-		borderBottomColor: 'rgba(0,0,0,.87)',
-		borderBottomWidth: 1
-	},
-	cellText: {
-		flex: 1, 
-		alignSelf: 'center'
+	cell: {
+		paddingHorizontal: 0,
+		borderTopWidth:1,
+		borderBottomWidth: 1,
+		borderColor: 'black'
 	},
 	arrowIcon: {
 		alignSelf: 'center'

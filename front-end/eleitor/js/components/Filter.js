@@ -22,18 +22,20 @@ export default class Filter extends Component {
 			icon: 'md-close',
 			onPress: this.closeModal.bind(this)
 		};
+		
 		return(
 			<Modal 
 				animationType={'slide'}
 				transparent={false}
 				visible={this.props.modalVisible}
 				onRequestClose={() => this.props.changeFilterVisibility(false)} >
-				<View style={Platform.select({android: styles.androidView})}>
+				<View style={[Platform.select({android: styles.androidView}), {flex: 1}]}>
 					<Header
 						navigator={this.props.navigator}
-						title='Filtro'
+						title={this.props.title}
 						leftItem={closeModal} />
 					<ListView
+						style={{flex: 1}}
 	                    enableEmptySections={true}
 	                    automaticallyAdjustContentInsets={false}
 	                    dataSource={this.props.dataSource} 

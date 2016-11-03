@@ -13,13 +13,14 @@ import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PoliticoPerfilScene from '../scenes/PoliticoPerfilScene';
+import {fakePoliticos, fakeFilter} from '../fakeData';
 
 export default class ListaPoliticosScene extends Component {	
 	constructor(props){
 		super(props);
 		this.state = {
 			modalVisible: false,
-			selectedFilters: ['empty']
+			selectedFilters: []
 		}
 		this.onShowFilter = this.onShowFilter.bind(this);
 		this.onCloseFilter = this.onCloseFilter.bind(this);
@@ -75,17 +76,9 @@ export default class ListaPoliticosScene extends Component {
 		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 		let type = this.props.type ? this.props.type : 'lista';
 		let title = this.props.type ? 'Ranking de Políticos' : 'Políticos';
-		// const dataSource = ds.cloneWithRows([0,1,2,3,4,5,6,7,8,9,10]);
-		const fakeData0 = {nome: 'NOME DO POLITICO', idade: 'IDADE', cargo: 'CARGO E LOCALIZACAO', vigencia: 'VIGENCIA DO CARGO', partido: 'NOME DO PARTIDO', vote: 'xxxx', ranking: '1', approval: '30'};
-		const fakeData1 = {nome: 'helder', idade: '30 anos', cargo: 'presidente', vigencia: '29 de julho de 2005 a 24 de janeiro de 2012', partido: 'partido xyz', vote: '1234', ranking: '10', approval: '50'};
-		const fakeData2 = {nome: 'marcela', idade: '24 anos', cargo: 'prefeito de sao paulo', vigencia: '1º de janeiro de 2013 até a atualidade', partido: 'partido abc', vote: '0987', ranking: '121', approval: '0'};
-		const dataSource = ds.cloneWithRows([fakeData0, fakeData1, fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1,fakeData2, fakeData1]);
+		const politicosDataSource = ds.cloneWithRows(fakePoliticos);
+		const filterDataSource = ds.cloneWithRows(fakeFilter);
 
-		const fakeFilter = ds.cloneWithRows([{topic: 'Localização', options: ['São Paulo', 'Rio de Janeiro']}, 
-							{topic: 'Cargo', options: ['Prefeito', 'Vereador']},
-							{topic: 'Partido', options: ['PT', 'PSDB', 'PSOL']}, 
-							{topic: 'Assunto', options: ['Saúde', 'Educação', 'Transporte', 'Animais']},
-							{topic: 'Aprovação', options: ['Melhores Aprovados', 'Piores Aprovados']}]);
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
@@ -96,13 +89,14 @@ export default class ListaPoliticosScene extends Component {
 				<ListView
                     enableEmptySections={true}
                     automaticallyAdjustContentInsets={false}
-                    dataSource={dataSource} 
+                    dataSource={politicosDataSource} 
                     renderRow={(rowData) => <PoliticosListItem onPress={()=>this.onPoliticoPress(rowData)} politico={rowData} cellType={type}/>} />
                 <Filter 
                 	navigator={this.props.navigator} 
                 	modalVisible={this.state.modalVisible} 
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
-                	dataSource={fakeFilter}
+                	dataSource={filterDataSource}
+                	title='Filtrar Políticos'
                 	selectedFilters={this.state.selectedFilters}
                 	onSelectFilter={(option) => this.onSelectFilter(option)} 
                 	onClearActionSelected={() => this.onClearActionSelected()}
@@ -126,9 +120,7 @@ export default class ListaPoliticosScene extends Component {
 
 	onClearActionSelected() {
 		console.log('onClearActionSelected');
-		const emptyArray = ['empty'];
-		this.setState({selectedFilters: emptyArray});
-		console.log(this.state.selectedFilters);
+		this.setState({selectedFilters: []});
 	}
 
 	onFilterActionSelected() {

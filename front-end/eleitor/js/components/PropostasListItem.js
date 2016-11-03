@@ -9,7 +9,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
 
-export default class PoliticosListItem extends Component {
+export default class PropostasListItem extends Component {
 	renderIcon() {
 		return Platform.select({
 			ios: <Icon name='ios-arrow-forward' size={24} style={styles.icon}/>
@@ -19,7 +19,7 @@ export default class PoliticosListItem extends Component {
 	renderRanking() {
 		if (this.props.cellType === 'ranking') {
 			return(
-				<Text style={styles.ranking}>{this.props.politico.ranking}</Text>
+				<Text style={styles.ranking}>{this.props.proposta.ranking}</Text>
 			)
 		} else {
 			return null;
@@ -29,15 +29,16 @@ export default class PoliticosListItem extends Component {
 	render() {
 		return(
 			<TouchableElement onPress={this.props.onPress}>
-				<View style={[styles.cell, this.props.style]}>
+				<View style={styles.cell}>
 					{this.renderRanking()}
 					<Image
 						style={styles.roundedimage}
 						source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
 					<View style={styles.info}>
-						<Text style={styles.h1}>{this.props.politico.nome}</Text>
-						<Text>{this.props.politico.cargo}</Text>
-						<Text>{this.props.politico.partido}</Text>
+						<Text style={styles.h1}>{this.props.proposta.nome}</Text>
+						<Text>Categoria: {this.props.proposta.categoria}</Text>
+						<Text>Proposta em: {this.props.proposta.data}</Text>
+						<Text>Por: {this.props.proposta.nomePolitico}</Text>
 					</View>
 					{this.renderIcon()}
 				</View>
