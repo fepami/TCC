@@ -5,11 +5,14 @@ const pool = mysql.createPool({
   host     : 'localhost',
   user     : 'root',
   password : 'gogogo',
-  database : 'node',
+  database : 'eleitor',
   debug    :  false
 });
 
-function handler(query, callback) {  
+// INSERT INTO politician VALUES (1,'Felipe','1993-04-05', 'TCC')
+// INSERT INTO politician VALUES (2,'Yay','1999-04-05', 'TCC')
+
+function handler(query, callback) {
   pool.getConnection(function(err, connection){
     if (err) {
       // res.json({"code" : 100, "status" : "Error in connection database"});
@@ -18,7 +21,7 @@ function handler(query, callback) {
     }
 
     console.log('connected as id ' + connection.threadId);
-    
+
     connection.query(query, function(err,rows){
       connection.release();
       callback(err, rows)
@@ -29,7 +32,7 @@ function handler(query, callback) {
       // }
     });
 
-    connection.on('error', function(err) {      
+    connection.on('error', function(err) {
       // res.json({"code" : 100, "status" : "Error in connection database"});
       callback(err, null)
       return;

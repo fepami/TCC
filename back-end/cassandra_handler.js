@@ -1,7 +1,7 @@
 const cassandra = require('cassandra-driver');
 const client = new cassandra.Client({
-  contactPoints: ['172.17.0.2', '172.17.0.1'],
-  keyspace: 'test_keyspace'
+  contactPoints: ['127.0.0.1'],
+  keyspace: 'eleitor'
 });
 
 client.connect(function (err) {
@@ -21,20 +21,26 @@ client.connect(function (err) {
 //   };
 // });
 
-var query = 'SELECT * FROM test_table';
-client.execute(query, function (err, result) {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log('Cassandra OK!');
-  };
-});
+// var query = 'SELECT * FROM politician_vote';
+// client.execute(query, function (err, result) {
+//   if (err) {
+//     console.log(err);
+//   } else {
+//     console.log('Cassandra OK!');
+//   };
+// });
 
 function handler(query, callback) {
-  client.execute(query, callback)
+  var wrapper = function(err, result){
+    if (err) {return callback(err, result);}
+
+    return callback(err, result['rows']);
+  }
+
+  client.execute(query, wrapper)
 };
 
 module.exports = {
-  'handler': client.execute,
+  'handler': handler,
   'client': client
 }
