@@ -15,7 +15,6 @@ const pool = mysql.createPool({
 function handler(query, params_or_callback, callback) {
   pool.getConnection(function(err, connection){
     if (err) {
-      // res.json({"code" : 100, "status" : "Error in connection database"});
       callback(err, null)
       return;
     }
@@ -26,33 +25,28 @@ function handler(query, params_or_callback, callback) {
       connection.query(query, function(err,rows){
         connection.release();
         params_or_callback(err, rows)
-        // if(!err) {
-        //   res.json(rows);
-        // } else {
-        //   res.json(err);
-        // }
       });
     } else {
       connection.query(query, params_or_callback, function(err,rows){
         connection.release();
         callback(err, rows)
-        // if(!err) {
-        //   res.json(rows);
-        // } else {
-        //   res.json(err);
-        // }
       });
     }
 
-
-
     connection.on('error', function(err) {
-      // res.json({"code" : 100, "status" : "Error in connection database"});
       callback(err, null)
       return;
     });
   });
 }
+
+handler('select 1', function(err){
+  if (err) {
+    console.log(err);
+  } else {
+    console.log('MySql loaded!');
+  }
+});
 
 module.exports = {
   'handler': handler

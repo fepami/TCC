@@ -7,8 +7,9 @@ const client = new cassandra.Client({
 client.connect(function (err) {
   if (err) {
     console.log(err);
-  };
-  console.log('Cassandra loaded!')
+  } else {
+    console.log('Cassandra loaded!');
+  }
 });
 
 // var query = 'INSERT INTO test_table (id, test_value) VALUES (?, ?)';
