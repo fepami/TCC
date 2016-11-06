@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 
 const hostname = '127.0.0.1';
-const port = 3000;
+const port = 80;
 
 const mysql_handler = require("./mysql_handler").handler
 const cassandra_handler = require("./cassandra_handler").handler
@@ -179,6 +179,6 @@ app.get("/lista_politicos",(req,res) => {
 });
 
 
-app.listen(3000, () => {
-	console.log('Listening on port 3000');
+app.listen(port, () => {
+	console.log('Listening on port '+ port);
 });

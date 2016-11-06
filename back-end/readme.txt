@@ -14,6 +14,9 @@ docker run -it --rm --net container:cassone poklet/cassandra cqlsh
 
 CREATE KEYSPACE eleitor WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1}
 
+#ssh -i /path/myfirstkey.pem ec2-user@i-0b191e44f2f250804
+#ssh -i /path/myfirstkey.pem ubuntu@i-0b191e44f2f250804
+
 
 #### MySql ####
 CREATE DATABASE eleitor;
