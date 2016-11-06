@@ -2,15 +2,15 @@ const express = require("express");
 const app = express();
 
 const hostname = '127.0.0.1';
-const port = 80;
+const port = 3000;
 
 const mysql_handler = require("./mysql_handler").handler
 const cassandra_handler = require("./cassandra_handler").handler
 
 const cassandra_client = require("./cassandra_handler").client
 
-// INSERT INTO politician VALUES (1,'Felipe','1993-04-05', 'TCC')
-// INSERT INTO politician VALUES (2,'Yay','1999-04-05', 'TCC')
+// INSERT INTO politician VALUES (1,'Felipe','1993-04-05', 'TCC');
+// INSERT INTO politician VALUES (2,'Yay','1999-04-05', 'TCC');
 
 // INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (1,1,true);
 // INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (2,1,true);
@@ -65,7 +65,7 @@ app.get("/",(req,res) => {
 // 		if (err) {
 // 			res.json(err);
 // 		} else {
-// 			function get_age(dateString) {
+// 			function get_age_from_birthday(dateString) {
 // 				var today = new Date();
 // 				var birthDate = new Date(dateString);
 // 				var age = today.getFullYear() - birthDate.getFullYear();
@@ -85,7 +85,7 @@ app.get("/",(req,res) => {
 // 					'politician_id': poli['id'],
 // 					'ranking': poli['id'], // faaaake
 // 					'nome': poli['name'],
-// 					'idade': get_age(poli['date_of_birth']) + ' anos',
+// 					'idade': get_age_from_birthday(poli['date_of_birth']) + ' anos',
 // 					'partido': poli['party'],
 // 					'approval': 0
 // 				}
@@ -134,7 +134,20 @@ app.get("/",(req,res) => {
 // 		}
 // 	});
 // });
-app.get("/lista_politicos",(req,res) => {
+
+function get_age_from_birthday(dateString) {
+	var today = new Date();
+	var birthDate = new Date(dateString);
+	var age = today.getFullYear() - birthDate.getFullYear();
+	var m = today.getMonth() - birthDate.getMonth();
+	if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+		age--;
+	}
+	return age;
+}
+
+
+app.get("/politicos",(req,res) => {
 	var query_for_polis = 'select \
 		pol.id, \
 		pol.name, \
@@ -144,17 +157,6 @@ app.get("/lista_politicos",(req,res) => {
 	from politician pol \
 	inner join politician_vote vote on vote.politician_id=pol.id \
 	group by pol.id'
-
-	function get_age(dateString) {
-		var today = new Date();
-		var birthDate = new Date(dateString);
-		var age = today.getFullYear() - birthDate.getFullYear();
-		var m = today.getMonth() - birthDate.getMonth();
-		if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-			age--;
-		}
-		return age;
-	}
 
 	mysql_handler(query_for_polis, function(err, politicians){
 		var parsed_politicians = [];
@@ -166,7 +168,43 @@ app.get("/lista_politicos",(req,res) => {
 				'politician_id': poli['id'],
 				'ranking': poli['id'], // faaaake
 				'nome': poli['name'],
-				'idade': get_age(poli['date_of_birth']) + ' anos',
+				'idade': get_age_from_birthday(poli['date_of_birth']) + ' anos',
+				'partido': poli['party'],
+				'approval': poli['approval']
+			}
+
+			parsed_politicians.push(parsed_poli);
+		}
+
+		res.json(parsed_politicians);
+	});
+});
+
+
+app.get("/politicos/:politician_id",(req,res) => {
+	var politician_id = req.params['politician_id'];
+
+	var query_for_polis = 'select \
+		pol.id, \
+		pol.name, \
+		pol.date_of_birth, \
+		pol.party, \
+		avg(vote.is_positive) as approval \
+	from politician pol \
+	inner join politician_vote vote on vote.politician_id=pol.id \
+	where pol.id=?';
+
+	mysql_handler(query_for_polis, [politician_id], function(err, politicians){
+		var parsed_politicians = [];
+
+		for (var i = 0; i < politicians.length; i++) {
+			var poli = politicians[i];
+
+			var parsed_poli = {
+				'politician_id': poli['id'],
+				'ranking': poli['id'], // faaaake
+				'nome': poli['name'],
+				'idade': get_age_from_birthday(poli['date_of_birth']) + ' anos',
 				'partido': poli['party'],
 				'approval': poli['approval']
 			}
