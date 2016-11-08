@@ -11,7 +11,7 @@ gender: Text
 
 # device_id temporario
 CREATE TABLE user (
-	id int NOT NULL,
+	id int NOT NULL AUTO_INCREMENT,
 	device_id varchar(255),
 	PRIMARY KEY (id)
 );
@@ -22,7 +22,7 @@ date_of_birth: Date
 party: Text
 
 CREATE TABLE politician (
-	id int NOT NULL,
+	id int NOT NULL AUTO_INCREMENT,
 	name varchar(255) NOT NULL,
 	date_of_birth date,
 	party varchar(255),
@@ -36,7 +36,7 @@ summary: Text
 created_at: Datetime
 
 CREATE TABLE proposal (
-	id int NOT NULL,
+	id int NOT NULL AUTO_INCREMENT,
 	content text NOT NULL,
 	code varchar(255),
 	summary text,
@@ -48,7 +48,7 @@ name: Text
 term_length: Integer (em meses)
 
 CREATE TABLE position (
-	id int NOT NULL,
+	id int NOT NULL AUTO_INCREMENT,
 	name varchar(255),
 	term_length int,
 	PRIMARY KEY (id)
@@ -60,7 +60,7 @@ user_id: Integer
 politician_id: Integer
 
 CREATE TABLE politician_vote (
-	id int NOT NULL,
+	id int NOT NULL AUTO_INCREMENT,
   user_id int,
   politician_id int,
   is_positive boolean,
@@ -76,7 +76,7 @@ start_date: Date
 end_date: Date
 
 CREATE TABLE politician_position (
-	id int NOT NULL,
+	id int NOT NULL AUTO_INCREMENT,
   politician_id int,
   position_id int,
   vote_code varchar(15),
@@ -93,3 +93,69 @@ politician_id: Integer
 ProposalVote
 user_id: Integer
 proposal_id: Integer
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE user (
+	id int NOT NULL AUTO_INCREMENT,
+	device_id varchar(255),
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE politician (
+	id int NOT NULL AUTO_INCREMENT,
+	name varchar(255) NOT NULL,
+	date_of_birth date,
+	party varchar(255),
+	ranking int,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE politician_vote (
+	id int NOT NULL AUTO_INCREMENT,
+  user_id int,
+  politician_id int,
+  is_positive boolean,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE politician_follow (
+	id int NOT NULL AUTO_INCREMENT,
+  user_id int,
+  politician_id int,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE proposal (
+	id int NOT NULL AUTO_INCREMENT,
+	content text NOT NULL,
+	code varchar(255),
+	summary text,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE politician_position (
+	id int NOT NULL AUTO_INCREMENT,
+  politician_id int,
+  position_id int,
+  vote_code varchar(15),
+  election_year int,
+  start_date date,
+	end_date date,
+	location varchar(255),
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE position (
+	id int NOT NULL AUTO_INCREMENT,
+	name varchar(255),
+	term_length int,
+	PRIMARY KEY (id)
+);
