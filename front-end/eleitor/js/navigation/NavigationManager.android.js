@@ -64,12 +64,12 @@ class NavigationManager extends Component {
 					selected={this.props.tab === 'home'}
 					onPress={this.onTabSelect.bind(this, 'home')} />
 				<MenuItem
-					icon='contacts'
+					icon='account-balance'
 					title='Políticos'
 					selected={this.props.tab === 'politicos'}
 					onPress={this.onTabSelect.bind(this, 'politicos')} />
 				<MenuItem
-					icon='bookmarks'
+					icon='assignment'
 					title='Propostas'
 					selected={this.props.tab === 'propostas'}
 					onPress={this.onTabSelect.bind(this, 'propostas')} />

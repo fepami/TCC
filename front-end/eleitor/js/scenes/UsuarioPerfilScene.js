@@ -4,6 +4,7 @@ import {
 	View,
 	Image,
 	Text,
+	ScrollView,
 	Platform
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -48,7 +49,7 @@ export default class UsuarioPerfilScene extends Component {
 					title='Perfil'
 					actions={rightActions}
 					leftItem={leftActions} />
-				<View style={styles.view}>
+				<ScrollView style={styles.view}>
 					<View style={styles.line}>
 						<Image
 							style={styles.roundedImage}
@@ -70,7 +71,7 @@ export default class UsuarioPerfilScene extends Component {
 							{this.renderIcon()}
 						</View>
 					</TouchableElement>
-				</View>
+				</ScrollView>
 			</View>
 		)
 	}
@@ -80,7 +81,8 @@ export default class UsuarioPerfilScene extends Component {
 	}
 
 	onPressEditar(){
-		this.props.navigator.push({component: UsuarioEditarScene});
+		const usuario = {nome: 'Marcela', email: 'marcela@gmail.com', idade: '24', sexo: 'Feminino', cidade: 'São Paulo', estado: 'SP'};
+		this.props.navigator.push({component: UsuarioEditarScene, passProps: usuario});
 	}
 
 	onPressAtividades(){

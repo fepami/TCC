@@ -4,6 +4,7 @@ import {
 	View,
 	Image,
 	Text,
+	ScrollView,
 	Platform
 } from 'react-native';
 import Dimensions from 'Dimensions';
@@ -78,7 +79,7 @@ export default class PropostaDetalheScene extends Component {
 				<Header
 					navigator={this.props.navigator}
 					title={this.props.categoria} />
-				<View style={styles.view}>
+				<ScrollView style={styles.view}>
 					<Text style={styles.h1}>{this.props.nome}</Text>
 					<Text>Categoria: {this.props.categoria}</Text>
 					<Text>Proposta em: {this.props.data}</Text>
@@ -95,7 +96,7 @@ export default class PropostaDetalheScene extends Component {
 							<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
 						</TouchableElement>
 					</View>
-				</View>
+				</ScrollView>
 			</View>
 		)
 	}

@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {
 	StyleSheet,
 	View,
+	ScrollView,
 	Text
 } from 'react-native';
 import TouchableElement from '../components/TouchableElement';
@@ -23,7 +24,7 @@ export default class HomeScene extends Component {
 				<Header
 					navigator={this.props.navigator}
 					title='Home' />
-				<View style={styles.view}>
+				<ScrollView style={styles.view}>
 					<TouchableElement style={styles.banner}  onPress={this.onPress}>
 						<Text>Confira os candidatos da próxima eleição</Text>
 					</TouchableElement>
@@ -36,7 +37,7 @@ export default class HomeScene extends Component {
 					<TouchableElement style={styles.banner}  onPress={this.onPressRankingPropostas}>
 						<Text>Ranking de propostas</Text>
 					</TouchableElement>
-				</View>
+				</ScrollView>
 			</View>
 		)
 	}

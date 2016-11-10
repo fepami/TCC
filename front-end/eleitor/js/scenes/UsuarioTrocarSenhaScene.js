@@ -4,6 +4,7 @@ import {
 	View,
 	Text,
 	TextInput,
+	ScrollView,
 	Platform
 } from 'react-native';
 import TouchableElement from '../components/TouchableElement';
@@ -21,7 +22,7 @@ export default class UsuarioTrocarSenhaScene extends Component {
 				<Header
 					navigator={this.props.navigator}
 					title='Trocar a Senha' />
-				<View style={styles.view}>
+				<ScrollView style={styles.view}>
 					<Text>Senha antiga:</Text>	
 					<TextInput 
 						ref={'currentpwd'}
@@ -66,7 +67,7 @@ export default class UsuarioTrocarSenhaScene extends Component {
 							<Text>Salvar</Text>
 						</TouchableElement>
 					</View>
-				</View>
+				</ScrollView>
 			</View>
 		)
 	}
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
 		height: 30, 
 		borderColor: 'lightgray', 
 		borderWidth: 1, 
-		borderRadius: 5, 
+		borderRadius: 3, 
 		backgroundColor: 'white', 
 		flexDirection: 'row', 
 		flex: 1

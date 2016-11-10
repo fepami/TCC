@@ -9,12 +9,13 @@ import TouchableElement from '../components/TouchableElement';
 
 export default class FilterListItem extends Component {
 	render() {
-		const isCheckedStyle = this.props.isChecked ? styles.checked : null;
+		const isCheckedIcon = this.props.isChecked ? 'md-radio-button-on' : 'md-radio-button-off';
+		const isCheckedColor = this.props.isChecked ? 'limegreen' : 'black';
 
 		return(
 			<TouchableElement onPress={(option) => this.props.onSelectFilter(this.props.title)}>
 				<View style={styles.cell}>
-					<View style={[styles.checkbox, isCheckedStyle]}></View>
+					<Icon name={isCheckedIcon} size={20} style={{alignSelf: 'center', marginHorizontal: 10}} color={isCheckedColor} />
 					<Text style={styles.text}>{this.props.title}</Text>
 				</View>
 			</TouchableElement>
@@ -30,17 +31,5 @@ const styles = StyleSheet.create({
 	text: {
 		flex: 1, 
 		alignSelf: 'center'
-	},
-	checkbox: {
-		alignSelf: 'center',
-		width: 10,
-		height: 10,
-		borderRadius: 5,
-		borderWidth: 1,
-		borderColor: 'black',
-		marginHorizontal: 10
-	},
-	checked: {
-		backgroundColor: 'limegreen'
 	}
 });

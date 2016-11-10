@@ -8,7 +8,7 @@ import {
 	Platform
 } from 'react-native';
 import { switchTab } from '../redux/actions/navigation';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
 import HomeScene from '../scenes/HomeScene';
 import ListaPoliticosScene from '../scenes/ListaPoliticosScene';
@@ -26,8 +26,8 @@ class NavigationManager extends Component{
 	render(){
 		const tabs = [
 			{tab: 'home', title: 'Home', icon: 'home', component: HomeScene}, 
-			{tab: 'politicos', title: 'Políticos', icon: 'contacts', component: ListaPoliticosScene}, 
-			{tab: 'propostas', title: 'Propostas', icon: 'bookmarks', component: ListaPropostasScene}, 
+			{tab: 'politicos', title: 'Políticos', icon: 'account-balance', component: ListaPoliticosScene}, 
+			{tab: 'propostas', title: 'Propostas', icon: 'assignment', component: ListaPropostasScene}, 
 			{tab: 'seguindo', title: 'Seguindo', icon: 'star', component: SeguindoScene}, 
 			{tab: 'perfil', title: 'Perfil', icon: 'person', component: UsuarioPerfilScene}
 		];
@@ -40,8 +40,8 @@ class NavigationManager extends Component{
 							title={tab.title}
 							selected={this.props.tab === tab.tab}
 							onPress={this.onTabSelect.bind(this, tab.tab)}
-							iconName={`ios-${tab.icon}-outline`}
-							selectedIconName={`ios-${tab.icon}`}>
+							iconName={tab.icon}
+							selectedIconName={tab.icon}>
 							<View style={styles.container} >
 								<Navigator
 									ref='navigator'

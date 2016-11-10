@@ -17,6 +17,10 @@ import UsuarioAjudaScene from '../scenes/UsuarioAjudaScene';
 import UsuarioProblemaScene from '../scenes/UsuarioProblemaScene';
 import UsuarioSobreScene from '../scenes/UsuarioSobreScene';
 import UsuarioTermosScene from '../scenes/UsuarioTermosScene';
+import FBSDK from 'react-native-fbsdk';
+const {
+  LoginManager,
+} = FBSDK;
 
 export default class UsuarioConfiguracoesScene extends Component {
 	renderIcon() {
@@ -27,7 +31,7 @@ export default class UsuarioConfiguracoesScene extends Component {
 
 	render() {
 		return(
-			<View>
+			<View style={{flex: 1}}>
 				<Header
 						navigator={this.props.navigator}
 						title='Configurações' />
@@ -85,7 +89,8 @@ export default class UsuarioConfiguracoesScene extends Component {
 	}
 
 	onPressEditar() {
-		this.props.navigator.push({component: UsuarioEditarScene});
+		const usuario = {nome: 'Marcela', email: 'marcela@gmail.com', idade: '24', sexo: 'Feminino', cidade: 'São Paulo', estado: 'SP'};
+		this.props.navigator.push({component: UsuarioEditarScene, passProps: usuario});
 	}
 
 	onPressPassword() {
@@ -113,7 +118,7 @@ export default class UsuarioConfiguracoesScene extends Component {
 	}
 
 	onPressDeslogar() {
-
+		// LoginManager.logout();
 	}
 }
 

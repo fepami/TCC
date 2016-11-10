@@ -4,6 +4,7 @@ import {
 	View,
 	Image,
 	Text,
+	ScrollView,
 	Platform
 } from 'react-native';
 import Dimensions from 'Dimensions';
@@ -78,7 +79,7 @@ export default class PoliticoPerfilScene extends Component {
 					navigator={this.props.navigator}
 					title={this.props.nome} 
 					actions={actions}/>
-				<View style={styles.view}>
+				<ScrollView style={styles.view}>
 					<View style={{alignItems: 'center'}}>
 						<View style={{width: 120}}>
 							<Image
@@ -114,7 +115,7 @@ export default class PoliticoPerfilScene extends Component {
 							<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
 						</TouchableElement>
 					</View>
-				</View>
+				</ScrollView>
 			</View>
 		)
 	}
