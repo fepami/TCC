@@ -10,15 +10,15 @@ delete from politician_position;
 alter table politician_position auto_increment=1;
 
 
-INSERT INTO politician (name, date_of_birth, party) VALUES ('Toyoda','1993-04-05', 'TCC');
-INSERT INTO politician (name, date_of_birth, party) VALUES ('Marcela','1993-04-05', 'TCC');
-INSERT INTO politician (name, date_of_birth, party) VALUES ('Paiva','1993-04-05', 'TCC');
-INSERT INTO politician (name, date_of_birth, party) VALUES ('Carol','1993-04-05', 'TCC');
+INSERT INTO politician (name, date_of_birth, party, email) VALUES ('Toyoda','1993-04-05', 'TCC', 'meu_email@TCC.com.br');
+INSERT INTO politician (name, date_of_birth, party, email) VALUES ('Marcela','1993-04-05', 'TCC', 'meu_email@TCC.com.br');
+INSERT INTO politician (name, date_of_birth, party, email) VALUES ('Paiva','1993-04-05', 'TCC', 'meu_email@TCC.com.br');
+INSERT INTO politician (name, date_of_birth, party, email) VALUES ('Carol','1993-04-05', 'TCC', 'meu_email@TCC.com.br');
 
-INSERT INTO politician (name, date_of_birth, party) VALUES ('Koji','1999-04-05', 'PFEL');
-INSERT INTO politician (name, date_of_birth, party) VALUES ('Jun','1999-04-05', 'PFEL');
-INSERT INTO politician (name, date_of_birth, party) VALUES ('Felipe 10','1999-04-05', 'PFEL');
-INSERT INTO politician (name, date_of_birth, party) VALUES ('Felipe Outro','1999-04-05', 'PFEL');
+INSERT INTO politician (name, date_of_birth, party, email) VALUES ('Koji','1999-04-05', 'PFEL', 'meu_email@PFEL.com.br');
+INSERT INTO politician (name, date_of_birth, party, email) VALUES ('Jun','1999-04-05', 'PFEL', 'meu_email@PFEL.com.br');
+INSERT INTO politician (name, date_of_birth, party, email) VALUES ('Felipe 10','1999-04-05', 'PFEL', 'meu_email@PFEL.com.br');
+INSERT INTO politician (name, date_of_birth, party, email) VALUES ('Felipe Outro','1999-04-05', 'PFEL', 'meu_email@PFEL.com.br');
 
 INSERT INTO user (device_id) VALUES ('device_id1');
 INSERT INTO user (device_id) VALUES ('device_id2');
@@ -64,6 +64,11 @@ INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (2,8,fa
 INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (3,8,false);
 INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (4,8,false);
 INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (5,8,false);
+
+INSERT INTO politician_follow (user_id, politician_id) VALUES (1,1);
+INSERT INTO politician_follow (user_id, politician_id) VALUES (1,3);
+INSERT INTO politician_follow (user_id, politician_id) VALUES (2,2);
+INSERT INTO politician_follow (user_id, politician_id) VALUES (2,4);
 
 UPDATE politician p
 JOIN (

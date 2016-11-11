@@ -163,6 +163,7 @@ var get_politicians_func = function(type){
 			pol.date_of_birth,\
 			pol.party,\
 			pol.ranking,\
+			pol.email,\
 			APPROVAL_T.approval as approval,\
 			USER_VOTE_T.is_positive as user_vote,\
 			CUR_POS_T.name as position,\
@@ -191,6 +192,7 @@ var get_politicians_func = function(type){
 					'nome': poli['name'],
 					'idade': get_age_from_birthday(poli['date_of_birth']) + ' anos',
 					'partido': poli['party'],
+					'email': poli['email'],
 					'approval': poli['approval'],
 					'user_vote': poli['user_vote'],
 					'cargo': null

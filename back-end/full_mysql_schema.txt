@@ -102,6 +102,15 @@ proposal_id: Integer
 
 
 
+DROP TABLE user;
+DROP TABLE politician;
+DROP TABLE politician_vote;
+DROP TABLE politician_follow;
+DROP TABLE proposal;
+DROP TABLE politician_position;
+DROP TABLE position;
+
+
 
 CREATE TABLE user (
 	id int NOT NULL AUTO_INCREMENT,
@@ -115,6 +124,7 @@ CREATE TABLE politician (
 	date_of_birth date,
 	party varchar(255),
 	ranking int,
+	email varchar(255),
 	PRIMARY KEY (id)
 );
 

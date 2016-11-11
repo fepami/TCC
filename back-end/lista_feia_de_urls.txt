@@ -1,0 +1,40 @@
+** tudo no http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000
+
+** Lista de todos os politicos (sem device_id o parametro "user_vote" vai sempre vir null)
+/politicos?device_id=<device_id>
+
+/politicos?device_id=device_id1
+/politicos?device_id=device_id2
+
+** Dados de um politico (sem device_id o parametro "user_vote" vai sempre vir null)
+/politicos/<politician_id>?device_id=<device_id>
+
+/politicos/1?device_id=device_id1
+/politicos/2?device_id=device_id1
+/politicos/3?device_id=device_id2
+
+** Dados dos politicos que o usuario segue
+/politicos_seguidos?device_id=<device_id>
+
+/politicos_seguidos?device_id=device_id1
+/politicos_seguidos?device_id=device_id2
+
+** Votar em politico (responde com um json porco com uma string)
+/politicos/<politician_id>/votar?device_id=<device_id>&is_positive=<true_false>
+
+/politicos/1/votar?device_id=device_id1&is_positive=true
+/politicos/1/votar?device_id=device_id1&is_positive=false
+
+** Seguir politico (responde com um json porco com uma string)
+/politicos/<politician_id>/seguir?device_id=<device_id>&follow=<true_false>
+
+/politicos/1/seguir?device_id=device_id1&follow=true
+/politicos/1/seguir?device_id=device_id1&follow=false
+/politicos/1/seguir?device_id=device_id2&follow=true
+/politicos/3/seguir?device_id=device_id2&follow=true
+
+
+** URL migué se vc quiser rodar alguma query por algum motivo
+/?database=mysql&execute_query=select * from politician
+/?database=mysql&execute_query=select%20*%20from%20politician
+/?database=mysql&execute_query=select * from user
