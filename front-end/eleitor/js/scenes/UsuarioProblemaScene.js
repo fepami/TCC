@@ -7,6 +7,7 @@ import {
 	Text
 } from 'react-native';
 import Header from '../components/Header';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default class UsuarioProblemaScene extends Component {
 	constructor(props) {
@@ -22,25 +23,29 @@ export default class UsuarioProblemaScene extends Component {
 				<Header
 					navigator={this.props.navigator}
 					title='Reportar um Problema' />
-				<ScrollView style={styles.view}>
-					<Text>Digite o seu problema:</Text>	
-					<TextInput 
-						ref={'problem-input'}
-						style={[styles.input, {height: 90, borderColor: this.state.textError ? 'red' : 'lightgray'}]}
-						autoCorrect={false}
-						keyboardAppearance='default'
-						underlineColorAndroid='transparent'
-						multiline={true}
-						numberOfLines={5}
-						onChangeText={(text) => this.setState({text: text})}
-						onSubmitEditing={this.onPress.bind(this)}
-						/>
-					<View style={styles.box}>
-						<TouchableElement onPress={this.onPress.bind(this)} style={styles.button}>
-							<Text>Enviar</Text>
-						</TouchableElement>
-					</View>				
-				</ScrollView>
+				<KeyboardAwareScrollView style={{flex: 1}}>
+					<View style={styles.view}>
+						<Text>Encontrou um problema e não consegue resolvê-lo?</Text>
+						<Text/>
+						<Text style={{paddingBottom: 15}}>Não se preocupe, digite o seu problema no campo abaixo e tentaremos ao máximo solucioná-lo.</Text>	
+						<TextInput 
+							ref={'problem-input'}
+							style={[styles.input, {height: 90, borderColor: this.state.textError ? 'red' : 'lightgray'}]}
+							autoCorrect={false}
+							keyboardAppearance='default'
+							underlineColorAndroid='transparent'
+							multiline={true}
+							numberOfLines={5}
+							onChangeText={(text) => this.setState({text: text})}
+							onSubmitEditing={this.onPress.bind(this)}
+							/>
+						<View style={styles.box}>
+							<TouchableElement onPress={this.onPress.bind(this)} style={styles.button}>
+								<Text>Enviar</Text>
+							</TouchableElement>
+						</View>
+					</View>
+				</KeyboardAwareScrollView>
 			</View>
 		)
 	}
@@ -75,8 +80,7 @@ const styles = StyleSheet.create({
 		borderRadius: 3, 
 		backgroundColor: 'white', 
 		flexDirection: 'row', 
-		flex: 1,
-		padding: 5
+		flex: 1
 	},
 	box: {
 		flex: 1,

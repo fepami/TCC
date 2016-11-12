@@ -1,0 +1,7 @@
+module.exports = (`A Câmara de Vereadores exerce a função do Poder Legislativo na esfera municipal. Os vereadores são eleitos através do voto direto, cujo mandato tem duração de quatro anos, sendo a reeleição ilimitada. A quantidade de membros desse cargo político é estabelecida através do contingente populacional de cada município (quanto mais habitantes, maior será o número de vereadores de uma cidade). Contudo, foi estabelecido um número mínimo de 9 e um máximo de 55 vereadores por município.
+
+Os vereadores são eleitos juntamente com o prefeito de um município, no qual os primeiros têm a função de discutir as questões locais e fiscalizar o ato do Executivo Municipal (Prefeito) com relação à administração e gastos do orçamento. Eles devem trabalhar em função da melhoria da qualidade de vida da população, elaborando leis, recebendo o povo, atendendo às reivindicações, desempenhando a função de mediador entre os habitantes e o prefeito.
+
+Outra importante atribuição a um vereador é a elaboração da Lei Orgânica do Município. Esse documento consiste numa espécie de Constituição Municipal, na qual há um conjunto de medidas para proporcionar melhorias para a população local. O prefeito, sob fiscalização da Câmara de Vereadores, deve cumprir a Lei Orgânica.
+
+Fonte: http://brasilescola.uol.com.br/politica/vereador.htm`)

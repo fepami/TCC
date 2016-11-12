@@ -49,28 +49,30 @@ export default class UsuarioPerfilScene extends Component {
 					title='Perfil'
 					actions={rightActions}
 					leftItem={leftActions} />
-				<ScrollView style={styles.view}>
-					<View style={styles.line}>
-						<Image
-							style={styles.roundedImage}
-							source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
-						<Text style={styles.h1}>{usuario.nome}, {usuario.idade}</Text>
-						<Text>{usuario.email}</Text>
-						<Text>Vota em: {usuario.cidade}, {usuario.estado}</Text>
-						<Text>{usuario.sexo}</Text>
+				<ScrollView style={{flex: 1}}>
+					<View style={styles.view}>
+						<View style={styles.line}>
+							<Image
+								style={styles.roundedImage}
+								source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
+							<Text style={styles.h1}>{usuario.nome}, {usuario.idade}</Text>
+							<Text>{usuario.email}</Text>
+							<Text>Vota em: {usuario.cidade}, {usuario.estado}</Text>
+							<Text>{usuario.sexo}</Text>
+						</View>
+						<TouchableElement onPress={this.onPressConfiguracoes.bind(this)}>
+							<View style={styles.cellTop}>
+								<Text style={styles.cellText}>Configurações</Text>
+								{this.renderIcon()}
+							</View>
+						</TouchableElement>
+						<TouchableElement onPress={this.onPressAtividades.bind(this)}>
+							<View style={styles.cellBottom}>
+								<Text style={styles.cellText}>Atividades Recentes</Text>
+								{this.renderIcon()}
+							</View>
+						</TouchableElement>
 					</View>
-					<TouchableElement onPress={this.onPressConfiguracoes.bind(this)}>
-						<View style={styles.cellTop}>
-							<Text style={styles.cellText}>Configurações</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressAtividades.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Atividades Recentes</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
 				</ScrollView>
 			</View>
 		)

@@ -16,6 +16,7 @@ import CustomPicker from '../components/CustomPicker';
 import Header from '../components/Header';
 import dismissKeyboard from 'dismissKeyboard';
 import HomeScene from '../scenes/HomeScene';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default class CadastroScene extends Component {
 	constructor(props) {
@@ -59,147 +60,149 @@ export default class CadastroScene extends Component {
 				<Header
 					navigator={this.props.navigator}
 					title='Cadastro' />
-				<ScrollView style={styles.view}>
-					<View style={{alignItems: 'center', borderBottomColor: 'black', borderBottomWidth: 2, paddingBottom: 15}}>
-						<View style={{width: 140, height: 112}}>
-							<View style={styles.roundedView}>
-								<Image
-									style={styles.roundedImage}
-									source={this.state.fotoText}/>
+				<KeyboardAwareScrollView style={{flex: 1}}>
+					<View style={styles.view}>
+						<View style={{alignItems: 'center', borderBottomColor: 'black', borderBottomWidth: 2, paddingBottom: 15}}>
+							<View style={{width: 140, height: 112}}>
+								<View style={styles.roundedView}>
+									<Image
+										style={styles.roundedImage}
+										source={this.state.fotoText}/>
+								</View>
+								<TouchableElement onPress={() => this.onChangePhotoPress()} style={styles.line}>
+									<Text style={{color: 'black'}}>Escolher uma foto</Text>
+								</TouchableElement>
 							</View>
-							<TouchableElement onPress={() => this.onChangePhotoPress()} style={styles.line}>
-								<Text style={{color: 'black'}}>Escolher uma foto</Text>
+						</View>	
+						<View style={{paddingTop: 15}}>
+							<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Informações pessoais:</Text>
+							<View style={{flexDirection: 'row'}}>
+								<Icon name='account-box' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+								<TextInput 
+									ref={'name-input'}
+									style={[styles.input, {height: deviceHeight, borderColor: this.state.nomeError ? 'red' : 'lightgray'}]}
+									autoCapitalize='words'							
+									autoCorrect={false}
+									enablesReturnKeyAutomatically={true}
+									keyboardAppearance='default'
+									returnKeyType='next'
+									underlineColorAndroid='transparent'
+									numberOfLines={1}
+									value={this.state.nomeText}
+									placeholder='Nome' 
+									onChangeText={(text) => this.setState({nomeText: text})}
+									onSubmitEditing={() => this.refs['email-input'].focus()}
+									/>	
+							</View>	
+							<View style={{flexDirection: 'row'}}>	
+								<Icon name='email' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+								<TextInput 
+									ref={'email-input'}
+									style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
+									autoCapitalize='none'							
+									autoCorrect={false}
+									enablesReturnKeyAutomatically={true}
+									keyboardAppearance='default'
+									returnKeyType='next'
+									underlineColorAndroid='transparent'
+									numberOfLines={1}
+									value={this.state.emailText}
+									placeholder='Email'
+									onChangeText={(text) => this.setState({emailText: text})}
+									onSubmitEditing={() => this.refs['password-input'].focus()}
+									/>	
+							</View>
+							<View style={{flexDirection: 'row'}}>	
+								<Icon name='vpn-key' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+								<TextInput 
+									ref={'password-input'}
+									style={[styles.input, {height: deviceHeight, borderColor: this.state.passwordError ? 'red' : 'lightgray'}]}
+									autoCapitalize='none'							
+									secureTextEntry={true}
+									autoCorrect={false}
+									enablesReturnKeyAutomatically={true}
+									keyboardAppearance='default'
+									returnKeyType='next'
+									underlineColorAndroid='transparent'
+									numberOfLines={1}
+									placeholder='Senha'
+									onChangeText={(text) => this.setState({passwordText: text})}
+									onSubmitEditing={() => this.refs['password2-input'].focus()}
+									/>	
+							</View>
+							<View style={{flexDirection: 'row'}}>	
+								<Icon name='vpn-key' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+								<TextInput 
+									ref={'password2-input'}
+									style={[styles.input, {height: deviceHeight, borderColor: this.state.password2Error ? 'red' : 'lightgray'}]}
+									autoCapitalize='none'							
+									secureTextEntry={true}
+									autoCorrect={false}
+									enablesReturnKeyAutomatically={true}
+									keyboardAppearance='default'
+									returnKeyType='done'
+									underlineColorAndroid='transparent'
+									numberOfLines={1}
+									placeholder='Confirme a senha'
+									onChangeText={(text) => this.setState({password2Text: text})}
+									onSubmitEditing={() => dismissKeyboard()}
+									/>	
+							</View>
+							<View style={{flexDirection: 'row'}} >
+								<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.idadeError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+									<CustomPicker
+										mode='dropdown'
+										selectedValue={this.state.idadeText}
+										onValueChange={(age) => this.setState({idadeText: age})}>
+										{agesPickerItems}
+									</CustomPicker>
+								</View>
+								<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
+								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.sexoError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+									<CustomPicker
+										mode='dropdown'
+										selectedValue={this.state.sexoText}
+										onValueChange={(gender) => this.setState({sexoText: gender})}>
+										<Picker.Item color="rgba(0,0,0,.2)" label="Sexo" value="" />							
+										<Picker.Item color="rgba(0,0,0,.87)" label="Feminino" value="Feminino" />							
+										<Picker.Item color="rgba(0,0,0,.87)" label="Masculino" value="Masculino" />
+									</CustomPicker>
+								</View>
+							</View>
+							<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Estado e cidade em que vota:</Text>
+							<View style={{flexDirection: 'row'}} >
+								<Icon name='map' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.estadoError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+									<CustomPicker
+										mode='dropdown'
+										selectedValue={this.state.estadoText}
+										onValueChange={(state) => this.setState({estadoText: state})}>
+										<Picker.Item color="rgba(0,0,0,.2)" label="Estado" value="" />							
+										<Picker.Item color="rgba(0,0,0,.87)" label="SP" value="SP" />							
+										<Picker.Item color="rgba(0,0,0,.87)" label="RJ" value="RJ" />
+									</CustomPicker>
+								</View>
+								<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
+								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cidadeError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+									<CustomPicker
+										mode='dropdown'
+										selectedValue={this.state.cidadeText}
+										onValueChange={(city) => this.setState({cidadeText: city})}>
+										<Picker.Item color="rgba(0,0,0,.2)" label="Cidade" value="" />							
+										<Picker.Item color="rgba(0,0,0,.87)" label="São Paulo" value="São Paulo" />							
+										<Picker.Item color="rgba(0,0,0,.87)" label="Rio de Janeiro" value="Rio de Janeiro" />
+									</CustomPicker>
+								</View>
+							</View>
+						</View>
+						<View style={styles.box}>
+							<TouchableElement onPress={this.onSavePress.bind(this)} style={styles.button}>
+								<Text>Salvar</Text>
 							</TouchableElement>
 						</View>
 					</View>	
-					<View style={{paddingTop: 15}}>
-						<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Informações pessoais:</Text>
-						<View style={{flexDirection: 'row'}}>
-							<Icon name='account-box' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-							<TextInput 
-								ref={'name-input'}
-								style={[styles.input, {height: deviceHeight, borderColor: this.state.nomeError ? 'red' : 'lightgray'}]}
-								autoCapitalize='words'							
-								autoCorrect={false}
-								enablesReturnKeyAutomatically={true}
-								keyboardAppearance='default'
-								returnKeyType='next'
-								underlineColorAndroid='transparent'
-								numberOfLines={1}
-								value={this.state.nomeText}
-								placeholder='Nome' 
-								onChangeText={(text) => this.setState({nomeText: text})}
-								onSubmitEditing={() => this.refs['email-input'].focus()}
-								/>	
-						</View>	
-						<View style={{flexDirection: 'row'}}>	
-							<Icon name='email' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-							<TextInput 
-								ref={'email-input'}
-								style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
-								autoCapitalize='none'							
-								autoCorrect={false}
-								enablesReturnKeyAutomatically={true}
-								keyboardAppearance='default'
-								returnKeyType='next'
-								underlineColorAndroid='transparent'
-								numberOfLines={1}
-								value={this.state.emailText}
-								placeholder='Email'
-								onChangeText={(text) => this.setState({emailText: text})}
-								onSubmitEditing={() => this.refs['password-input'].focus()}
-								/>	
-						</View>
-						<View style={{flexDirection: 'row'}}>	
-							<Icon name='vpn-key' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-							<TextInput 
-								ref={'password-input'}
-								style={[styles.input, {height: deviceHeight, borderColor: this.state.passwordError ? 'red' : 'lightgray'}]}
-								autoCapitalize='none'							
-								secureTextEntry={true}
-								autoCorrect={false}
-								enablesReturnKeyAutomatically={true}
-								keyboardAppearance='default'
-								returnKeyType='next'
-								underlineColorAndroid='transparent'
-								numberOfLines={1}
-								placeholder='Senha'
-								onChangeText={(text) => this.setState({passwordText: text})}
-								onSubmitEditing={() => this.refs['password2-input'].focus()}
-								/>	
-						</View>
-						<View style={{flexDirection: 'row'}}>	
-							<Icon name='vpn-key' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-							<TextInput 
-								ref={'password2-input'}
-								style={[styles.input, {height: deviceHeight, borderColor: this.state.password2Error ? 'red' : 'lightgray'}]}
-								autoCapitalize='none'							
-								secureTextEntry={true}
-								autoCorrect={false}
-								enablesReturnKeyAutomatically={true}
-								keyboardAppearance='default'
-								returnKeyType='done'
-								underlineColorAndroid='transparent'
-								numberOfLines={1}
-								placeholder='Confirme a senha'
-								onChangeText={(text) => this.setState({password2Text: text})}
-								onSubmitEditing={() => dismissKeyboard()}
-								/>	
-						</View>
-						<View style={{flexDirection: 'row'}} >
-							<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-							<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.idadeError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
-								<CustomPicker
-									mode='dropdown'
-									selectedValue={this.state.idadeText}
-									onValueChange={(age) => this.setState({idadeText: age})}>
-									{agesPickerItems}
-								</CustomPicker>
-							</View>
-							<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-							<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.sexoError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
-								<CustomPicker
-									mode='dropdown'
-									selectedValue={this.state.sexoText}
-									onValueChange={(gender) => this.setState({sexoText: gender})}>
-									<Picker.Item color="rgba(0,0,0,.2)" label="Sexo" value="" />							
-									<Picker.Item color="rgba(0,0,0,.87)" label="Feminino" value="Feminino" />							
-									<Picker.Item color="rgba(0,0,0,.87)" label="Masculino" value="Masculino" />
-								</CustomPicker>
-							</View>
-						</View>
-						<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Estado e cidade em que vota:</Text>
-						<View style={{flexDirection: 'row'}} >
-							<Icon name='map' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-							<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.estadoError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
-								<CustomPicker
-									mode='dropdown'
-									selectedValue={this.state.estadoText}
-									onValueChange={(state) => this.setState({estadoText: state})}>
-									<Picker.Item color="rgba(0,0,0,.2)" label="Estado" value="" />							
-									<Picker.Item color="rgba(0,0,0,.87)" label="SP" value="SP" />							
-									<Picker.Item color="rgba(0,0,0,.87)" label="RJ" value="RJ" />
-								</CustomPicker>
-							</View>
-							<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-							<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cidadeError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
-								<CustomPicker
-									mode='dropdown'
-									selectedValue={this.state.cidadeText}
-									onValueChange={(city) => this.setState({cidadeText: city})}>
-									<Picker.Item color="rgba(0,0,0,.2)" label="Cidade" value="" />							
-									<Picker.Item color="rgba(0,0,0,.87)" label="São Paulo" value="São Paulo" />							
-									<Picker.Item color="rgba(0,0,0,.87)" label="Rio de Janeiro" value="Rio de Janeiro" />
-								</CustomPicker>
-							</View>
-						</View>
-					</View>
-					<View style={styles.box}>
-						<TouchableElement onPress={this.onSavePress.bind(this)} style={styles.button}>
-							<Text>Salvar</Text>
-						</TouchableElement>
-					</View>	
-				</ScrollView>
+				</KeyboardAwareScrollView>
 			</View>
 		)
 	}

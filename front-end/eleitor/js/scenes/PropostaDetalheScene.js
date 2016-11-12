@@ -79,22 +79,24 @@ export default class PropostaDetalheScene extends Component {
 				<Header
 					navigator={this.props.navigator}
 					title={this.props.categoria} />
-				<ScrollView style={styles.view}>
-					<Text style={styles.h1}>{this.props.nome}</Text>
-					<Text>Categoria: {this.props.categoria}</Text>
-					<Text>Proposta em: {this.props.data}</Text>
-					<Text>Por: {this.props.nomePolitico}</Text>
-					<ApprovalBar viewSize={approval_width} approvalPercentage={this.props.approval} />
-					<Text>Descrição:</Text>
-					<Text style={{paddingBottom: 15}}>{this.props.descricao}</Text>
-					<PoliticosListItem style={styles.cell} onPress={()=>this.onPoliticoPress(politicoData)} politico={politicoData} cellType='lista'/>
-					<View style={styles.box}>
-						<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
-							<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
-						</TouchableElement>
-						<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
-							<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
-						</TouchableElement>
+				<ScrollView style={{flex: 1}}>
+					<View style={styles.view}>
+						<Text style={styles.h1}>{this.props.nome}</Text>
+						<Text>Categoria: {this.props.categoria}</Text>
+						<Text>Proposta em: {this.props.data}</Text>
+						<Text>Por: {this.props.nomePolitico}</Text>
+						<ApprovalBar viewSize={approval_width} approvalPercentage={this.props.approval} />
+						<Text>Descrição:</Text>
+						<Text style={{paddingBottom: 15}}>{this.props.descricao}</Text>
+						<PoliticosListItem style={styles.cell} onPress={()=>this.onPoliticoPress(politicoData)} politico={politicoData} cellType='lista'/>
+						<View style={styles.box}>
+							<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
+								<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
+							</TouchableElement>
+							<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
+								<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
+							</TouchableElement>
+						</View>
 					</View>
 				</ScrollView>
 			</View>
@@ -102,7 +104,6 @@ export default class PropostaDetalheScene extends Component {
 	}
 
 	onPoliticoPress(data){
-		// console.log(data);
 		this.props.navigator.push({component: PoliticoPerfilScene, passProps: data});
 	}
 }

@@ -21,7 +21,7 @@ class NavigationManager extends Component{
 		this.props.onTabSelect(tab);
 	}
 	renderScene(route, navigator) {
-		return <route.component {...route.passProps} navigator={navigator} />
+		return <route.component {...route.passProps} navigator={navigator} rootNavigator={this.props.navigator} />
 	}
 	render(){
 		const tabs = [
@@ -47,7 +47,7 @@ class NavigationManager extends Component{
 									ref='navigator'
 									style={{flex: 1}}
 									initialRoute={{component: tab.component}}
-									renderScene={this.renderScene}
+									renderScene={this.renderScene.bind(this)}
 									configureScene={route => {
 										if(Platform.OS === 'android'){
 											return Navigator.SceneConfigs.FloatFromBottomAndroid;

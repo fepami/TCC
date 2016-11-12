@@ -4,6 +4,7 @@ import {
 	Platform
 } from 'react-native';
 import NavigationManager from './navigation/NavigationManager';
+import LoginScene from './scenes/LoginScene';
 
 export default class DefaultNavigator extends Component {
 	render(){
@@ -12,6 +13,7 @@ export default class DefaultNavigator extends Component {
 				ref='navigator'
 				style={{flex: 1}}
 				//mudar de NavigationManager para login
+				// initialRoute={{component: LoginScene}}
 				initialRoute={{component: NavigationManager}}
 				renderScene={this.renderScene}
 				configureScene={route => {

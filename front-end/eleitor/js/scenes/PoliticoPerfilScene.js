@@ -79,41 +79,43 @@ export default class PoliticoPerfilScene extends Component {
 					navigator={this.props.navigator}
 					title={this.props.nome} 
 					actions={actions}/>
-				<ScrollView style={styles.view}>
-					<View style={{alignItems: 'center'}}>
-						<View style={{width: 120}}>
-							<Image
-								style={styles.roundedImage}
-								source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
-							<View style={styles.line}>
-								<Text style={{color: 'white'}}>{this.props.vote}</Text>
+				<ScrollView style={{flex: 1}}>
+					<View style={styles.view}>
+						<View style={{alignItems: 'center'}}>
+							<View style={{width: 120}}>
+								<Image
+									style={styles.roundedImage}
+									source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
+								<View style={styles.line}>
+									<Text style={{color: 'white'}}>{this.props.vote}</Text>
+								</View>
 							</View>
 						</View>
-					</View>
-					<ApprovalBar viewSize={approval_width} approvalPercentage={this.props.approval} />
-					<Text style={styles.h1}>{this.props.nome}, {this.props.idade}</Text>
-					<Text>{this.props.cargo}</Text>
-					<Text>{this.props.vigencia}</Text>
-					<Text style={{paddingBottom: 15}}>{this.props.partido}</Text>
-					<TouchableElement onPress={this.onPressHistorico.bind(this)}>
-						<View style={styles.cellTop}>
-							<Text style={styles.cellText}>Histórico de Propostas</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressCarreira.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Carreira Política</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<View style={styles.box}>
-						<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
-							<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
+						<ApprovalBar viewSize={approval_width} approvalPercentage={this.props.approval} />
+						<Text style={styles.h1}>{this.props.nome}, {this.props.idade}</Text>
+						<Text>{this.props.cargo}</Text>
+						<Text>{this.props.vigencia}</Text>
+						<Text style={{paddingBottom: 15}}>{this.props.partido}</Text>
+						<TouchableElement onPress={this.onPressHistorico.bind(this)}>
+							<View style={styles.cellTop}>
+								<Text style={styles.cellText}>Histórico de Propostas</Text>
+								{this.renderIcon()}
+							</View>
 						</TouchableElement>
-						<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
-							<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
+						<TouchableElement onPress={this.onPressCarreira.bind(this)}>
+							<View style={styles.cellBottom}>
+								<Text style={styles.cellText}>Carreira Política</Text>
+								{this.renderIcon()}
+							</View>
 						</TouchableElement>
+						<View style={styles.box}>
+							<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
+								<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
+							</TouchableElement>
+							<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
+								<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
+							</TouchableElement>
+						</View>
 					</View>
 				</ScrollView>
 			</View>
@@ -121,12 +123,10 @@ export default class PoliticoPerfilScene extends Component {
 	}
 
 	onPressHistorico(){
-		// console.log(data);
 		this.props.navigator.push({component: PoliticoHistoricoPropostasScene, passProps: this.props});
 	}
 
 	onPressCarreira(){
-		// console.log(data);
 		// this.props.navigator.push({component: PoliticoPerfilScene, passProps: {nome: data.nome}});
 	}
 }

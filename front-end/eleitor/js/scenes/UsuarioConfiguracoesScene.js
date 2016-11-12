@@ -7,9 +7,12 @@ import {
 	ScrollView,
 	Platform
 } from 'react-native';
+import {connect} from 'react-redux';
+import {switchTab} from '../redux/actions/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
+import LoginScene from './LoginScene';
 import UsuarioEditarScene from '../scenes/UsuarioEditarScene';
 import UsuarioTrocarSenhaScene from '../scenes/UsuarioTrocarSenhaScene';
 import UsuarioPerfisAssociadosScene from '../scenes/UsuarioPerfisAssociadosScene';
@@ -22,7 +25,7 @@ const {
   LoginManager,
 } = FBSDK;
 
-export default class UsuarioConfiguracoesScene extends Component {
+class UsuarioConfiguracoesScene extends Component {
 	renderIcon() {
 		return Platform.select({
 			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrowIcon}/>
@@ -35,53 +38,49 @@ export default class UsuarioConfiguracoesScene extends Component {
 				<Header
 						navigator={this.props.navigator}
 						title='Configurações' />
-				<ScrollView  style={styles.view}>
-					<TouchableElement onPress={this.onPressEditar.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Editar perfil</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressPassword.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Trocar a senha</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressPerfis.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Perfis associados</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressAjuda.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Ajuda</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressProblema.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Reportar um problema</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressSobre.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Sobre o aplicativo</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<TouchableElement onPress={this.onPressTermos.bind(this)}>
-						<View style={styles.cellBottom}>
-							<Text style={styles.cellText}>Termos de uso</Text>
-							{this.renderIcon()}
-						</View>
-					</TouchableElement>
-					<View style={styles.box}>
-						<TouchableElement onPress={this.onPressDeslogar.bind(this)} style={styles.button}>
-							<Text>Deslogar</Text>
+				<ScrollView style={{flex: 1}}>
+					<View style={styles.view}>
+						<TouchableElement onPress={this.onPressEditar.bind(this)}>
+							<View style={styles.cellBottom}>
+								<Text style={styles.cellText}>Editar perfil</Text>
+								{this.renderIcon()}
+							</View>
 						</TouchableElement>
+						<TouchableElement onPress={this.onPressPassword.bind(this)}>
+							<View style={styles.cellBottom}>
+								<Text style={styles.cellText}>Trocar a senha</Text>
+								{this.renderIcon()}
+							</View>
+						</TouchableElement>
+						<TouchableElement onPress={this.onPressAjuda.bind(this)}>
+							<View style={styles.cellBottom}>
+								<Text style={styles.cellText}>Ajuda</Text>
+								{this.renderIcon()}
+							</View>
+						</TouchableElement>
+						<TouchableElement onPress={this.onPressProblema.bind(this)}>
+							<View style={styles.cellBottom}>
+								<Text style={styles.cellText}>Reportar um problema</Text>
+								{this.renderIcon()}
+							</View>
+						</TouchableElement>
+						<TouchableElement onPress={this.onPressSobre.bind(this)}>
+							<View style={styles.cellBottom}>
+								<Text style={styles.cellText}>Sobre o aplicativo</Text>
+								{this.renderIcon()}
+							</View>
+						</TouchableElement>
+						<TouchableElement onPress={this.onPressTermos.bind(this)}>
+							<View style={styles.cellBottom}>
+								<Text style={styles.cellText}>Termos de uso</Text>
+								{this.renderIcon()}
+							</View>
+						</TouchableElement>
+						<View style={styles.box}>
+							<TouchableElement onPress={this.onPressDeslogar.bind(this)} style={styles.button}>
+								<Text>Deslogar</Text>
+							</TouchableElement>
+						</View>
 					</View>
 				</ScrollView>
 			</View>
@@ -119,6 +118,8 @@ export default class UsuarioConfiguracoesScene extends Component {
 
 	onPressDeslogar() {
 		// LoginManager.logout();
+		Platform.OS === 'ios' ? this.props.rootNavigator.resetTo({component: LoginScene}) : this.props.navigator.resetTo({component: LoginScene});
+		this.props.dispatch(switchTab('home'));
 	}
 }
 
@@ -158,3 +159,5 @@ const styles = StyleSheet.create({
 		alignItems: 'center'
 	}
 })
+
+export default connect()(UsuarioConfiguracoesScene);

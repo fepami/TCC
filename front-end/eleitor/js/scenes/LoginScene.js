@@ -11,6 +11,9 @@ import TouchableElement from '../components/TouchableElement';
 import CadastroScene from '../scenes/CadastroScene';
 import HomeScene from '../scenes/HomeScene';
 import FBSDK from 'react-native-fbsdk';
+import NavigationManager from '../navigation/NavigationManager';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
 const {
 	LoginButton,
 	AccessToken,
@@ -36,61 +39,63 @@ export default class LoginScene extends Component {
 		})
 
 		return(
-			<View style={{flex: 1, backgroundColor: 'white', padding: 15}}>
-				<View style={{alignItems: 'center', paddingTop: 30}}>
-					<Image
-						style={styles.image}
-						source={require('../resources/image/logo.png')} />
-					<Text style={styles.h1}>e-leitor</Text>
-				</View>	
-				<View style={{paddingTop: 20}}>
-					<Text>Email:</Text>
-					<TextInput 
-						ref={'email-input'}
-						style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
-						autoCapitalize='words'							
-						autoCorrect={false}
-						enablesReturnKeyAutomatically={true}
-						keyboardAppearance='default'
-						keyboardType='email-address'
-						returnKeyType='next'
-						underlineColorAndroid='transparent'
-						numberOfLines={1}
-						onChangeText={(text) => this.setState({emailText: text})}
-						onSubmitEditing={() => this.refs['password-input'].focus()}
-						/>	
-					<Text>Senha:</Text>
-					<TextInput 
-						ref={'password-input'}
-						style={[styles.input, {height: deviceHeight, borderColor: this.state.passwordError ? 'red' : 'lightgray'}]}
-						autoCapitalize='none'							
-						secureTextEntry={true}
-						autoCorrect={false}
-						enablesReturnKeyAutomatically={true}
-						keyboardAppearance='default'
-						returnKeyType='done'
-						underlineColorAndroid='transparent'
-						numberOfLines={1}
-						onChangeText={(text) => this.setState({passwordText: text})}
-						onSubmitEditing={this.onLoginPress.bind(this)}
-						/>	
+			<KeyboardAwareScrollView style={{flex: 1}}>
+				<View style={{flex: 1, backgroundColor: 'white', padding: 15}}>
+					<View style={{alignItems: 'center', paddingTop: 30}}>
+						<Image
+							style={styles.image}
+							source={require('../resources/image/logo.png')} />
+						<Text style={styles.h1}>e-leitor</Text>
+					</View>	
+					<View style={{paddingTop: 20}}>
+						<Text>Email:</Text>
+						<TextInput 
+							ref={'email-input'}
+							style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
+							autoCapitalize='words'							
+							autoCorrect={false}
+							enablesReturnKeyAutomatically={true}
+							keyboardAppearance='default'
+							keyboardType='email-address'
+							returnKeyType='next'
+							underlineColorAndroid='transparent'
+							numberOfLines={1}
+							onChangeText={(text) => this.setState({emailText: text})}
+							onSubmitEditing={() => this.refs['password-input'].focus()}
+							/>	
+						<Text>Senha:</Text>
+						<TextInput 
+							ref={'password-input'}
+							style={[styles.input, {height: deviceHeight, borderColor: this.state.passwordError ? 'red' : 'lightgray'}]}
+							autoCapitalize='none'							
+							secureTextEntry={true}
+							autoCorrect={false}
+							enablesReturnKeyAutomatically={true}
+							keyboardAppearance='default'
+							returnKeyType='done'
+							underlineColorAndroid='transparent'
+							numberOfLines={1}
+							onChangeText={(text) => this.setState({passwordText: text})}
+							onSubmitEditing={this.onLoginPress.bind(this)}
+							/>	
+					</View>
+					<View style={styles.box}>
+						<View style={{flex: 1, flexDirection: 'column'}}>
+							<TouchableElement onPress={this.onLoginPress.bind(this)} style={styles.button}>
+								<Text>Entrar</Text>
+							</TouchableElement>
+							<LoginButton
+								style={{flex: 1, height: 40, marginTop: 15}}
+								readPermissions={['public_profile', 'email', 'user_birthday']}
+								onLoginFinished={this.onFBLoginFinished.bind(this)}
+								onLogoutFinished={() => alert("User logged out")}/>
+							</View>
+					</View>	
+					<TouchableElement onPress={this.onNewAccountPress.bind(this)} style={{alignSelf: 'center', height: 40, justifyContent: 'center'}}>
+						<Text>Criar uma conta</Text>
+					</TouchableElement>
 				</View>
-				<View style={styles.box}>
-					<View style={{flex: 1, flexDirection: 'column'}}>
-						<TouchableElement onPress={this.onLoginPress.bind(this)} style={styles.button}>
-							<Text>Entrar</Text>
-						</TouchableElement>
-						<LoginButton
-							style={{flex: 1, height: 40, marginTop: 15}}
-							readPermissions={['public_profile', 'email', 'user_birthday']}
-							onLoginFinished={this.onFBLoginFinished.bind(this)}
-							onLogoutFinished={() => alert("User logged out")}/>
-						</View>
-				</View>	
-				<TouchableElement onPress={this.onNewAccountPress.bind(this)} style={{alignSelf: 'center', height: 40, justifyContent: 'center'}}>
-					<Text>Criar uma conta</Text>
-				</TouchableElement>
-			</View>
+			</KeyboardAwareScrollView>
 		)
 	}
 
@@ -152,7 +157,8 @@ export default class LoginScene extends Component {
 		
 		this.setState({emailError: emailError, passwordError: passwordError}, () => {
 			if (!emailError && !passwordError) {
-				this.props.navigator.push({component: HomeScene});
+				// this.props.navigator.push({component: HomeScene});
+				this.props.navigator.replace({component: NavigationManager})
 			}	
 		})
 	}

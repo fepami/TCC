@@ -10,6 +10,7 @@ import {
 import TouchableElement from '../components/TouchableElement';
 import dismissKeyboard from 'dismissKeyboard';
 import Header from '../components/Header';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default class UsuarioTrocarSenhaScene extends Component {
 	render(){
@@ -22,52 +23,54 @@ export default class UsuarioTrocarSenhaScene extends Component {
 				<Header
 					navigator={this.props.navigator}
 					title='Trocar a Senha' />
-				<ScrollView style={styles.view}>
-					<Text>Senha antiga:</Text>	
-					<TextInput 
-						ref={'currentpwd'}
-						style={[styles.input, {height: deviceHeight}]}
-						autoCapitalize='none'
-						secureTextEntry={true}
-						autoCorrect={false}
-						enablesReturnKeyAutomatically={true}
-						keyboardAppearance='default'
-						returnKeyType='next'
-						underlineColorAndroid='transparent'
-						numberOfLines={1}
-						/>		
-					<Text>Nova senha:</Text>	
-					<TextInput 
-						ref={'newpwd'}
-						style={[styles.input, {height: deviceHeight}]}
-						autoCapitalize='none'
-						secureTextEntry={true}
-						autoCorrect={false}
-						enablesReturnKeyAutomatically={true}
-						keyboardAppearance='default'
-						returnKeyType='next'
-						underlineColorAndroid='transparent'
-						numberOfLines={1}
-						/>				
-					<Text>Confirmação da nova senha:</Text>	
-					<TextInput 
-						ref={'newpwd2'}
-						style={[styles.input, {height: deviceHeight}]}
-						autoCapitalize='none'
-						secureTextEntry={true}
-						autoCorrect={false}
-						enablesReturnKeyAutomatically={true}
-						keyboardAppearance='default'
-						returnKeyType='done'
-						underlineColorAndroid='transparent'
-						numberOfLines={1}
-						/>		
-					<View style={styles.box}>
-						<TouchableElement onPress={this.onPress.bind(this)} style={styles.button}>
-							<Text>Salvar</Text>
-						</TouchableElement>
+				<KeyboardAwareScrollView style={{flex: 1}}>
+					<View style={styles.view}>
+						<Text>Senha antiga:</Text>	
+						<TextInput 
+							ref={'currentpwd'}
+							style={[styles.input, {height: deviceHeight}]}
+							autoCapitalize='none'
+							secureTextEntry={true}
+							autoCorrect={false}
+							enablesReturnKeyAutomatically={true}
+							keyboardAppearance='default'
+							returnKeyType='next'
+							underlineColorAndroid='transparent'
+							numberOfLines={1}
+							/>		
+						<Text>Nova senha:</Text>	
+						<TextInput 
+							ref={'newpwd'}
+							style={[styles.input, {height: deviceHeight}]}
+							autoCapitalize='none'
+							secureTextEntry={true}
+							autoCorrect={false}
+							enablesReturnKeyAutomatically={true}
+							keyboardAppearance='default'
+							returnKeyType='next'
+							underlineColorAndroid='transparent'
+							numberOfLines={1}
+							/>				
+						<Text>Confirmação da nova senha:</Text>	
+						<TextInput 
+							ref={'newpwd2'}
+							style={[styles.input, {height: deviceHeight}]}
+							autoCapitalize='none'
+							secureTextEntry={true}
+							autoCorrect={false}
+							enablesReturnKeyAutomatically={true}
+							keyboardAppearance='default'
+							returnKeyType='done'
+							underlineColorAndroid='transparent'
+							numberOfLines={1}
+							/>		
+						<View style={styles.box}>
+							<TouchableElement onPress={this.onPress.bind(this)} style={styles.button}>
+								<Text>Salvar</Text>
+							</TouchableElement>
+						</View>
 					</View>
-				</ScrollView>
+				</KeyboardAwareScrollView>
 			</View>
 		)
 	}

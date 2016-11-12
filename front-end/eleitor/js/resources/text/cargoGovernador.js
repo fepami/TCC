@@ -1,0 +1,7 @@
+module.exports = (`Governador é o cargo político que representa o poder executivo na esfera dos Estados e do Distrito Federal. É função do governador: a direção da administração estadual e a representação do Estado em suas relações jurídicas, políticas e administrativas, defendendo seus interesses junto à Presidência e buscando investimentos. O governador do Distrito Federal, por ser um caso singular (município neutro), exerce certas funções que são cabíveis ao prefeito.
+
+O termo “governador” foi estabelecido a partir de 1947. No entanto, ao longo da história do Brasil, o cargo correspondente ao de governador já existia muito antes, só que com terminologias diferentes. Com funções semelhantes, podemos citar o cargo de donatário e capitão-mor, no Período Colonial; o cargo de presidente de província, no Período Imperial; e o de presidente de estado, na República Velha.
+
+No Brasil, o governador tem um mandato de quatro anos, sendo eleito através do sistema de sufrágio universal. É eleito o candidato que tiver 50% dos votos mais um, caso contrário, os dois candidatos mais votados disputam o segundo turno. Nos Estados Unidos, são os delegados de cada Estado que elegem o governador, ou seja, o sistema de votos é distrital. Já na China, o governador é eleito pelo sistema central, é o presidente que escolhe os governadores.
+
+Fonte: http://mundoeducacao.bol.uol.com.br/politica/governador.htm`)
