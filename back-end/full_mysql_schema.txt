@@ -106,6 +106,7 @@ DROP TABLE user;
 DROP TABLE politician;
 DROP TABLE politician_vote;
 DROP TABLE politician_follow;
+DROP TABLE politician_proposal;
 DROP TABLE proposal;
 DROP TABLE politician_position;
 DROP TABLE position;
@@ -148,6 +149,14 @@ CREATE TABLE proposal (
 	content text NOT NULL,
 	code varchar(255),
 	summary text,
+	ranking int,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE politician_proposal (
+	id int NOT NULL AUTO_INCREMENT,
+  politician_id int,
+  proposal_id int,
 	PRIMARY KEY (id)
 );
 
