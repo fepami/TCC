@@ -1,5 +1,13 @@
 const express = require("express");
 const app = express();
+var http = require('http');
+var https = require('https');
+var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+};
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -365,7 +373,5 @@ app.get("/politicos/:politician_id/seguir",(req,res) => {
 	});
 });
 
-
-app.listen(port, () => {
-	console.log('Listening on port '+ port);
-});
+https.createServer(options, app).listen(443);
+http.createServer(app).listen(port);
