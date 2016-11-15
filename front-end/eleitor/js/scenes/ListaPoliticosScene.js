@@ -7,6 +7,7 @@ import {
 	ListView,
 	Platform
 } from 'react-native';
+import LoadingOverlay from '../components/LoadingOverlay';
 import PoliticosListItem from '../components/PoliticosListItem';
 import SearchBarIOS from '../components/SearchBarIOS';
 import Filter from '../components/Filter';
@@ -15,22 +16,45 @@ import Header from '../components/Header';
 import PoliticoPerfilScene from '../scenes/PoliticoPerfilScene';
 import {fakePoliticos, fakeFilter} from '../fakeData';
 
+const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+
 export default class ListaPoliticosScene extends Component {	
 	constructor(props){
 		super(props);
 		this.state = {
 			modalVisible: false,
-			selectedFilters: []
+			selectedFilters: [],
+			politicosDataSource: ds.cloneWithRows([]),
+			loading: true
 		}
 		this.onShowFilter = this.onShowFilter.bind(this);
 		this.onCloseFilter = this.onCloseFilter.bind(this);
 		this.onSubmitSearch = this.onSubmitSearch.bind(this);
+		this.getPoliticos = this.getPoliticos.bind(this);
+		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
 	}
 
-	renderSearchBarIOS() {
-		return Platform.select({
-			ios: <SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)}/>
-		})
+	getPoliticos() {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+				this.setState({politicosDataSource: ds.cloneWithRows(jsonResponse), loading: false});
+			} else {
+				console.warn('Erro: não foi possível conectar ao servidor.');
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos?device_id=device_id1');
+		request.send();
+	}
+
+	componentDidMount() {
+		this.getPoliticos();
 	}
 
 	chooseFilterIcon() {
@@ -40,22 +64,21 @@ export default class ListaPoliticosScene extends Component {
 		})
 	}
 
-	onShowFilter() {
-		this.setState({modalVisible: true});
+	renderLoadingOrView() {
+		if (this.state.loading) {
+			return (<LoadingOverlay/>)
+		} else {
+			let type = this.props.type ? this.props.type : 'lista';
+			return (
+				<ListView
+                    enableEmptySections={true}
+                    automaticallyAdjustContentInsets={false}
+                    dataSource={this.state.politicosDataSource} 
+                    renderRow={(rowData) => <PoliticosListItem onPress={()=>this.onPoliticoPress(rowData)} politico={rowData} cellType={type}/>} />
+			)
+		}
 	}
-
-	onCloseFilter() {
-		this.setState({modalVisible: false});
-	}
-
-	changeFilterVisibility(visible) {
-		this.setState({modalVisible: visible});
-	}
-
-	onSubmitSearch() {
-
-	}
-
+	
 	render(){
 		let filterIcon = this.chooseFilterIcon();
 		const actions = [
@@ -73,10 +96,8 @@ export default class ListaPoliticosScene extends Component {
 		// }
 		];
 
-		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-		let type = this.props.type ? this.props.type : 'lista';
 		let title = this.props.type ? 'Ranking de Políticos' : 'Políticos';
-		const politicosDataSource = ds.cloneWithRows(fakePoliticos);
+		// this.state.politicosDataSource = ds.cloneWithRows(fakePoliticos);
 		const filterDataSource = ds.cloneWithRows(fakeFilter);
 
 		return(
@@ -86,11 +107,7 @@ export default class ListaPoliticosScene extends Component {
 					title={title}
 					actions={actions} />
 				<SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)} />
-				<ListView
-                    enableEmptySections={true}
-                    automaticallyAdjustContentInsets={false}
-                    dataSource={politicosDataSource} 
-                    renderRow={(rowData) => <PoliticosListItem onPress={()=>this.onPoliticoPress(rowData)} politico={rowData} cellType={type}/>} />
+				{this.renderLoadingOrView()}
                 <Filter 
                 	navigator={this.props.navigator} 
                 	modalVisible={this.state.modalVisible} 
@@ -129,6 +146,22 @@ export default class ListaPoliticosScene extends Component {
 
 	onPoliticoPress(data) {
 		this.props.navigator.push({component: PoliticoPerfilScene, passProps: data});
+	}
+
+	onShowFilter() {
+		this.setState({modalVisible: true});
+	}
+
+	onCloseFilter() {
+		this.setState({modalVisible: false});
+	}
+
+	changeFilterVisibility(visible) {
+		this.setState({modalVisible: visible});
+	}
+
+	onSubmitSearch() {
+
 	}
 }
 

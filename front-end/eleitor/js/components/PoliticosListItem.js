@@ -27,22 +27,26 @@ export default class PoliticosListItem extends Component {
 	}
 
 	render() {
-		return(
-			<TouchableElement onPress={this.props.onPress}>
-				<View style={[styles.cell, this.props.style]}>
-					{this.renderRanking()}
-					<Image
-						style={styles.roundedimage}
-						source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
-					<View style={styles.info}>
-						<Text style={styles.h1}>{this.props.politico.nome}</Text>
-						<Text>{this.props.politico.cargo}</Text>
-						<Text>{this.props.politico.partido}</Text>
+		if (this.props.politico != null) {
+			return(
+				<TouchableElement onPress={this.props.onPress}>
+					<View style={[styles.cell, this.props.style]}>
+						{this.renderRanking()}
+						<Image
+							style={styles.roundedimage}
+							source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
+						<View style={styles.info}>
+							<Text style={styles.h1}>{this.props.politico.nome}</Text>
+							<Text>{this.props.politico.cargo}</Text>
+							<Text>{this.props.politico.partido}</Text>
+						</View>
+						{this.renderIcon()}
 					</View>
-					{this.renderIcon()}
-				</View>
-			</TouchableElement>
-		)
+				</TouchableElement>
+			)
+		} else { 
+			return null
+		}
 	}
 }
 

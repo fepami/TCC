@@ -1,4 +1,4 @@
-export default function(state = {tab: 'home'}, action){
+export default function(state = {tab: 'politicos'}, action){
 	if(action.type === 'SWITCH_TAB'){
 		return {tab: action.tab};
 	}

@@ -5,7 +5,8 @@ import {
 	Image,
 	Text,
 	TextInput,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
 import TouchableElement from '../components/TouchableElement';
 import CadastroScene from '../scenes/CadastroScene';
@@ -30,6 +31,8 @@ export default class LoginScene extends Component {
 			emailError: false,
 			passwordError: false
 		}
+
+		this.saveCredentials = this.saveCredentials.bind(this);
 	}
 
 	render(){
@@ -110,7 +113,7 @@ export default class LoginScene extends Component {
 					alert('Erro de autenticação');
 				} else {
 					const age = this.getAge(result.birthday);
-					this.setState({usuario: {nome: result.name, email: result.email, sexo: result.gender, foto: result.picture.data.url, idade: age}}, () => console.log(this.state.usuario));
+					this.setState({usuario: {nome: result.name, email: result.email, sexo: result.gender, foto: result.picture.data.url, idade: age}}, this.saveCredentials());
 				}
 			}
 
@@ -161,6 +164,14 @@ export default class LoginScene extends Component {
 				this.props.navigator.replace({component: NavigationManager})
 			}	
 		})
+	}
+
+	saveCredentials() {
+		AsyncStorage.setItem('nome', this.state.nome);
+		AsyncStorage.setItem('email', this.state.email);
+		AsyncStorage.setItem('sexo', this.state.sexo);
+		AsyncStorage.setItem('foto', this.state.foto);
+		AsyncStorage.setItem('idade', this.state.idade);
 	}
 
 	onNewAccountPress() {

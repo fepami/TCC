@@ -118,8 +118,18 @@ class UsuarioConfiguracoesScene extends Component {
 
 	onPressDeslogar() {
 		// LoginManager.logout();
+		// this.removeCredentials.bind(this);
+
 		Platform.OS === 'ios' ? this.props.rootNavigator.resetTo({component: LoginScene}) : this.props.navigator.resetTo({component: LoginScene});
 		this.props.dispatch(switchTab('home'));
+	}
+
+	removeCredentials() {
+		AsyncStorage.removeItem('nome');
+		AsyncStorage.removeItem('email');
+		AsyncStorage.removeItem('sexo');
+		AsyncStorage.removeItem('foto');
+		AsyncStorage.removeItem('idade');
 	}
 }
 

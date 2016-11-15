@@ -7,7 +7,7 @@ import {
 export default class ApprovalBar extends Component {
 	render() {
 		const container_size = this.props.viewSize - 2;
-		const green_size = container_size * this.props.approvalPercentage / 100;
+		const green_size = container_size * this.props.approvalPercentage;
 		const red_size = container_size - green_size;
 		let green_style = styles.green;
 		let red_style = styles.red;

@@ -7,6 +7,7 @@ import {
 	ScrollView,
 	Platform
 } from 'react-native';
+import LoadingOverlay from '../components/LoadingOverlay';
 import Dimensions from 'Dimensions';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
@@ -19,12 +20,77 @@ export default class PoliticoPerfilScene extends Component {
 		super(props);
 		this.state = {
 			starIcon: 'ios-star-outline',
-			likeIcon: 'ios-thumbs-up',
-			dislikeIcon: 'ios-thumbs-down'
+			politicoInfo: {},
+			user_vote: 0,
+			user_follow: false,
+			loading: true
 		}
 		this.onStarActionSelected = this.onStarActionSelected.bind(this);
 		this.onLikeActionSelected = this.onLikeActionSelected.bind(this);
 		this.onDislikeActionSelected = this.onDislikeActionSelected.bind(this);
+		this.getPolitico = this.getPolitico.bind(this);
+		this.postVoto = this.postVoto.bind(this);
+		this.postFollow = this.postFollow.bind(this);
+		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
+	}
+
+	getPolitico() {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+				this.setState({politicoInfo: jsonResponse[0], user_vote: jsonResponse[0].user_vote, user_follow: jsonResponse[0].user_follow, loading: false});
+			} else {
+				console.warn('Erro: não foi possível conectar ao servidor.');
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '?device_id=device_id1');
+		request.send();
+	}
+
+	postVoto() {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+			} else {
+				console.warn('Erro: não foi possível conectar ao servidor.');
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/votar?device_id=device_id1');
+		request.send();
+	}
+
+	postFollow() {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+			} else {
+				console.warn('Erro: não foi possível conectar ao servidor.');
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/seguir?device_id=device_id1&follow=' + this.state.user_follow);
+		request.send();
+	}
+
+	componentDidMount() {
+		this.getPolitico();
 	}
 
 	onStarActionSelected(){
@@ -33,52 +99,39 @@ export default class PoliticoPerfilScene extends Component {
 		} else {
 			this.setState({starIcon: 'ios-star-outline'});
 		}
+		// this.postFollow();
 	}
 
 	onLikeActionSelected(){
-		if(this.state.likeIcon === 'ios-thumbs-up-outline'){
-			this.setState({likeIcon: 'ios-thumbs-up'});	
+		if(this.state.user_vote === 1){
+			this.setState({user_vote: 0});	
 		} else {
-			this.setState({likeIcon: 'ios-thumbs-up-outline'});
-			this.setState({dislikeIcon: 'ios-thumbs-down'});
+			this.setState({user_vote: 1});
 		}
+		// this.postVoto();
 	}
 
 	onDislikeActionSelected(){
-		if(this.state.dislikeIcon === 'ios-thumbs-down-outline'){
-			this.setState({dislikeIcon: 'ios-thumbs-down'});	
+		if(this.state.user_vote === -1){
+			this.setState({user_vote: 0});	
 		} else {
-			this.setState({dislikeIcon: 'ios-thumbs-down-outline'});
-			this.setState({likeIcon: 'ios-thumbs-up'});	
+			this.setState({user_vote: -1});
 		}
+		// this.postVoto();
 	}
 
-	renderIcon() {
-		return Platform.select({
-			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrowIcon}/>
-		})
-	}
+	renderLoadingOrView() {
+		if (this.state.loading) {
+			return (<LoadingOverlay/>)
+		} else {
+			let like_bgcolor = (this.state.user_vote === 1) ? 'limegreen' : 'white';
+			let likeIcon_color = (this.state.user_vote === 1) ? 'white' : 'limegreen';
+			let dislike_bgcolor = (this.state.user_vote === -1) ? 'red' : 'white';
+			let dislikeIcon_color = (this.state.user_vote === -1) ? 'white' : 'red';
 
-	render(){
-		const actions = [{
-			title: 'Seguir',
-			iconName: this.state.starIcon,
-			show: 'always',
-			onActionSelected: this.onStarActionSelected
-		}];
-
-		let like_bgcolor = (this.state.likeIcon === 'ios-thumbs-up-outline') ? 'limegreen' : 'white';
-		let likeIcon_color = (this.state.likeIcon === 'ios-thumbs-up-outline') ? 'white' : 'limegreen';
-		let dislike_bgcolor = (this.state.dislikeIcon === 'ios-thumbs-down-outline') ? 'red' : 'white';
-		let dislikeIcon_color = (this.state.dislikeIcon === 'ios-thumbs-down-outline') ? 'white' : 'red';
-
-		const approval_width = Dimensions.get('window').width - 30;
-		return(
-			<View style={{flex: 1, backgroundColor: 'white'}}>
-				<Header
-					navigator={this.props.navigator}
-					title={this.props.nome} 
-					actions={actions}/>
+			const approval_width = Dimensions.get('window').width - 30;
+			
+			return (
 				<ScrollView style={{flex: 1}}>
 					<View style={styles.view}>
 						<View style={{alignItems: 'center'}}>
@@ -91,11 +144,12 @@ export default class PoliticoPerfilScene extends Component {
 								</View>
 							</View>
 						</View>
-						<ApprovalBar viewSize={approval_width} approvalPercentage={this.props.approval} />
-						<Text style={styles.h1}>{this.props.nome}, {this.props.idade}</Text>
-						<Text>{this.props.cargo}</Text>
-						<Text>{this.props.vigencia}</Text>
-						<Text style={{paddingBottom: 15}}>{this.props.partido}</Text>
+						<ApprovalBar viewSize={approval_width} approvalPercentage={this.state.politicoInfo.approval} />
+						<Text style={styles.h1}>{this.state.politicoInfo.nome}, {this.state.politicoInfo.idade}</Text>
+						<Text>{this.state.politicoInfo.cargo}</Text>
+						<Text>{this.state.politicoInfo.vigencia}</Text>
+						<Text>{this.state.politicoInfo.partido}</Text>
+						<Text style={{paddingBottom: 15}}>{this.state.politicoInfo.email}</Text>
 						<TouchableElement onPress={this.onPressHistorico.bind(this)}>
 							<View style={styles.cellTop}>
 								<Text style={styles.cellText}>Histórico de Propostas</Text>
@@ -118,6 +172,31 @@ export default class PoliticoPerfilScene extends Component {
 						</View>
 					</View>
 				</ScrollView>
+			)
+		}
+	}
+
+	renderIcon() {
+		return Platform.select({
+			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrowIcon}/>
+		})
+	}
+
+	render(){
+		const actions = [{
+			title: 'Seguir',
+			iconName: this.state.starIcon,
+			show: 'always',
+			onActionSelected: this.onStarActionSelected
+		}];
+
+		return(
+			<View style={{flex: 1, backgroundColor: 'white'}}>
+				<Header
+					navigator={this.props.navigator}
+					title={this.props.nome} 
+					actions={actions}/>
+				{this.renderLoadingOrView()}
 			</View>
 		)
 	}
