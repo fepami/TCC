@@ -166,9 +166,20 @@ var vote = function(req,res) {
 
 			var is_positive = helpers.parse_null_bool(req.query['user_vote']);
 			if (existing_vote.length > 0) {
-				var existing_is_positive = helpers.parse_bool(existing_vote[0]['is_positive'])
+				var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive'])
 				var vote_id = existing_vote[0]['vote_id'];
-				if (existing_is_positive !== is_positive) {
+				if (is_positive === null) {
+					// delete
+					var delete_query = 'delete from politician_vote where id=?';
+					mysql_handler(delete_query, [vote_id], function(err){
+						if (err) {
+							res.json(err);
+						} else {
+							mysql_handler(update_ranking_query, function(err){});
+							res.json('ok, delete');
+						}
+					});
+				} else if (existing_is_positive !== is_positive) {
 					// update
 					var update_query = 'update politician_vote set is_positive = ? where id=?';
 					mysql_handler(update_query, [is_positive, vote_id], function(err){
@@ -182,7 +193,7 @@ var vote = function(req,res) {
 				} else {
 					res.json('ok, do nothing');
 				}
-			} else {
+			} else if (is_positive !== null){
 				// create
 				var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive)\
 				(SELECT u.id, ?, ? FROM user u WHERE u.device_id=?);';
@@ -194,6 +205,8 @@ var vote = function(req,res) {
 						res.json('ok, create');
 					}
 				});
+			} else {
+				res.json('ok, do nothing');
 			}
 		}
 	});
