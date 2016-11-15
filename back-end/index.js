@@ -1,5 +1,13 @@
 const express = require("express");
 const app = express();
+var http = require('http');
+var https = require('https');
+var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+};
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -260,7 +268,6 @@ app.get("/politicos/:politician_id/seguir",(req,res) => {
 
 
 
-
 var get_proposals = function(req, res) {
 	var query_for_props = [];
 	query_for_props[0] = 'select\
@@ -325,8 +332,5 @@ app.get("/propostas/:proposal_id", get_proposals);
 
 
 
-
-
-app.listen(port, () => {
-	console.log('Listening on port '+ port);
-});
+https.createServer(options, app).listen(443);
+http.createServer(app).listen(port);
