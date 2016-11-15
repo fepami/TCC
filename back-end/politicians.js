@@ -64,7 +64,7 @@ var get_politicians_func = function(type){
 					'approval': poli['approval'],
 					'user_vote': helpers.format_null_bool(poli['user_vote']),
 					'n_p_votar': poli['vote_code'],
-					'photo_url': poli['photo_url'],
+					'foto_url': poli['photo_url'],
 					'cargo': null
 				}
 
@@ -130,6 +130,123 @@ var get_politicians_func = function(type){
 	return get_politicians;
 }
 
+var vote = function(req,res) {
+	// assumindo q vai vir device_id e user_vote pelo get
+	// http://localhost:3000/politicos/1/votar?device_id=device_id4&user_vote=1
+	var politician_id = req.params['politician_id'];
+	var device_id = req.query['device_id'];
+	var existing_vote_query = 'select\
+	  v.id as vote_id,\
+	  v.is_positive\
+	from politician_vote v\
+	inner join user u on u.id=v.user_id\
+	where u.device_id = ? and v.politician_id = ?;';
+
+	mysql_handler(existing_vote_query, [device_id, politician_id], function(err, existing_vote){
+		if (err) {
+			res.json(err);
+		} else {
+			var update_ranking_query = 'UPDATE politician p\
+				JOIN (\
+				  SELECT\
+				    @rank:=@rank+1 AS rank,\
+				    APPROVAL_T.approval AS approval,\
+				    APPROVAL_T.id AS id\
+				  FROM (\
+				    SELECT\
+				      pol.id,\
+				      avg(vote.is_positive) AS approval\
+				    FROM politician pol\
+				    INNER join politician_vote vote ON vote.politician_id=pol.id\
+				    GROUP BY pol.id\
+				    ORDER BY approval DESC\
+				  ) AS APPROVAL_T, (SELECT @rank:=0) meh\
+				) RANKED_T ON RANKED_T.id = p.id\
+				SET p.ranking = RANKED_T.rank;';
+
+			var is_positive = helpers.parse_null_bool(req.query['user_vote']);
+			if (existing_vote.length > 0) {
+				var existing_is_positive = helpers.parse_bool(existing_vote[0]['is_positive'])
+				var vote_id = existing_vote[0]['vote_id'];
+				if (existing_is_positive !== is_positive) {
+					// update
+					var update_query = 'update politician_vote set is_positive = ? where id=?';
+					mysql_handler(update_query, [is_positive, vote_id], function(err){
+						if (err) {
+							res.json(err);
+						} else {
+							mysql_handler(update_ranking_query, function(err){});
+							res.json('ok, update');
+						}
+					});
+				} else {
+					res.json('ok, do nothing');
+				}
+			} else {
+				// create
+				var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive)\
+				(SELECT u.id, ?, ? FROM user u WHERE u.device_id=?);';
+				mysql_handler(create_query, [politician_id, is_positive, device_id], function(err){
+					if (err) {
+						res.json(err);
+					} else {
+						mysql_handler(update_ranking_query, function(err){});
+						res.json('ok, create');
+					}
+				});
+			}
+		}
+	});
+}
+
+var follow = function(req,res) {
+	// assumindo q vai vir device_id e is_positive pelo get
+	// http://localhost:3000/politicos/1/seguir?device_id=device_id4&user_follow=true
+	var politician_id = req.params['politician_id'];
+	var device_id = req.query['device_id'];
+
+	var existing_follow_query = 'select\
+	  f.id as follow_id\
+	from politician_follow f\
+	inner join user u on u.id=f.user_id\
+	where u.device_id = ? and f.politician_id = ?;';
+
+	mysql_handler(existing_follow_query, [device_id, politician_id], function(err, existing_follow){
+		if (err) {
+			res.json(err);
+		} else {
+			var follow = helpers.parse_bool(req.query['user_follow']);
+			if (existing_follow.length > 0 && !follow) {
+				// delete
+				var follow_id = existing_follow[0]['follow_id'];
+				var delete_query = 'delete from politician_follow where id=?';
+				mysql_handler(delete_query, [follow_id], function(err){
+					if (err) {
+						res.json(err);
+					} else {
+						res.json('ok, delete');
+					}
+				});
+			} else if (existing_follow.length === 0 && follow) {
+				// create
+				var create_query = 'INSERT INTO politician_follow (user_id, politician_id)\
+				(SELECT u.id, ? FROM user u WHERE u.device_id=?);';
+				mysql_handler(create_query, [politician_id, device_id], function(err){
+					if (err) {
+						res.json(err);
+					} else {
+						res.json('ok, create');
+					}
+				});
+			} else {
+				res.json('ok, do nothing');
+			}
+		}
+	});
+}
+
 module.exports = {
-  'get_politicians_func': get_politicians_func
+  'get_politicians_func': get_politicians_func,
+  'vote': vote,
+  'follow': follow,
 }
