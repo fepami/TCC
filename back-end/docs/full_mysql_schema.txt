@@ -128,6 +128,7 @@ CREATE TABLE politician (
 	party varchar(255),
 	ranking int,
 	email varchar(255),
+	photo_url text,
 	PRIMARY KEY (id)
 );
 
@@ -179,7 +180,7 @@ CREATE TABLE politician_position (
   vote_code varchar(15),
   election_year int,
   start_date date,
-	end_date date,
+	end_date date, # soh preenchido se o mandato jah acabou
 	location varchar(255),
 	PRIMARY KEY (id)
 );
@@ -187,6 +188,6 @@ CREATE TABLE politician_position (
 CREATE TABLE position (
 	id int NOT NULL AUTO_INCREMENT,
 	name varchar(255),
-	term_length int,
+	term_length int, # em anos ateh aparecer um cargo que precisa de ser em meses
 	PRIMARY KEY (id)
 );
