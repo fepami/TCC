@@ -14,10 +14,17 @@ docker run -it --rm --net container:cassone poklet/cassandra cqlsh
 
 CREATE KEYSPACE eleitor WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1}
 
-#ssh -i /path/myfirstkey.pem ec2-user@i-0b191e44f2f250804
-#ssh -i /path/myfirstkey.pem ubuntu@ec2-52-67-189-113.sa-east-1.compute.amazonaws.com
 
 
 #### MySql ####
 CREATE DATABASE eleitor;
 USE eleitor;
+
+
+
+
+#### linux ####
+pdftotext -layout exemplo_proposta.pdf teste_pdf_out.txt
+
+#ssh -i /path/myfirstkey.pem ec2-user@i-0b191e44f2f250804
+#ssh -i /path/myfirstkey.pem ubuntu@ec2-52-67-189-113.sa-east-1.compute.amazonaws.com

@@ -15,7 +15,7 @@ function parse_null_bool(string_value) {
 	if (string_value === '-1') return false;
 	if (string_value === '0') return null;
 
-	return parse_null_bool(format_null_bool(string_value));
+	return parse_bool(string_value);
 }
 
 function parse_null_bool_db(string_value) {
