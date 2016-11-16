@@ -21,11 +21,11 @@ alter table proposal_vote auto_increment=1;
 
 INSERT INTO politician (name, congress_name, date_of_birth, party, email, photo_url) VALUES ('Paulo Sérgio Abou Anni', 'Abou Anni','1966-11-06', 'PV', 'abouanni@uol.com.br', 'http://www.camara.sp.gov.br/wp-content/uploads/2014/10/abou-anni.jpg');
 
-INSERT INTO politician (name, congress_name, date_of_birth, party, email) VALUES ('Adilson Armando Carvalho Amadeu', 'Adilson Amadeu','1950-11-15', 'PTB', 'adilsonamadeu@camara.sp.gov.br');
+INSERT INTO politician (name, congress_name, date_of_birth, party, email, photo_url) VALUES ('Adilson Armando Carvalho Amadeu', 'Adilson Amadeu','1950-11-15', 'PTB', 'adilsonamadeu@camara.sp.gov.br', 'http://www.camara.sp.gov.br/wp-content/uploads/2014/10/adilson-amadeu.jpg');
 
-INSERT INTO politician (name, congress_name, date_of_birth, party, email) VALUES ('Adolfo Quintas Gonçalves Neto', 'Adolfo Quintas','1953-07-02', 'PSD', 'adolfoquintas@camara.sp.gov.br');
+INSERT INTO politician (name, congress_name, date_of_birth, party, email, photo_url) VALUES ('Adolfo Quintas Gonçalves Neto', 'Adolfo Quintas','1953-07-02', 'PSD', 'adolfoquintas@camara.sp.gov.br', 'http://www.camara.sp.gov.br/wp-content/uploads/2015/01/adolfo.jpg');
 
-INSERT INTO politician (name, congress_name, date_of_birth, party, email) VALUES ('Alfredo Alves Cavalcante ', 'Alfredinho','1959-06-24', 'PT', 'Alfredinho');
+INSERT INTO politician (name, congress_name, date_of_birth, party, email, photo_url) VALUES ('Alfredo Alves Cavalcante ', 'Alfredinho','1959-06-24', 'PT', 'Alfredinho', 'http://www.camara.sp.gov.br/wp-content/uploads/2014/10/alfredinho.jpg');
 
 INSERT INTO position (name, term_length) VALUES ('Prefeito', 4);
 INSERT INTO position (name, term_length) VALUES ('Vereador', 4);
