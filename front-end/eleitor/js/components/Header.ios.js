@@ -65,7 +65,7 @@ class ItemWrapperIOS extends Component {
 			);
 		} else if (icon) {
 			// content = <Icon name={icon} color={style.color} size={24} />;
-			content = <Icon name={icon} size={24} />;
+			content = <Icon name={icon} size={24} color='#33CCCC'/>;
 		}
 
 		return (
@@ -85,7 +85,7 @@ var HEADER_HEIGHT = 44 + STATUS_BAR_HEIGHT;
 
 var styles = StyleSheet.create({
 	header: {
-		backgroundColor: 'white',
+		backgroundColor: '#2B2B2B',
 		paddingTop: STATUS_BAR_HEIGHT,
 		height: HEADER_HEIGHT,
 		flexDirection: 'row',
@@ -95,7 +95,7 @@ var styles = StyleSheet.create({
 		borderBottomWidth: StyleSheet.hairlineWidth
 	},
 	titleText: {
-		color: 'black',
+		color: '#33CCCC',
 		fontWeight: 'bold',
 		fontSize: 20,
 	},

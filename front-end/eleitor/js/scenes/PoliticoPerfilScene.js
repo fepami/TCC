@@ -13,13 +13,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
 import ApprovalBar from '../components/ApprovalBar';
-import PoliticoHistoricoPropostasScene from '../scenes/PoliticoHistoricoPropostasScene';
+import PoliticoHistoricoPropostasScene from './PoliticoHistoricoPropostasScene';
 
 export default class PoliticoPerfilScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			starIcon: 'ios-star-outline',
 			politicoInfo: {},
 			user_vote: 0,
 			user_follow: false,
@@ -53,7 +52,7 @@ export default class PoliticoPerfilScene extends Component {
 		request.send();
 	}
 
-	postVoto() {
+	postVoto(user_vote) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = (e) => {
 			if (request.readyState !== 4) {
@@ -67,11 +66,11 @@ export default class PoliticoPerfilScene extends Component {
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/votar?device_id=device_id1');
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/votar?device_id=device_id1&user_vote=' + user_vote);
 		request.send();
 	}
 
-	postFollow() {
+	postFollow(user_follow) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = (e) => {
 			if (request.readyState !== 4) {
@@ -85,7 +84,7 @@ export default class PoliticoPerfilScene extends Component {
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/seguir?device_id=device_id1&follow=' + this.state.user_follow);
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/seguir?device_id=device_id1&user_follow=' + user_follow);
 		request.send();
 	}
 
@@ -94,30 +93,27 @@ export default class PoliticoPerfilScene extends Component {
 	}
 
 	onStarActionSelected(){
-		if(this.state.starIcon === 'ios-star-outline'){
-			this.setState({starIcon: 'ios-star'});	
+		if(this.state.user_follow === true){
+			this.setState({user_follow: false}, this.postFollow(false));	
 		} else {
-			this.setState({starIcon: 'ios-star-outline'});
+			this.setState({user_follow: true}, this.postFollow(true));
 		}
-		// this.postFollow();
 	}
 
 	onLikeActionSelected(){
 		if(this.state.user_vote === 1){
-			this.setState({user_vote: 0});	
+			this.setState({user_vote: 0}, this.postVoto(0));	
 		} else {
-			this.setState({user_vote: 1});
+			this.setState({user_vote: 1}, this.postVoto(1));
 		}
-		// this.postVoto();
 	}
 
 	onDislikeActionSelected(){
 		if(this.state.user_vote === -1){
-			this.setState({user_vote: 0});	
+			this.setState({user_vote: 0}, this.postVoto(0));	
 		} else {
-			this.setState({user_vote: -1});
+			this.setState({user_vote: -1}, this.postVoto(-1));
 		}
-		// this.postVoto();
 	}
 
 	renderLoadingOrView() {
@@ -138,9 +134,9 @@ export default class PoliticoPerfilScene extends Component {
 							<View style={{width: 120}}>
 								<Image
 									style={styles.roundedImage}
-									source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
+									source={{uri: this.state.politicoInfo.foto_url}} />
 								<View style={styles.line}>
-									<Text style={{color: 'white'}}>{this.props.vote}</Text>
+									<Text style={{color: 'black', fontWeight: 'bold'}}>{this.state.politicoInfo.n_p_votar}</Text>
 								</View>
 							</View>
 						</View>
@@ -148,8 +144,8 @@ export default class PoliticoPerfilScene extends Component {
 						<Text style={styles.h1}>{this.state.politicoInfo.nome}, {this.state.politicoInfo.idade}</Text>
 						<Text>{this.state.politicoInfo.cargo}</Text>
 						<Text>{this.state.politicoInfo.vigencia}</Text>
-						<Text>{this.state.politicoInfo.partido}</Text>
-						<Text style={{paddingBottom: 15}}>{this.state.politicoInfo.email}</Text>
+						<Text>Partido: {this.state.politicoInfo.partido}</Text>
+						<Text style={{paddingBottom: 15}}>email: {this.state.politicoInfo.email}</Text>
 						<TouchableElement onPress={this.onPressHistorico.bind(this)}>
 							<View style={styles.cellTop}>
 								<Text style={styles.cellText}>Histórico de Propostas</Text>
@@ -185,7 +181,7 @@ export default class PoliticoPerfilScene extends Component {
 	render(){
 		const actions = [{
 			title: 'Seguir',
-			iconName: this.state.starIcon,
+			iconName: (this.state.user_follow === true) ? 'ios-star' : 'ios-star-outline',
 			show: 'always',
 			onActionSelected: this.onStarActionSelected
 		}];
@@ -225,19 +221,19 @@ const styles = StyleSheet.create({
 		height: 100, 
 		borderRadius: 50,
 		alignSelf: 'center',
-		borderColor: 'red', // trocar para preto
-		borderWidth: 1
+		borderColor: 'black',
+		borderWidth: 2
 	},
 	line: {
 		position: 'absolute',
 		bottom: 0,
 		width: 120,
-		height: 30,
-		borderTopColor: 'red', // trocar para preto
-		borderTopWidth: 1,
+		height: 25,
+		borderTopColor: 'black',
+		borderTopWidth: 2,
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: 'transparent'
+		backgroundColor: 'rgba(255,255,255,.5)'
 	},
 	cellTop: {
 		paddingVertical: 15,

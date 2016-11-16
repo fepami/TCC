@@ -7,7 +7,8 @@ import {
 	Platform
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import TouchableElement from '../components/TouchableElement';
+import TouchableElement from './TouchableElement';
+import {Pie} from 'react-native-pathjs-charts';
 
 export default class PropostasListItem extends Component {
 	renderIcon() {
@@ -27,18 +28,35 @@ export default class PropostasListItem extends Component {
 	}
 
 	render() {
+		const like = this.props.proposta.approval * 100;
+		const dislike = 100 - like;
+		const pieData = [{name: ' ', approval: like}, {name: '  ', approval: dislike}];
+		const pieOptions = {
+			center: [25,25],
+			width: 50, 
+			height: 50, 
+			color: '#ff0000',
+            R: 20,
+            r: 5,
+        	animate: {
+                type: 'oneByOne',
+                duration: 200,
+                fillTransition: 3
+            }
+        };
 		return(
 			<TouchableElement onPress={this.props.onPress}>
 				<View style={styles.cell}>
 					{this.renderRanking()}
-					<Image
-						style={styles.roundedimage}
-						source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
+					<Pie
+						data={pieData}
+						options={pieOptions}
+						pallete={[{r: 50, g: 205, b: 50}, {r: 255, g: 0, b: 0}]}
+						accessorKey="approval" />
 					<View style={styles.info}>
 						<Text style={styles.h1}>{this.props.proposta.nome}</Text>
 						<Text>Categoria: {this.props.proposta.categoria}</Text>
 						<Text>Proposta em: {this.props.proposta.data}</Text>
-						<Text>Por: {this.props.proposta.nomePolitico}</Text>
 					</View>
 					{this.renderIcon()}
 				</View>

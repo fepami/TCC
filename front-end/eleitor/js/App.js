@@ -8,6 +8,7 @@ export default class App extends Component{
 			<View style={{flex: 1}} >
 				<StatusBar
 					translucent={true}
+					barStyle="light-content"
 					backgroundColor='rgba(0,0,0,.2)' />
 				<DefaultNavigator />
 			</View>

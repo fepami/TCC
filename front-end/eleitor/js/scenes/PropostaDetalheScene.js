@@ -13,7 +13,7 @@ import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
 import ApprovalBar from '../components/ApprovalBar';
 import PoliticosListItem from '../components/PoliticosListItem';
-import PoliticoPerfilScene from '../scenes/PoliticoPerfilScene';
+import PoliticoPerfilScene from './PoliticoPerfilScene';
 import {fakePolitico0, fakePolitico1, fakePolitico2} from '../fakeData';
 
 export default class PropostaDetalheScene extends Component {

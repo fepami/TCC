@@ -8,9 +8,9 @@ import {
 	Platform
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Header from '../components/Header';
-import TouchableElement from '../components/TouchableElement';
-import FilterListTopic from '../components/FilterListTopic';
+import Header from './Header';
+import TouchableElement from './TouchableElement';
+import FilterListTopic from './FilterListTopic';
 
 export default class Filter extends Component {
 	closeModal(){
@@ -45,11 +45,11 @@ export default class Filter extends Component {
 								                	selectedOptions={this.props.selectedFilters}
 								                	onSelectFilter={(option) => this.props.onSelectFilter(option)}/>} />
 					<View style={styles.box}>
-						<TouchableElement onPress={this.props.onClearActionSelected} style={styles.button}>
-							<Text>Limpar</Text>
+						<TouchableElement onPress={this.props.onClearActionSelected} style={[styles.button, {backgroundColor: '#575757'}]}>
+							<Text style={{fontWeight: 'bold', color: 'white'}}>Limpar</Text>
 						</TouchableElement>
-						<TouchableElement onPress={this.props.onFilterActionSelected} style={styles.button}>
-							<Text>Filtrar</Text>
+						<TouchableElement onPress={this.props.onFilterActionSelected} style={[styles.button, {backgroundColor: '#33CCCC'}]}>
+							<Text style={{fontWeight: 'bold', color: 'white'}}>Filtrar</Text>
 						</TouchableElement>
 					</View>
 				</View>
@@ -72,8 +72,6 @@ const styles = StyleSheet.create({
 		width: 100,
 		height: 40,
 		margin: 15,
-		borderColor: 'black',
-		borderWidth: 1,
 		borderRadius: 3,
 		justifyContent: 'center',
 		alignItems: 'center'

@@ -57,7 +57,7 @@ class NavigationManager extends Component {
 
 	renderNavigationView(){
 		return(
-			<View style={{flex: 1, backgroundColor: 'white', marginTop: StatusBar.currentHeight }}>
+			<View style={{flex: 1, backgroundColor: '#2B2B2B', paddingTop: StatusBar.currentHeight }}>
 				<MenuItem
 					icon='home'
 					title='Home'

@@ -10,7 +10,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
-import HomeCargosExplicacaoScene from '../scenes/HomeCargosExplicacaoScene';
+import HomeCargosExplicacaoScene from './HomeCargosExplicacaoScene';
 
 export default class HomeCargosScene extends Component {
 	renderIcon() {
@@ -28,7 +28,7 @@ export default class HomeCargosScene extends Component {
 				<ScrollView style={{flex: 1}}>
 					<View style={styles.view}>
 						<View style={styles.title}>
-							<Text style={{fontWeight: 'bold'}}>Poder Executivo</Text>
+							<Text style={{fontWeight: 'bold', color: 'white'}}>Poder Executivo</Text>
 						</View>
 						<TouchableElement onPress={this.onPressPresidente.bind(this)}>
 							<View style={styles.cellBottom}>
@@ -49,7 +49,7 @@ export default class HomeCargosScene extends Component {
 							</View>
 						</TouchableElement>
 						<View style={styles.title}>
-							<Text style={{fontWeight: 'bold'}}>Poder Legislativo</Text>
+							<Text style={{fontWeight: 'bold', color: 'white'}}>Poder Legislativo</Text>
 						</View>
 						<TouchableElement onPress={this.onPressDeputado.bind(this)}>
 							<View style={styles.cellBottom}>
@@ -70,7 +70,7 @@ export default class HomeCargosScene extends Component {
 							</View>
 						</TouchableElement>
 						<View style={styles.title}>
-							<Text style={{fontWeight: 'bold'}}>Poder Judiciário - Cargos não eletivos</Text>
+							<Text style={{fontWeight: 'bold', color: 'white'}}>Poder Judiciário - Cargos não eletivos</Text>
 						</View>
 						<TouchableElement onPress={this.onPressMinistro.bind(this)}>
 							<View style={styles.cellBottom}>
@@ -144,9 +144,6 @@ const styles = StyleSheet.create({
 		paddingVertical: 5,
 		paddingHorizontal: 15,
 		marginHorizontal: -15,
-		borderTopColor: 'black',
-		borderTopWidth: 2,
-		borderBottomColor: 'black',
-		borderBottomWidth: 2,
+		backgroundColor: '#575757'
 	}
 })

@@ -32,7 +32,7 @@ class NavigationManager extends Component{
 			{tab: 'perfil', title: 'Perfil', icon: 'person', component: UsuarioPerfilScene}
 		];
 		return(
-			<TabBarIOS tintColor='green' translucent={false}>
+			<TabBarIOS unselectedTintColor='white' tintColor='#33CCCC' translucent={false} barTintColor='#2B2B2B'>
 				{tabs.map(tab => {
 					return (
 						<Icon.TabBarItem

@@ -15,7 +15,7 @@ import TouchableElement from '../components/TouchableElement';
 import CustomPicker from '../components/CustomPicker';
 import Header from '../components/Header';
 import dismissKeyboard from 'dismissKeyboard';
-import HomeScene from '../scenes/HomeScene';
+import HomeScene from './HomeScene';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default class CadastroScene extends Component {
@@ -198,7 +198,7 @@ export default class CadastroScene extends Component {
 						</View>
 						<View style={styles.box}>
 							<TouchableElement onPress={this.onSavePress.bind(this)} style={styles.button}>
-								<Text>Salvar</Text>
+								<Text style={{fontWeight: 'bold', color: 'white'}}>Salvar</Text>
 							</TouchableElement>
 						</View>
 					</View>	
@@ -336,11 +336,10 @@ const styles = StyleSheet.create({
 	button: {
 		flex: 1,
 		height: 40,
-		borderColor: 'black',
-		borderWidth: 1,
 		borderRadius: 3,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
+		backgroundColor: '#33CCCC'
 	},
 	picker: {
 		flex: 1, 

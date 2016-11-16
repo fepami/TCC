@@ -9,7 +9,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default class MenuItem extends Component{
 	render(){
-		const color = this.props.selected ? 'green' : 'rgba(0,0,0,.87)';
+		// const color = this.props.selected ? 'royalblue' : 'rgba(0,0,0,.87)';
+		const color = this.props.selected ? '#33CCCC' : 'white';
 		return(
 			<TouchableNativeFeedback
 				onPress={this.props.onPress}>

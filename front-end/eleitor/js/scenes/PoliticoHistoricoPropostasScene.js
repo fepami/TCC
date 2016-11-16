@@ -11,7 +11,7 @@ import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PropostasListItem from '../components/PropostasListItem';
-import PropostaDetalheScene from '../scenes/PropostaDetalheScene';
+import PropostaDetalheScene from './PropostaDetalheScene';
 import {fakePropostas, fakeFilter} from '../fakeData';
 
 export default class PoliticoHistoricoPropostasScene extends Component {

@@ -21,7 +21,7 @@ export default class UsuarioAjudaScene extends Component {
 						<Text/>
 						<View style={styles.box}>
 							<TouchableElement onPress={this.onTutorialPress.bind(this)} style={styles.button}>
-								<Text>Ver o tutorial novamente</Text>
+								<Text style={{fontWeight: 'bold', color: 'white'}}>Ver o tutorial novamente</Text>
 							</TouchableElement>
 						</View>	
 						<Text style={styles.h2}>1 - O que é a barra verde/vermelha no perfil do político e na descrição da proposta?</Text>
@@ -79,10 +79,9 @@ const styles = StyleSheet.create({
 		height: 40,
 		marginTop: 10,
 		marginBottom: 20,
-		borderColor: 'black',
-		borderWidth: 1,
 		borderRadius: 3,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
+		backgroundColor: '#33CCCC'
 	}
 })

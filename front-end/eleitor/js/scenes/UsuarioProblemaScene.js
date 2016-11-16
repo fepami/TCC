@@ -41,7 +41,7 @@ export default class UsuarioProblemaScene extends Component {
 							/>
 						<View style={styles.box}>
 							<TouchableElement onPress={this.onPress.bind(this)} style={styles.button}>
-								<Text>Enviar</Text>
+								<Text style={{fontWeight: 'bold', color: 'white'}}>Enviar</Text>
 							</TouchableElement>
 						</View>
 					</View>
@@ -92,10 +92,9 @@ const styles = StyleSheet.create({
 	button: {
 		flex: 1,
 		height: 40,
-		borderColor: 'black',
-		borderWidth: 1,
 		borderRadius: 3,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
+		backgroundColor: '#33CCCC'
 	}
 })

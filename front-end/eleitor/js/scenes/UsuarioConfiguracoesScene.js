@@ -13,13 +13,13 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
 import LoginScene from './LoginScene';
-import UsuarioEditarScene from '../scenes/UsuarioEditarScene';
-import UsuarioTrocarSenhaScene from '../scenes/UsuarioTrocarSenhaScene';
-import UsuarioPerfisAssociadosScene from '../scenes/UsuarioPerfisAssociadosScene';
-import UsuarioAjudaScene from '../scenes/UsuarioAjudaScene';
-import UsuarioProblemaScene from '../scenes/UsuarioProblemaScene';
-import UsuarioSobreScene from '../scenes/UsuarioSobreScene';
-import UsuarioTermosScene from '../scenes/UsuarioTermosScene';
+import UsuarioEditarScene from './UsuarioEditarScene';
+import UsuarioTrocarSenhaScene from './UsuarioTrocarSenhaScene';
+import UsuarioPerfisAssociadosScene from './UsuarioPerfisAssociadosScene';
+import UsuarioAjudaScene from './UsuarioAjudaScene';
+import UsuarioProblemaScene from './UsuarioProblemaScene';
+import UsuarioSobreScene from './UsuarioSobreScene';
+import UsuarioTermosScene from './UsuarioTermosScene';
 import FBSDK from 'react-native-fbsdk';
 const {
   LoginManager,
@@ -78,7 +78,7 @@ class UsuarioConfiguracoesScene extends Component {
 						</TouchableElement>
 						<View style={styles.box}>
 							<TouchableElement onPress={this.onPressDeslogar.bind(this)} style={styles.button}>
-								<Text>Deslogar</Text>
+								<Text style={{fontWeight: 'bold', color: 'white'}}>Deslogar</Text>
 							</TouchableElement>
 						</View>
 					</View>
@@ -162,11 +162,10 @@ const styles = StyleSheet.create({
 	button: {
 		flex: 1,
 		height: 40,
-		borderColor: 'black',
-		borderWidth: 1,
 		borderRadius: 3,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
+		backgroundColor: '#33CCCC'
 	}
 })
 

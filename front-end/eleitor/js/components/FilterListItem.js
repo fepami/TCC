@@ -5,7 +5,7 @@ import {
 	Text
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import TouchableElement from '../components/TouchableElement';
+import TouchableElement from './TouchableElement';
 
 export default class FilterListItem extends Component {
 	render() {

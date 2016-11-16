@@ -3,13 +3,16 @@ import {
 	StyleSheet,
 	View,
 	ScrollView,
-	Text
+	Text,
+	Image,
+	Platform
 } from 'react-native';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
-import ListaPoliticosScene from '../scenes/ListaPoliticosScene';
-import ListaPropostasScene from '../scenes/ListaPropostasScene';
-import HomeCargosScene from '../scenes/HomeCargosScene';
+import ListaPoliticosScene from './ListaPoliticosScene';
+import ListaPropostasScene from './ListaPropostasScene';
+import HomeCargosScene from './HomeCargosScene';
+import Dimensions from 'Dimensions';
 
 export default class HomeScene extends Component {
 	constructor(props){
@@ -21,25 +24,34 @@ export default class HomeScene extends Component {
 	}
 
 	render(){
-		console.log(this.props);
+		const width = Dimensions.get('window').width;
+		const height = width/784.0*295;
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 					navigator={this.props.navigator}
 					title='Home' />
 				<ScrollView style={{flex: 1}}>
-					<View style={styles.view}>
-						<TouchableElement style={styles.banner}  onPress={this.onPressEleicao}>
-							<Text>Confira os candidatos da próxima eleição</Text>
+					<View style={[styles.view, {marginTop: (Platform.select({ios: -20}))}]}>
+						<TouchableElement style={{marginBottom: 5}} onPress={this.onPressEleicao}>
+							<Image
+							style={[styles.banner, {width: width, height: height}]}
+							source={require('../resources/image/banner1.png')} />
 						</TouchableElement>
-						<TouchableElement style={styles.banner}  onPress={this.onPressCargos}>
-							<Text>Entenda o que faz cada cargo político</Text>
+						<TouchableElement style={{marginBottom: 5}} onPress={this.onPressCargos}>
+							<Image
+							style={[styles.banner, {width: width, height: height}]}
+							source={require('../resources/image/banner2.png')} />
 						</TouchableElement>
-						<TouchableElement style={styles.banner}  onPress={this.onPressRankingPoliticos}>
-							<Text>Ranking de políticos</Text>
+						<TouchableElement style={{marginBottom: 5}} onPress={this.onPressRankingPoliticos}>
+							<Image
+							style={[styles.banner, {width: width, height: height}]}
+							source={require('../resources/image/banner3.png')} />
 						</TouchableElement>
-						<TouchableElement style={styles.banner}  onPress={this.onPressRankingPropostas}>
-							<Text>Ranking de propostas</Text>
+						<TouchableElement onPress={this.onPressRankingPropostas}>
+							<Image
+							style={[styles.banner, {width: width, height: height}]}
+							source={require('../resources/image/banner4.png')} />
 						</TouchableElement>
 					</View>
 				</ScrollView>
@@ -66,17 +78,9 @@ export default class HomeScene extends Component {
 
 const styles = StyleSheet.create({
 	view: {
-		padding: 15,
-		flexDirection: 'column',
-		flex: 1
+		flex: 1,
 	},
 	banner: {
-		height: 50,
-		marginVertical: 10,
-		borderColor: 'black',
-		borderWidth: StyleSheet.hairlineWidth,
-		borderRadius: 3,
-		justifyContent: 'center',
-		alignItems: 'center'
+		resizeMode: 'contain',
 	}
 })

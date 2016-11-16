@@ -39,7 +39,9 @@ export default class Header extends Component {
 					contentInsetEnd={56}
 					actions={this.props.actions}
 					onActionSelected={onActionSelected}
-					style={styles.toolbar}>
+					style={styles.toolbar}
+					titleColor='#33CCCC'
+					iconColor='#33CCCC'>
 					{this.props.children}
 				</Icon.ToolbarAndroid>
 			</View>
@@ -66,7 +68,8 @@ const HEADER_HEIGHT = 56 + STATUS_BAR_HEIGHT;
 
 const styles = StyleSheet.create({
 	toolbarContainer: {
-		paddingTop: STATUS_BAR_HEIGHT
+		paddingTop: STATUS_BAR_HEIGHT,
+		backgroundColor: '#2B2B2B'
 	},
 	toolbar: {
 		height: HEADER_HEIGHT - STATUS_BAR_HEIGHT,

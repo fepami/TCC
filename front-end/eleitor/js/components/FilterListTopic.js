@@ -5,8 +5,8 @@ import {
 	Text
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import TouchableElement from '../components/TouchableElement';
-import FilterListItem from '../components/FilterListItem';
+import TouchableElement from './TouchableElement';
+import FilterListItem from './FilterListItem';
 
 export default class FilterListTopic extends Component {
 	constructor(props) {

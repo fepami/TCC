@@ -10,13 +10,13 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
-import UsuarioConfiguracoesScene from '../scenes/UsuarioConfiguracoesScene';
-import UsuarioEditarScene from '../scenes/UsuarioEditarScene';
+import UsuarioConfiguracoesScene from './UsuarioConfiguracoesScene';
+import UsuarioEditarScene from './UsuarioEditarScene';
 
 export default class UsuarioPerfilScene extends Component {
 	renderIcon() {
 		return Platform.select({
-			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrowIcon}/>
+			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrowIcon} color='black'/>
 		})
 	}
 
@@ -54,11 +54,11 @@ export default class UsuarioPerfilScene extends Component {
 						<View style={styles.line}>
 							<Image
 								style={styles.roundedImage}
-								source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
+								source={{uri: 'http://facebook.github.io/react/img/logo_og.png'}} />
 							<Text style={styles.h1}>{usuario.nome}, {usuario.idade}</Text>
-							<Text>{usuario.email}</Text>
-							<Text>Vota em: {usuario.cidade}, {usuario.estado}</Text>
-							<Text>{usuario.sexo}</Text>
+							<Text >{usuario.email}</Text>
+							<Text >Vota em: {usuario.cidade}, {usuario.estado}</Text>
+							<Text >{usuario.sexo}</Text>
 						</View>
 						<TouchableElement onPress={this.onPressConfiguracoes.bind(this)}>
 							<View style={styles.cellTop}>
@@ -101,14 +101,14 @@ const styles = StyleSheet.create({
 	h1: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		paddingTop: 15
+		paddingTop: 15,
 	},
 	roundedImage: {
 		width: 100, 
 		height: 100, 
 		borderRadius: 50,
 		alignSelf: 'center',
-		borderColor: 'black',
+		borderColor: 'white',
 		borderWidth: 1
 	},
 	line: {
@@ -119,20 +119,21 @@ const styles = StyleSheet.create({
 	cellTop: {
 		paddingVertical: 15,
 		flexDirection: 'row', 
-		borderTopColor: 'rgba(0,0,0,.87)',
+		borderTopColor: 'black',
 		borderTopWidth: 1,
-		borderBottomColor: 'rgba(0,0,0,.87)',
+		borderBottomColor: 'black',
 		borderBottomWidth: 1
 	},
 	cellBottom: {
 		paddingVertical: 15,
 		flexDirection: 'row', 
-		borderBottomColor: 'rgba(0,0,0,.87)',
+		borderBottomColor: 'black',
 		borderBottomWidth: 1
 	},
 	cellText: {
 		flex: 1, 
-		alignSelf: 'center'
+		alignSelf: 'center',
+		color: 'black'
 	},
 	arrowIcon: {
 		alignSelf: 'center'

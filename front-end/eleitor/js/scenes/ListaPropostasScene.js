@@ -12,7 +12,7 @@ import SearchBarIOS from '../components/SearchBarIOS';
 import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
-import PropostaDetalheScene from '../scenes/PropostaDetalheScene';
+import PropostaDetalheScene from './PropostaDetalheScene';
 import {fakePropostas, fakeFilter} from '../fakeData';
 
 export default class ListaPropostasScene extends Component {	

@@ -13,7 +13,7 @@ import SearchBarIOS from '../components/SearchBarIOS';
 import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
-import PoliticoPerfilScene from '../scenes/PoliticoPerfilScene';
+import PoliticoPerfilScene from './PoliticoPerfilScene';
 import {fakePolitico0, fakePolitico1, fakeFilter} from '../fakeData';
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});

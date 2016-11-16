@@ -9,8 +9,8 @@ import {
 	AsyncStorage
 } from 'react-native';
 import TouchableElement from '../components/TouchableElement';
-import CadastroScene from '../scenes/CadastroScene';
-import HomeScene from '../scenes/HomeScene';
+import CadastroScene from './CadastroScene';
+import HomeScene from './HomeScene';
 import FBSDK from 'react-native-fbsdk';
 import NavigationManager from '../navigation/NavigationManager';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';

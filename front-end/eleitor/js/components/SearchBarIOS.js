@@ -7,7 +7,7 @@ import {
 	Platform
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import TouchableElement from '../components/TouchableElement';
+import TouchableElement from './TouchableElement';
 import dismissKeyboard from 'dismissKeyboard';
 
 export default class SearchBar extends Component {
@@ -46,9 +46,9 @@ export default class SearchBar extends Component {
 			android: 35
 		})
 		return(
-			<View style={{backgroundColor: 'lightgray', flexDirection: 'row'}}>	
-				<View style={{margin: 10, height: 30, borderColor: 'lightgray', borderWidth: 1, borderRadius: 5, backgroundColor: 'white', flexDirection: 'row', flex: 1}}>	
-					<Icon name='ios-search-outline' size={20} style={{alignSelf: 'center', marginLeft: 10, marginRight: 3}} color='lightgray' />
+			<View style={{backgroundColor: '#525252', flexDirection: 'row'}}>	
+				<View style={{margin: 10, height: 30, borderColor: '#525252', borderWidth: 1, borderRadius: 5, backgroundColor: 'white', flexDirection: 'row', flex: 1}}>	
+					<Icon name='ios-search-outline' size={20} style={{alignSelf: 'center', marginLeft: 10, marginRight: 3}} color='#525252' />
 					<TextInput 
 						ref={'searchbar'}
 						style={{height: deviceHeight, flex: 1}}

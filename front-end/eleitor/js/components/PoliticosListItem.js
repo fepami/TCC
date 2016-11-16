@@ -7,7 +7,7 @@ import {
 	Platform
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import TouchableElement from '../components/TouchableElement';
+import TouchableElement from './TouchableElement';
 
 export default class PoliticosListItem extends Component {
 	renderIcon() {
@@ -34,7 +34,7 @@ export default class PoliticosListItem extends Component {
 						{this.renderRanking()}
 						<Image
 							style={styles.roundedimage}
-							source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
+							source={{uri: this.props.politico.foto_url}} />
 						<View style={styles.info}>
 							<Text style={styles.h1}>{this.props.politico.nome}</Text>
 							<Text>{this.props.politico.cargo}</Text>
