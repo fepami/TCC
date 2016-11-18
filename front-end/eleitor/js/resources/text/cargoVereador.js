@@ -7,5 +7,4 @@ Entre as principias atribuições dos senadores estão:
 - Autorizar operações externas de natureza financeira, de interesse da União, dos Estados, do Distrito Federal, dos Territórios e dos Municípios;
 - Fixar, por proposta do Presidente da República, limites globais para o montante da dívida consolidada da União, dos Estados, do Distrito Federal e dos Municípios;
 - Aprovar, por maioria absoluta e por voto secreto, a exoneração, de ofício, do Procurador-Geral da República antes do término de seu mandato.
-
-Fonte: http://brasilescola.uol.com.br/politica/senador.htm`)
+`)

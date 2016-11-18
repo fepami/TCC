@@ -20,7 +20,7 @@ export default class PropostasListItem extends Component {
 	renderRanking() {
 		if (this.props.cellType === 'ranking') {
 			return(
-				<Text style={styles.ranking}>{this.props.proposta.ranking}</Text>
+				<Text style={[styles.ranking, {width: (this.props.proposta.ranking < 100) ? 20 : 30}]}>{this.props.proposta.ranking}</Text>
 			)
 		} else {
 			return null;
@@ -36,7 +36,7 @@ export default class PropostasListItem extends Component {
 			width: 50, 
 			height: 50, 
 			color: '#ff0000',
-            R: 20,
+            R: 24,
             r: 5,
         	animate: {
                 type: 'oneByOne',
@@ -48,11 +48,13 @@ export default class PropostasListItem extends Component {
 			<TouchableElement onPress={this.props.onPress}>
 				<View style={styles.cell}>
 					{this.renderRanking()}
-					<Pie
-						data={pieData}
-						options={pieOptions}
-						pallete={[{r: 50, g: 205, b: 50}, {r: 255, g: 0, b: 0}]}
-						accessorKey="approval" />
+					<View style={{alignSelf: 'center'}}>
+						<Pie
+							data={pieData}
+							options={pieOptions}
+							pallete={[{r: 50, g: 205, b: 50}, {r: 255, g: 0, b: 0}]}
+							accessorKey="approval" />
+					</View>
 					<View style={styles.info}>
 						<Text style={styles.h1}>{this.props.proposta.nome}</Text>
 						<Text>Categoria: {this.props.proposta.categoria}</Text>
@@ -91,9 +93,9 @@ const styles = StyleSheet.create({
 		alignSelf: 'center'
 	},
 	ranking: {
-		width: 20,
 		color: 'black', 
-		paddingRight: 15, 
-		alignSelf: 'center'
+		marginRight: 10, 
+		alignSelf: 'center',
+		textAlign: 'center'
 	}
 })

@@ -19,7 +19,7 @@ export default class PoliticosListItem extends Component {
 	renderRanking() {
 		if (this.props.cellType === 'ranking') {
 			return(
-				<Text style={styles.ranking}>{this.props.politico.ranking}</Text>
+				<Text style={[styles.ranking, {width: (this.props.politico.ranking < 100) ? 20 : 30}]}>{this.props.politico.ranking}</Text>
 			)
 		} else {
 			return null;
@@ -76,9 +76,9 @@ const styles = StyleSheet.create({
 		alignSelf: 'center'
 	},
 	ranking: {
-		width: 20,
 		color: 'black', 
-		paddingRight: 15, 
-		alignSelf: 'center'
+		marginRight: 10, 
+		alignSelf: 'center',
+		textAlign: 'center'
 	}
 })

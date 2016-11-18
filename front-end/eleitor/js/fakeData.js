@@ -9,7 +9,7 @@ export const fakeFilter = [{topic: 'Localização', options: ['São Paulo', 'Rio
 						   {topic: 'Assunto', options: ['Saúde', 'Educação', 'Transporte', 'Animais']},
 						   {topic: 'Aprovação', options: ['Melhores Aprovados', 'Piores Aprovados']}];
 
-export const fakeProposta0 = {id: 0, nome: 'NOME DA PROPOSTA', data: 'dd/mm/AA', categoria: 'CATEGORIA', ranking: '1', approval: '0.70', nomePolitico: 'NOME DO POLITICO', politicoID: 0,
+export const fakeProposta0 = {id: 0, nome: 'NOME DA PROPOSTA', data: 'dd/mm/AA', categoria: 'CATEGORIA', ranking: '999', approval: '0.70', nomePolitico: 'NOME DO POLITICO', politicoID: 0,
 descricao: 'Lorem ipsum dolor sit amet, pro erant dicunt ancillae in, et summo ludus nonumes vis, at deleniti lobortis comprehensam vim. Ne quem modo labore est. Id wisi albucius mandamus eam, dolorem adolescens ex est. Cu has vide intellegam, pri brute legere ut, eum brute vivendo conceptam ea. Sed quot percipitur scripserit et, in apeirian repudiare omittantur duo.'};
 export const fakeProposta1 = {id: 1, nome: 'Transporte de animais na cabine de passageiro', data: '13/10/16', categoria: 'Ambiente', ranking: '10', approval: '0.40', nomePolitico: 'Helder', politicoID: 1,
 descricao: 'Lorem ipsum dolor sit amet, pro erant dicunt ancillae in, et summo ludus nonumes vis, at deleniti lobortis comprehensam vim. Ne quem modo labore est. Id wisi albucius mandamus eam, dolorem adolescens ex est. Cu has vide intellegam, pri brute legere ut, eum brute vivendo conceptam ea. Sed quot percipitur scripserit et, in apeirian repudiare omittantur duo.'};

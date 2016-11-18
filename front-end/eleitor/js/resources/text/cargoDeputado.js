@@ -22,5 +22,4 @@ A principal função desse cargo é a elaboração de leis. Conforme a Constitui
 - Autorizar, por dois terços de seus membros, a instauração de processo contra o Presidente e o Vice-Presidente da República e os Ministros de Estado;
 - Proceder à tomada de contas do Presidente da República, quando não apresentadas ao Congresso Nacional dentro de sessenta dias após a abertura da sessão legislativa;
 - Eleger membros do Conselho da República, nos termos do art. 89, VII.
-
-Fontes: http://brasilescola.uol.com.br/politica/deputado-estadual.htm e http://brasilescola.uol.com.br/politica/deputado-federal.htm`)
+`)

@@ -16,5 +16,4 @@ Quando eleito, o presidente da República tem, entre outras, as seguintes funç�
 - Declarar guerra, no caso de agressão estrangeira, quando autorizado pelo Congresso Nacional ou referendado por ele;
 - Enviar ao Congresso Nacional o plano plurianual, o projeto de lei de diretrizes orçamentárias e as propostas previstas nesta Constituição;
 - Exercer outras atribuições previstas na Constituição da República Federativa do Brasil.
-
-Fonte: http://brasilescola.uol.com.br/politica/presidente.htm`)
+`)

@@ -12,5 +12,4 @@ Como liderança municipal, o prefeito possui várias atribuições, dentre as qu
 É claro que o prefeito não atua sozinho. Junto a ele, há o vice-prefeito e uma série de funcionários que atuam tanto no gabinete quanto nas secretarias municipais. Os secretários que ocupam essas vagas são escolhidos pelo mandato do próprio prefeito e, geralmente, vinculam-se aos partidos que apoiaram a candidatura durante as eleições.
 São, portanto, os secretários municipais que executam boa parte das ações requeridas pela prefeitura, ações essas que devem sempre estar sob a coordenação do próprio prefeito. Por exemplo: o secretário de educação deve preocupar-se com os salários dos professores da rede municipal e demais profissionais, além do número e condições das escolas e creches e todos os elementos relacionados com a esfera educacional da cidade.
 Caso o prefeito esteja fora ou o mesmo renuncie, quem governa a cidade é o vice-prefeito, que é eleito na mesma chapa. Caso o vice-prefeito também não possa exercer suas funções, o comando do prefeito passa para o chefe da Câmara Municipal, que é sempre um vereador que ocupa esse cargo por decisão de seus pares em votação.
-
-Fonte: http://mundoeducacao.bol.uol.com.br/politica/prefeito.htm`)
+`)
