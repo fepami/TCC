@@ -175,6 +175,7 @@ def get_proposals(post_data):
 		code = ' '.join(code_and_date[0:2])
 		date_obj = datetime.datetime.strptime(code_and_date[2], "%d/%m/%Y")
 
+		print '**********'
 		print 'code: %s' % code
 
 
@@ -207,6 +208,12 @@ def get_proposals(post_data):
 		if not politician_ids:
 			print 'Nenhum autor conhecido'
 			continue
+
+		print authors
+		print 'num_authors: %d' % len(politician_ids)
+		# if len(politician_ids) > 1:
+		# 	import pdb; pdb.set_trace()
+
 
 		content = get_txt_content(document_link, code)
 		if not content:
@@ -251,7 +258,7 @@ post_data = [
 		('form','A'),
 	# ('pathImages','/iah/pt/image/'),
 		('navBar','ON'),
-		('hits','100'), # numero de propostas
+		('hits','200'), # numero de propostas
 	('format','detalhado.pft'),
 		('lang','pt'),
 	# ('isisTotal','215'),
@@ -288,12 +295,27 @@ for proposal in proposals:
 			proposal (content, summary, code, category, received_at)
 			VALUES (%(content)s, %(summary)s, %(code)s, %(category)s, %(received_at)s);
 		"""
+		cur.execute(insert_query_proposal, proposal)
 	except Exception as e:
 		print proposal
 		import pdb; pdb.set_trace()
 		raise e
 
-	cur.execute(insert_query_proposal, proposal)
+
+	proposal_id = cur.lastrowid
+
+	for politician_id in proposal['politician_ids']:
+		try:
+			insert_query_politician_proposal = u"""
+				INSERT INTO
+				politician_proposal (politician_id, proposal_id)
+				VALUES (%(politician_id)s, %(proposal_id)s);
+			"""
+			cur.execute(insert_query_politician_proposal, {'politician_id': politician_id, 'proposal_id':proposal_id})
+		except Exception as e:
+			print proposal
+			import pdb; pdb.set_trace()
+			raise e
 
 # raise Exception()
 db.commit()
@@ -302,11 +324,11 @@ import shutil, os
 shutil.rmtree(PROPOSALS_DIR)
 os.makedirs(PROPOSALS_DIR)
 
-for summary_and_subjects_dict in uncategorized_summary_and_subjects:
-	print summary_and_subjects_dict['summary']
-	print summary_and_subjects_dict['subjects']
+# for summary_and_subjects_dict in uncategorized_summary_and_subjects:
+# 	print summary_and_subjects_dict['summary']
+# 	print summary_and_subjects_dict['subjects']
 
-	import pdb; pdb.set_trace()
+# 	import pdb; pdb.set_trace()
 
 
 # cursor.lastrowid
