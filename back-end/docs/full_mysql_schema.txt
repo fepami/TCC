@@ -116,7 +116,15 @@ DROP TABLE position;
 
 CREATE TABLE user (
 	id int NOT NULL AUTO_INCREMENT,
+	name varchar(255),
 	device_id varchar(255),
+	facebook_id varchar(255),
+	email varchar(255),
+	password varchar(255),
+	state varchar(255),
+	city varchar(255),
+	age int,
+	gender varchar(30),
 	PRIMARY KEY (id)
 );
 
@@ -173,6 +181,7 @@ CREATE TABLE proposal_vote (
 	PRIMARY KEY (id)
 );
 
+# mistura eleicao com cargo eleito, problemas em pegar vote_code e etc
 CREATE TABLE politician_position (
 	id int NOT NULL AUTO_INCREMENT,
   politician_id int,

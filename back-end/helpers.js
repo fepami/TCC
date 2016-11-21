@@ -43,11 +43,54 @@ function get_age_from_birthday(dateString) {
 	return age;
 }
 
+
+
+const fs = require('fs');
+const jwt = require('jsonwebtoken');
+var config = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+var token_secret = config['token_secret']
+
+function verify_token(token, callback) {
+	jwt.verify(token, token_secret, function(err, user_info) {
+		if(err){
+		  return callback(err);
+		};
+
+		callback(null, user_info)
+	})
+}
+
+function create_token(user_info) {
+	return jwt.sign(user_info, token_secret, {'expiresIn' : '60m' });
+}
+
+function jwt_mw(req, res, next) {
+	var token = req.query['token'];
+
+	if (!token) {return res.json('Precisa do token!')}
+
+	verify_token(token, function(err, user_info){
+		if (err) {
+			return res.json(err)
+		}
+
+		req.user = user_info;
+		return next();
+	});
+}
+
+
+
+
 module.exports = {
   'parse_bool': parse_bool,
   'format_null_bool': format_null_bool,
 	'parse_null_bool': parse_null_bool,
 	'parse_null_bool_db': parse_null_bool_db,
 	'debug_print': debug_print,
-	'get_age_from_birthday': get_age_from_birthday
+	'get_age_from_birthday': get_age_from_birthday,
+
+	'verify_token': verify_token,
+	'create_token': create_token,
+	'jwt_mw': jwt_mw,
 }

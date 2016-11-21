@@ -2,10 +2,14 @@
   "name": "eleitor",
   "version": "0.0.1",
   "dependencies": {
+    "bcryptjs": "^2.3.0",
     "cassandra-driver": "^3.1.5",
     "express": "^4.10.6",
+    "jsonwebtoken": "^7.1.9",
     "moment": "^2.16.0",
-    "mysql": "^2.5.4"
+    "mysql": "^2.5.4",
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.1.1"
   },
   "main": "(index.js)",
   "scripts": {

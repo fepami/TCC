@@ -29,15 +29,17 @@ INSERT INTO politician (name, congress_name, date_of_birth, party, email, photo_
 
 INSERT INTO position (name, term_length) VALUES ('Prefeito', 4);
 INSERT INTO position (name, term_length) VALUES ('Vereador', 4);
+INSERT INTO position (name, term_length) VALUES ('Vice-prefeito', 4);
+
 
 INSERT INTO politician_position (politician_id, position_id, vote_code, election_year, start_date, end_date, location)
- VALUES (1,1,'43010', 2012, '2012-01-01', null, 'São Paulo');
+ VALUES (1,1,'43010', 2012, '2013-01-01', null, 'São Paulo');
 INSERT INTO politician_position (politician_id, position_id, vote_code, election_year, start_date, end_date, location)
-  VALUES (2,1,'14200', 2012, '2012-01-01', null, 'São Paulo');
+  VALUES (2,1,'14200', 2012, '2013-01-01', null, 'São Paulo');
 INSERT INTO politician_position (politician_id, position_id, vote_code, election_year, start_date, end_date, location)
-  VALUES (3,1,'55555', 2012, '2012-01-01', null, 'São Paulo');
+  VALUES (3,1,'55555', 2012, '2013-01-01', null, 'São Paulo');
 INSERT INTO politician_position (politician_id, position_id, vote_code, election_year, start_date, end_date, location)
-  VALUES (4,1,'13110', 2012, '2012-01-01', null, 'São Paulo');
+  VALUES (4,1,'13110', 2012, '2013-01-01', null, 'São Paulo');
 
 INSERT INTO user (device_id) VALUES ('device_id1');
 INSERT INTO user (device_id) VALUES ('device_id2');

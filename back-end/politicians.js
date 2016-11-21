@@ -34,7 +34,7 @@ var get_politicians_func = function(type){
 			) APPROVAL_T on APPROVAL_T.politician_id=pol.id\
 		left join (select v.politician_id, v.is_positive\
 								from politician_vote v\
-								inner join user u on u.id=v.user_id where u.device_id=?\
+								where v.user_id=?\
 			) USER_VOTE_T on USER_VOTE_T.politician_id = pol.id\
 		left join (select pp.politician_id, pos.name, pp.location, pp.vote_code, pp.start_date, DATE_ADD(DATE_ADD(pp.start_date, INTERVAL pos.term_length YEAR), INTERVAL -1 DAY) as predicted_end_date \
 								from politician_position pp\
@@ -43,7 +43,7 @@ var get_politicians_func = function(type){
 			) CUR_POS_T on CUR_POS_T.politician_id=pol.id\
 		left join (select f.politician_id\
 								from politician_follow f\
-								inner join user u on u.id=f.user_id where u.device_id=?\
+								where f.user_id=?\
 			) USER_FOLLOW_T on USER_FOLLOW_T.politician_id = pol.id\
 		';
 		query_for_polis[1] = '';
@@ -88,13 +88,12 @@ var get_politicians_func = function(type){
 			return parsed_politicians;
 		}
 
-		var device_id = req.query['device_id'];
+		// var device_id = req.query['device_id'];
+		var user_id = req.user['id'];
 		if (type === 'follow') {
-			query_for_polis[1] = 'inner join politician_follow f on f.politician_id = pol.id\
-			inner join user u on u.id = f.user_id\
-			where u.device_id=?';
+			query_for_polis[1] = 'inner join politician_follow f on f.politician_id = pol.id where f.user_id=?';
 
-			mysql_handler(query_for_polis.join('\n'), [device_id, device_id ,device_id], function(err, politicians){
+			mysql_handler(query_for_polis.join('\n'), [user_id, user_id ,user_id], function(err, politicians){
 				if (err) {
 					res.json(err);
 					return;
@@ -107,7 +106,7 @@ var get_politicians_func = function(type){
 
 				query_for_polis[1] = 'where pol.id=?';
 
-				mysql_handler(query_for_polis.join('\n'), [device_id, device_id, parseInt(politician_id)], function(err, politicians){
+				mysql_handler(query_for_polis.join('\n'), [user_id, user_id, parseInt(politician_id)], function(err, politicians){
 					if (err) {
 						res.json(err);
 						return;
@@ -115,8 +114,7 @@ var get_politicians_func = function(type){
 					res.json(parse_politicians(politicians));
 				});
 			} else {
-				helpers.debug_print(query_for_polis.join('\n'))
-				mysql_handler(query_for_polis.join('\n'), [device_id, device_id], function(err, politicians){
+				mysql_handler(query_for_polis.join('\n'), [user_id, user_id], function(err, politicians){
 					if (err) {
 						res.json(err);
 						return;
@@ -134,15 +132,15 @@ var vote = function(req,res) {
 	// assumindo q vai vir device_id e user_vote pelo get
 	// http://localhost:3000/politicos/1/votar?device_id=device_id4&user_vote=1
 	var politician_id = req.params['politician_id'];
-	var device_id = req.query['device_id'];
+	// var device_id = req.query['device_id'];
+	var user_id = req.user['id'];
 	var existing_vote_query = 'select\
 	  v.id as vote_id,\
 	  v.is_positive\
 	from politician_vote v\
-	inner join user u on u.id=v.user_id\
-	where u.device_id = ? and v.politician_id = ?;';
+	where v.user_id = ? and v.politician_id = ?;';
 
-	mysql_handler(existing_vote_query, [device_id, politician_id], function(err, existing_vote){
+	mysql_handler(existing_vote_query, [user_id, politician_id], function(err, existing_vote){
 		if (err) {
 			res.json(err);
 		} else {
@@ -195,9 +193,8 @@ var vote = function(req,res) {
 				}
 			} else if (is_positive !== null){
 				// create
-				var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive)\
-				(SELECT u.id, ?, ? FROM user u WHERE u.device_id=?);';
-				mysql_handler(create_query, [politician_id, is_positive, device_id], function(err){
+				var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (?, ?, ?);';
+				mysql_handler(create_query, [user_id, politician_id, is_positive], function(err){
 					if (err) {
 						res.json(err);
 					} else {
@@ -216,15 +213,15 @@ var follow = function(req,res) {
 	// assumindo q vai vir device_id e is_positive pelo get
 	// http://localhost:3000/politicos/1/seguir?device_id=device_id4&user_follow=true
 	var politician_id = req.params['politician_id'];
-	var device_id = req.query['device_id'];
+	// var device_id = req.query['device_id'];
+	var user_id = req.user['id'];
 
 	var existing_follow_query = 'select\
 	  f.id as follow_id\
 	from politician_follow f\
-	inner join user u on u.id=f.user_id\
-	where u.device_id = ? and f.politician_id = ?;';
+	where f.user_id = ? and f.politician_id = ?;';
 
-	mysql_handler(existing_follow_query, [device_id, politician_id], function(err, existing_follow){
+	mysql_handler(existing_follow_query, [user_id, politician_id], function(err, existing_follow){
 		if (err) {
 			res.json(err);
 		} else {
@@ -242,9 +239,8 @@ var follow = function(req,res) {
 				});
 			} else if (existing_follow.length === 0 && follow) {
 				// create
-				var create_query = 'INSERT INTO politician_follow (user_id, politician_id)\
-				(SELECT u.id, ? FROM user u WHERE u.device_id=?);';
-				mysql_handler(create_query, [politician_id, device_id], function(err){
+				var create_query = 'INSERT INTO politician_follow (user_id, politician_id) VALUES (?, ?);';
+				mysql_handler(create_query, [user_id, politician_id], function(err){
 					if (err) {
 						res.json(err);
 					} else {
