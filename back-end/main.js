@@ -21,11 +21,12 @@ const fs = require('fs');
 var config = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
 var facebook_app_id = config['facebook_app_id'];
 var facebook_app_secret = config['facebook_app_secret'];
+var facebook_app_return_url = config['facebook_app_return_url'];
 
 passport.use(new Strategy({
     'clientID': facebook_app_id,
     'clientSecret': facebook_app_secret,
-    'callbackURL': 'http://localhost:3000/login/facebook/return',
+    'callbackURL': facebook_app_return_url,
     'profileFields': ['id', 'email', 'name'],
   },
   function(accessToken, refreshToken, profile, callback) {
