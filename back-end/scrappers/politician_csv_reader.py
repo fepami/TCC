@@ -213,7 +213,7 @@ FIELDNAMES_PER_START_YEAR = {
 # fonte
 # http://www.tse.jus.br/hotSites/pesquisas-eleitorais/candidatos_anos/2016.html
 
-POLITICIANS_DIR = 'politicians/'
+POLITICIANS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/politicians/'
 # file_name = POLITICIANS_DIR + 'consulta_cand_2016_SP.csv'
 for file_name in os.listdir(POLITICIANS_DIR):
 	file_name = POLITICIANS_DIR + file_name

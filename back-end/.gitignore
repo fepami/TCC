@@ -1,3 +1,4 @@
 *.pem
 config/*
 node_modules/*
+scrappers/proposals/*

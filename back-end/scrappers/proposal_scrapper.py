@@ -23,7 +23,8 @@ def file_get_contents(filename):
 	with open(filename) as f:
 		return f.read()
 
-PROPOSALS_DIR = 'proposals/'
+PROPOSALS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/proposals/'
+print PROPOSALS_DIR
 def get_txt_content(document_link, proposal_code):
 	formatted_code = proposal_code.replace(' ', '-')
 	file_name_pdf = '%s%s.pdf' % (PROPOSALS_DIR, formatted_code)
