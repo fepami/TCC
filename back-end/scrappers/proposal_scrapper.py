@@ -23,7 +23,7 @@ def file_get_contents(filename):
 	with open(filename) as f:
 		return f.read()
 
-PROPOSALS_DIR = '/home/felipe/projects/TCC/back-end/scrappers/proposals/'
+PROPOSALS_DIR = 'proposals/'
 def get_txt_content(document_link, proposal_code):
 	formatted_code = proposal_code.replace(' ', '-')
 	file_name_pdf = '%s%s.pdf' % (PROPOSALS_DIR, formatted_code)
