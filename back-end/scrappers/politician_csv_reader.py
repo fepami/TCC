@@ -254,7 +254,7 @@ for file_name in os.listdir(POLITICIANS_DIR):
 					politician['date_of_birth'] = datetime.datetime.strptime(row['DATA_NASCIMENTO'], "%d/%m/%Y")
 					politician['email'] = row.get('NM_EMAIL')
 
-					politician['photo_url'] = 'http://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/2/%s?x=1477879200000' % row['SEQUENCIAL_CANDIDATO']
+					politician['photo_url'] = 'http://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/2/%s' % row['SEQUENCIAL_CANDIDATO']
 
 					try:
 						insert_query = u"""

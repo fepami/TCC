@@ -55,34 +55,46 @@ function _verify_password(email, password, callback) {
 function create_user(req, res) {
 	var name = req.query['name'];
 	var email = req.query['email'];
-	var password = req.query['password'];
 	var state = req.query['state'];
 	var city = req.query['city'];
 	var age = req.query['age'];
 	var gender =  req.query['gender'];
 
-
+	var facebook_user_id = req.query['profile_id'];
+	var password = req.query['password'];
 	var existing_user_query = 'select id from user where email = ?';
+	var existing_user_query_params = [email]
+	if (facebook_user_id) {
+		existing_user_query += ' or facebook_id = ?';
+		existing_user_query_params.push(facebook_user_id);
+	}
 
-	mysql_handler(existing_user_query, [email], function(err, existing_user){
+
+
+	mysql_handler(existing_user_query, existing_user_query_params, function(err, existing_user){
 		if (err) {
 			return res.json(err);
 		}
 
 		if (existing_user.length > 0) {
 			res.status(400);
-			return res.json('Email já cadastrado');
+			return res.json('Email/Profile_id já cadastrado');
 		}
 
 		var create_user_query = 'INSERT INTO user SET ?';
 		user_params = {
 			'name': name,
 			'email': email,
-			'password': bcrypt.hashSync(password, 8),
 			'state': state,
 			'city': city,
 			'age': age,
 			'gender': gender,
+		}
+
+		if (facebook_user_id) {
+			user_params['facebook_id'] = facebook_user_id;
+		} else {
+			user_params['password'] = bcrypt.hashSync(password, 8);
 		}
 
 		mysql_handler(create_user_query, user_params, function(err, result){
