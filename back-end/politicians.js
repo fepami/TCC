@@ -95,8 +95,7 @@ var get_politicians_func = function(type){
 
 			mysql_handler(query_for_polis.join('\n'), [user_id, user_id ,user_id], function(err, politicians){
 				if (err) {
-					res.json(err);
-					return;
+					return res.json(err);
 				}
 				res.json(parse_politicians(politicians));
 			});
@@ -108,16 +107,14 @@ var get_politicians_func = function(type){
 
 				mysql_handler(query_for_polis.join('\n'), [user_id, user_id, parseInt(politician_id)], function(err, politicians){
 					if (err) {
-						res.json(err);
-						return;
+						return res.json(err);
 					}
 					res.json(parse_politicians(politicians));
 				});
 			} else {
 				mysql_handler(query_for_polis.join('\n'), [user_id, user_id], function(err, politicians){
 					if (err) {
-						res.json(err);
-						return;
+						return res.json(err);
 					}
 					res.json(parse_politicians(politicians));
 				});

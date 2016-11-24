@@ -100,13 +100,11 @@ function email_login(req, res) {
 
 	_verify_user(email, password, function(err, user){
 		if (err) {
-			res.json(err);
-			return;
+			return res.json(err);
 		}
 
 		if (!user) {
-			res.json('Usuário ou senha incorretos');
-			return;
+			return res.json('Usuário ou senha incorretos');
 		}
 
 		// repetido

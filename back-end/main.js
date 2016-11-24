@@ -112,8 +112,7 @@ app.get("/",(req,res) => {
 
 		query_handler(req.query['execute_query'], function(err, result){
 			if (err) {
-				res.json(err);
-				return;
+				return res.json(err);
 			}
 			res.json(result);
 		});
@@ -122,17 +121,19 @@ app.get("/",(req,res) => {
 
 app.get('/login/facebook', passport.authenticate('facebook', {'session': false, 'scope': 'email'}));
 app.get('/login/facebook/return', passport.authenticate('facebook', {'session': false, 'scope': 'email'}), function(req, res){
-	res.json(req.user);
+	res.json({'token': req.user});
 });
 
 app.get('/nao_tendi', helpers.jwt_mw, function(req, res){
-	res.json(req.user);
+	res.json({'token': req.user});
 });
 
 app.get("/login/cadastrar", user_controller.create_user);
 // /login/cadastrar?name=Felipe&email=felipe@toyoda.com.br&password=bacon&state=SP&city=São Paulo&age=23&gender=Masculino
 
 app.get("/login/email", user_controller.email_login);
+// /login/email?email=felipe@toyoda.com.br&password=bacon
+
 app.get("/test_token", function(req, res){
 	var token = req.query['token'];
 
