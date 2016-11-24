@@ -125,7 +125,7 @@ app.get('/login/facebook/return', passport.authenticate('facebook', {'session': 
 });
 
 app.get('/nao_tendi', helpers.jwt_mw, function(req, res){
-	res.json({'token': req.user});
+	res.json({'user_info': req.user});
 });
 
 app.get("/login/cadastrar", user_controller.create_user);

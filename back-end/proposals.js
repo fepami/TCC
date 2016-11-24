@@ -30,29 +30,57 @@ var get_proposals_func = function(type){
 		query_for_props[1] = '';
 		query_for_props[2] = 'group by prop.id';
 
-		var parse_proposals = function(proposals) {
+		var parse_proposals = function(proposals, callback) {
 			var parsed_proposals = [];
 
-			for (var i = 0; i < proposals.length; i++) {
-				var prop = proposals[i];
+			var politician_ids = proposals.map(function(prop){return prop['politician_ids'].split(',')});
+			politician_ids = [].concat.apply([], politician_ids);
 
-				var parsed_prop = {
-					'proposal_id': prop['id'],
-					'ranking': prop['ranking'],
-					'nome': prop['summary'],
-					'descricao': prop['content'],
-					'categoria': prop['category'],
-					'approval': prop['approval'],
-					'user_vote': prop['user_vote'],
-					'politicos': prop['politician_ids'].split(','),
-					'data': moment(prop['received_at']).format('LL'),
-					'cargo': null
+
+			query_for_polis = 'select\
+				pol.id,\
+				pol.name,\
+				pol.photo_url\
+			from politician pol\
+			where pol.id in (?);';
+
+			mysql_handler(query_for_polis, [politician_ids], function(err, politicians){
+				if (err) {return callback(err)}
+
+				politicians_by_id = {};
+				for (var i = 0; i < politicians.length; i++) {
+					politicians_by_id[politicians[i]['id'].toString()] = politicians[i];
+				}
+				helpers.debug_print(politicians_by_id);
+
+
+				// if (err) {return res.json(err)}
+
+				// res.json(parse_proposals(proposals));
+
+				for (var i = 0; i < proposals.length; i++) {
+					var prop = proposals[i];
+					var politicians_info = prop['politician_ids'].split(',').map(function(id){return politicians_by_id[id]});
+
+					var parsed_prop = {
+						'proposal_id': prop['id'],
+						'ranking': prop['ranking'],
+						'nome': prop['summary'],
+						'descricao': prop['content'],
+						'categoria': prop['category'],
+						'approval': prop['approval'],
+						'user_vote': prop['user_vote'],
+						'politicos': politicians_info,
+						'data': moment(prop['received_at']).format('LL'),
+						'cargo': null
+					}
+
+					parsed_proposals.push(parsed_prop);
 				}
 
-				parsed_proposals.push(parsed_prop);
-			}
-
-			return parsed_proposals;
+				// return parsed_proposals;
+				return callback(null, parsed_prop);
+			});
 		}
 
 		var user_id = req.user['id'];
@@ -61,6 +89,8 @@ var get_proposals_func = function(type){
 			query_for_props[1] = 'where pp.politician_id = ?';
 
 			mysql_handler(query_for_props.join('\n'), [user_id, politician_id], function(err, proposals){
+				if (err) {return res.json(err)}
+
 				res.json(parse_proposals(proposals));
 			});
 
@@ -70,11 +100,21 @@ var get_proposals_func = function(type){
 			query_for_props[1] = 'where prop.id=?';
 
 			mysql_handler(query_for_props.join('\n'), [user_id, parseInt(proposal_id)], function(err, proposals){
-				res.json(parse_proposals(proposals));
+				if (err) {return res.json(err)}
+
+				parse_proposals(proposals, function(err, parsed_props){
+					if (err) {return res.json(err)}
+					return res.json(parsed_props);
+				})
 			});
 		} else {
 			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
-				res.json(parse_proposals(proposals));
+				if (err) {return res.json(err)}
+
+				parse_proposals(proposals, function(err, parsed_props){
+					if (err) {return res.json(err)}
+					return res.json(parsed_props);
+				})
 			});
 		}
 	}
