@@ -230,7 +230,7 @@ for file_name in os.listdir(POLITICIANS_DIR):
 		fieldnames = FIELDNAMES_PER_START_YEAR[2010]
 
 	print(year)
-	import pdb; pdb.set_trace()
+	# import pdb; pdb.set_trace()
 
 
 	with open(file_name, 'rb') as f:
@@ -239,14 +239,15 @@ for file_name in os.listdir(POLITICIANS_DIR):
 			location = portuguese_titleize(row['DESCRICAO_UE'])
 			print '.',
 
-			if location in [u'São Paulo', u'Rio de Janeiro']:
+			# if location in [u'São Paulo', u'Rio de Janeiro']:
+			if location in [u'São Paulo']:
 				print ''
 
 				name = row['NOME_CANDIDATO']
 				politician_id = politicians_dict.get(normalize_string(name))
 				if not politician_id:
 					politician = {}
-					politician['name'] = name
+					politician['name'] = portuguese_titleize(name)
 					politician['congress_name'] = row['NOME_URNA_CANDIDATO']
 
 					politician['party'] = row['SIGLA_PARTIDO']
