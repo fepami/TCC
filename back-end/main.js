@@ -13,87 +13,87 @@ const cassandra_handler = require("./cassandra_handler").handler
 
 const helpers = require("./helpers")
 
-const passport = require('passport');
-const Strategy = require('passport-facebook').Strategy;
+// const passport = require('passport');
+// const Strategy = require('passport-facebook').Strategy;
 
 const fs = require('fs');
 
-var config = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
-var facebook_app_id = config['facebook_app_id'];
-var facebook_app_secret = config['facebook_app_secret'];
-var facebook_app_return_url = config['facebook_app_return_url'];
+// var config = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+// var facebook_app_id = config['facebook_app_id'];
+// var facebook_app_secret = config['facebook_app_secret'];
+// var facebook_app_return_url = config['facebook_app_return_url'];
 
-passport.use(new Strategy({
-    'clientID': facebook_app_id,
-    'clientSecret': facebook_app_secret,
-    'callbackURL': facebook_app_return_url,
-    'profileFields': ['id', 'email', 'name'],
-  },
-  function(accessToken, refreshToken, profile, callback) {
-    // In this example, the user's Facebook profile is supplied as the user
-    // record.  In a production-quality application, the Facebook profile should
-    // be associated with a user record in the application's database, which
-    // allows for account linking and authentication with other identity
-    // providers.
-    facebook_user_id = profile.id;
-    facebook_user_email = profile.emails[0]['value'];
-    facebook_user_name = profile.name['givenName'] + ' ' + profile.name['familyName'];
+// passport.use(new Strategy({
+//     'clientID': facebook_app_id,
+//     'clientSecret': facebook_app_secret,
+//     'callbackURL': facebook_app_return_url,
+//     'profileFields': ['id', 'email', 'name'],
+//   },
+//   function(accessToken, refreshToken, profile, callback) {
+//     // In this example, the user's Facebook profile is supplied as the user
+//     // record.  In a production-quality application, the Facebook profile should
+//     // be associated with a user record in the application's database, which
+//     // allows for account linking and authentication with other identity
+//     // providers.
+//     facebook_user_id = profile.id;
+//     facebook_user_email = profile.emails[0]['value'];
+//     facebook_user_name = profile.name['givenName'] + ' ' + profile.name['familyName'];
 
-    var user_query = 'select id from user where ?? = ?';
+//     var user_query = 'select id from user where ?? = ?';
 
-		mysql_handler(user_query, ['facebook_id', facebook_user_id], function(err, user_by_fb){
-			if (err) {return callback(err)}
+// 		mysql_handler(user_query, ['facebook_id', facebook_user_id], function(err, user_by_fb){
+// 			if (err) {return callback(err)}
 
-			// achou o user com fb
-			if (user_by_fb.length > 0) {
-				user_by_fb = user_by_fb[0]
-				user_info = {
-					'id': user_by_fb['id'],
-				}
-				var token = helpers.create_token(user_info);
+// 			// achou o user com fb
+// 			if (user_by_fb.length > 0) {
+// 				user_by_fb = user_by_fb[0]
+// 				user_info = {
+// 					'id': user_by_fb['id'],
+// 				}
+// 				var token = helpers.create_token(user_info);
 
-				return callback(null, token);
-			}
+// 				return callback(null, token);
+// 			}
 
-			mysql_handler(user_query, ['email', facebook_user_email], function(err, user_by_email){
-				if (err) {return callback(err)}
+// 			mysql_handler(user_query, ['email', facebook_user_email], function(err, user_by_email){
+// 				if (err) {return callback(err)}
 
-				// linkar a conta existente com o fb
-				if (user_by_email.length > 0) {
-					user_by_email = user_by_email[0]
+// 				// linkar a conta existente com o fb
+// 				if (user_by_email.length > 0) {
+// 					user_by_email = user_by_email[0]
 
-					var update_user_query = 'update user set ? where id=?';
-					var user_id = user_by_email['id']
-					mysql_handler(update_user_query, [{'facebook_id': facebook_user_id}, user_id], function(err){
-						if (err) {return callback(err)}
+// 					var update_user_query = 'update user set ? where id=?';
+// 					var user_id = user_by_email['id']
+// 					mysql_handler(update_user_query, [{'facebook_id': facebook_user_id}, user_id], function(err){
+// 						if (err) {return callback(err)}
 
-						user_info = {
-							'id': user_id,
-						}
-						var token = helpers.create_token(user_info);
+// 						user_info = {
+// 							'id': user_id,
+// 						}
+// 						var token = helpers.create_token(user_info);
 
-						return callback(null, token);
-					});
-				}
+// 						return callback(null, token);
+// 					});
+// 				}
 
-				// criar conta
-				var create_user_query = 'insert into user set ?';
-				mysql_handler(create_user_query, [{'facebook_id': facebook_user_id, 'email':facebook_user_email, 'name':facebook_user_name}], function(err, result){
-					if (err) {return callback(err)}
+// 				// criar conta
+// 				var create_user_query = 'insert into user set ?';
+// 				mysql_handler(create_user_query, [{'facebook_id': facebook_user_id, 'email':facebook_user_email, 'name':facebook_user_name}], function(err, result){
+// 					if (err) {return callback(err)}
 
-					user_info = {
-						'id': result.insertId,
-					}
-					var token = helpers.create_token(user_info);
+// 					user_info = {
+// 						'id': result.insertId,
+// 					}
+// 					var token = helpers.create_token(user_info);
 
-					return callback(null, token);
-				});
-			});
-		});
-  })
-);
+// 					return callback(null, token);
+// 				});
+// 			});
+// 		});
+//   })
+// );
 
-app.use(passport.initialize());
+// app.use(passport.initialize());
 
 
 var politicians_controller = require("./politicians.js");
@@ -119,10 +119,10 @@ app.get("/",(req,res) => {
 	}
 });
 
-app.get('/login/facebook', passport.authenticate('facebook', {'session': false, 'scope': 'email'}));
-app.get('/login/facebook/return', passport.authenticate('facebook', {'session': false, 'scope': 'email'}), function(req, res){
-	res.json({'token': req.user});
-});
+// app.get('/login/facebook', passport.authenticate('facebook', {'session': false, 'scope': 'email'}));
+// app.get('/login/facebook/return', passport.authenticate('facebook', {'session': false, 'scope': 'email'}), function(req, res){
+// 	res.json({'token': req.user});
+// });
 
 app.get('/nao_tendi', helpers.jwt_mw, function(req, res){
 	res.json({'user_info': req.user});
@@ -131,8 +131,8 @@ app.get('/nao_tendi', helpers.jwt_mw, function(req, res){
 app.get("/login/cadastrar", user_controller.create_user);
 // /login/cadastrar?name=Felipe&email=felipe@toyoda.com.br&password=bacon&state=SP&city=São Paulo&age=23&gender=Masculino
 
-app.get("/login/email", user_controller.email_login);
-// /login/email?email=felipe@toyoda.com.br&password=bacon
+app.get("/login", user_controller.login);
+// /login?email=felipe@toyoda.com.br&password=bacon&profile_id=afafkanjkbasjinjkasn
 
 app.get("/test_token", function(req, res){
 	var token = req.query['token'];

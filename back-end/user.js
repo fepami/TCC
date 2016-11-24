@@ -10,8 +10,8 @@ const helpers = require("./helpers")
 
 
 
-function _verify_user(email, password, callback) {
-	var user_query = 'select id, password from user where email = ?';
+function _verify_password(email, password, callback) {
+	var user_query = 'select id, password, name, email, state, city, age, gender from user where email = ?';
 
 	mysql_handler(user_query, [email], function(err, user){
 		if (err) {
@@ -28,6 +28,7 @@ function _verify_user(email, password, callback) {
 			return callback(null, null);
 		}
 
+		delete user.password;
 		return callback(null, user);
 	});
 }
@@ -87,38 +88,90 @@ function create_user(req, res) {
 			user_info = {
 				'id': result.insertId,
 			}
-
 			var token = helpers.create_token(user_info);
-			return res.json({token: token});
+
+			user_params['token'] = token
+			delete user_params.password;
+			return res.json(user_params);
 		});
 	});
 }
 
-function email_login(req, res) {
+function login(req, res) {
+	var facebook_user_id = req.query['profile_id']
 	var email = req.query['email'];
-	var password = req.query['password'];
 
-	_verify_user(email, password, function(err, user){
-		if (err) {
-			return res.json(err);
-		}
+	if (facebook_user_id) {
+		var user_query = 'select id, name, email, state, city, age, gender from user where ?? = ?';
 
-		if (!user) {
-			return res.json('Usuário ou senha incorretos');
-		}
+		mysql_handler(user_query, ['facebook_id', facebook_user_id], function(err, user_by_fb){
+			if (err) {res.status(500); return res.send(err.toString())}
 
-		// repetido
-		user_info = {
-			'id': user['id'],
-		}
-		var token = helpers.create_token(user_info);
+			// achou o user com fb
+			if (user_by_fb.length > 0) {
+				user_by_fb = user_by_fb[0]
+				user_info = {
+					'id': user_by_fb['id'],
+				}
+				var token = helpers.create_token(user_info);
 
-		return res.json({token: token});
-	});
+				user_by_fb['token'] = token;
+				return res.json(user_by_fb);
+			}
+
+			mysql_handler(user_query, ['email', email], function(err, user_by_email){
+				if (err) {res.status(500); return res.send(err.toString())}
+
+				// linkar a conta existente com o fb
+				if (user_by_email.length > 0) {
+					user_by_email = user_by_email[0]
+
+					var update_user_query = 'update user set ? where id=?';
+					var user_id = user_by_email['id']
+					mysql_handler(update_user_query, [{'facebook_id': facebook_user_id}, user_id], function(err){
+						if (err) {return callback(err)}
+
+						user_info = {
+							'id': user_id,
+						}
+						var token = helpers.create_token(user_info);
+
+						user_by_email['token'] = token;
+						return res.json(user_by_email);
+					});
+				} else {
+					res.status(418); // I am a teapot!
+					return res.send('New teapots must register first!');
+				}
+			});
+		});
+	} else {
+		var password = req.query['password'];
+
+		_verify_password(email, password, function(err, user){
+			if (err) {
+				return res.json(err);
+			}
+
+			if (!user) {
+				res.status(404);
+				return res.json('Usuário ou senha incorretos');
+			}
+
+			// repetido
+			user_info = {
+				'id': user['id'],
+			}
+			var token = helpers.create_token(user_info);
+
+			user['token'] = token;
+			return res.json(user);
+		});
+	}
 }
 
 
 module.exports = {
-  'email_login': email_login,
+  'login': login,
   'create_user': create_user,
 }
