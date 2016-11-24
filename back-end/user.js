@@ -70,6 +70,7 @@ function create_user(req, res) {
 		}
 
 		if (existing_user.length > 0) {
+			res.status(400);
 			return res.json('Email já cadastrado');
 		}
 
