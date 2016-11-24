@@ -24,7 +24,7 @@ function _verify_password(email, password, callback) {
 
 		user = user[0];
 		// provavelmente precisa mudar pra async
-		if (user['password'] === undefined) {
+		if (!user['password']) {
 			return callback(err);
 		}
 
