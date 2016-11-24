@@ -1,107 +1,3 @@
-#### MySql ####
-User
-id: Integer
-name: Text
-email: Text
-password (simplificado)
-state: Text
-city: Text
-age: Integer
-gender: Text
-
-# device_id temporario
-CREATE TABLE user (
-	id int NOT NULL AUTO_INCREMENT,
-	device_id varchar(255),
-	PRIMARY KEY (id)
-);
-
-Politician
-name: Text
-date_of_birth: Date
-party: Text
-
-CREATE TABLE politician (
-	id int NOT NULL AUTO_INCREMENT,
-	name varchar(255) NOT NULL,
-	date_of_birth date,
-	party varchar(255),
-	PRIMARY KEY (id)
-);
-
-Proposal
-content: Text
-code: Text
-summary: Text
-created_at: Datetime
-
-CREATE TABLE proposal (
-	id int NOT NULL AUTO_INCREMENT,
-	content text NOT NULL,
-	code varchar(255),
-	summary text,
-	PRIMARY KEY (id)
-);
-
-Position
-name: Text
-term_length: Integer (em meses)
-
-CREATE TABLE position (
-	id int NOT NULL AUTO_INCREMENT,
-	name varchar(255),
-	term_length int,
-	PRIMARY KEY (id)
-);
-
-#### Mysql (deveria ficar no Cassandra) ####
-PoliticianVote
-user_id: Integer
-politician_id: Integer
-
-CREATE TABLE politician_vote (
-	id int NOT NULL AUTO_INCREMENT,
-  user_id int,
-  politician_id int,
-  is_positive boolean,
-	PRIMARY KEY (id)
-);
-
-PoliticianPosition
-politician_id: Integer
-position_id: Integer
-vote_code: Text
-election_year: Integer
-start_date: Date
-end_date: Date
-
-CREATE TABLE politician_position (
-	id int NOT NULL AUTO_INCREMENT,
-  politician_id int,
-  position_id int,
-  vote_code varchar(15),
-  election_year int,
-  start_date date,
-	end_date date,
-	PRIMARY KEY (id)
-);
-
-PoliticianFollow
-user_id: Integer
-politician_id: Integer
-
-ProposalVote
-user_id: Integer
-proposal_id: Integer
-
-
-
-
-
-
-
-
-
 DROP TABLE user;
 DROP TABLE politician;
 DROP TABLE politician_vote;
@@ -117,7 +13,6 @@ DROP TABLE position;
 CREATE TABLE user (
 	id int NOT NULL AUTO_INCREMENT,
 	name varchar(255),
-	device_id varchar(255),
 	facebook_id varchar(255),
 	email varchar(255),
 	password varchar(255),
@@ -125,6 +20,7 @@ CREATE TABLE user (
 	city varchar(255),
 	age int,
 	gender varchar(30),
+	photo_url text,
 	PRIMARY KEY (id)
 );
 

@@ -11,7 +11,7 @@ const helpers = require("./helpers")
 
 
 function _verify_password(email, password, callback) {
-	var user_query = 'select id, password, name, email, state, city, age, gender from user where email = ?';
+	var user_query = 'select id, password, name, email, state, city, age, gender, photo_url from user where email = ?';
 
 	mysql_handler(user_query, [email], function(err, user){
 		if (err) {
@@ -59,6 +59,7 @@ function create_user(req, res) {
 	var city = req.query['city'];
 	var age = req.query['age'];
 	var gender =  req.query['gender'];
+	var photo_url =  req.query['photo_url'] || null;
 
 	var facebook_user_id = req.query['profile_id'];
 	var password = req.query['password'];
@@ -68,8 +69,6 @@ function create_user(req, res) {
 		existing_user_query += ' or facebook_id = ?';
 		existing_user_query_params.push(facebook_user_id);
 	}
-
-
 
 	mysql_handler(existing_user_query, existing_user_query_params, function(err, existing_user){
 		if (err) {
@@ -89,6 +88,7 @@ function create_user(req, res) {
 			'city': city,
 			'age': age,
 			'gender': gender,
+			'photo_url': photo_url,
 		}
 
 		if (facebook_user_id) {
@@ -119,7 +119,7 @@ function login(req, res) {
 	var email = req.query['email'];
 
 	if (facebook_user_id) {
-		var user_query = 'select id, name, email, state, city, age, gender from user where ?? = ?';
+		var user_query = 'select id, name, email, state, city, age, gender, photo_url from user where ?? = ?';
 
 		mysql_handler(user_query, ['facebook_id', facebook_user_id], function(err, user_by_fb){
 			if (err) {res.status(500); return res.send(err.toString())}
