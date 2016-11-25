@@ -5,11 +5,13 @@ import {
 	Text,
 	TextInput,
 	ListView,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
 import LoadingOverlay from '../components/LoadingOverlay';
 import PoliticosListItem from '../components/PoliticosListItem';
 import SearchBarIOS from '../components/SearchBarIOS';
+import Placeholder from '../components/Placeholder';
 import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
@@ -25,16 +27,19 @@ export default class SeguindoScene extends Component {
 			modalVisible: false,
 			selectedFilters: [],
 			politicosDataSource: ds.cloneWithRows([]),
-			loading: true
+			loading: true,
+			listIsEmpty: false,
+			errorState: false
 		}
 		this.onShowFilter = this.onShowFilter.bind(this);
 		this.onCloseFilter = this.onCloseFilter.bind(this);
 		this.onSubmitSearch = this.onSubmitSearch.bind(this);
 		this.getSeguindo = this.getSeguindo.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
+		this.refreshData = this.refreshData.bind(this);
 	}
 
-	getSeguindo() {
+	getSeguindo(token) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = (e) => {
 			if (request.readyState !== 4) {
@@ -43,18 +48,32 @@ export default class SeguindoScene extends Component {
 
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
-				this.setState({politicosDataSource: ds.cloneWithRows(jsonResponse), loading: false});
+				this.setState({politicosDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
 			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
+				this.setState({errorState: true});
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos_seguidos?device_id=device_id1');
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos_seguidos?token=' + token);
 		request.send();
 	}
 
+	refreshData() {
+		if (this.state.token) {
+			if (!this.state.loading) {
+				this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getSeguindo(this.state.token));
+			}
+		} else {
+			var _this = this;
+			AsyncStorage.getItem('token', (err, result) => {
+				_this.setState({token: result});
+				_this.getSeguindo(result);
+			});
+		}
+	}
+
 	componentDidMount() {
-		this.getSeguindo();
+		this.refreshData();
 	}
 
 	renderSearchBarIOS() {
@@ -66,6 +85,11 @@ export default class SeguindoScene extends Component {
 	renderLoadingOrView() {
 		if (this.state.loading) {
 			return (<LoadingOverlay/>)
+		} else if (this.state.listIsEmpty) {
+			return (<Placeholder type='follow' />)
+		} else if (this.state.errorState) {
+			return (<Placeholder type='error' onPress={() => {
+				this.setState({errorState: false, loading: true}, this.getSeguindo(this.state.token))}} />)
 		} else {
 			let type = this.props.type ? this.props.type : 'lista';
 			return (

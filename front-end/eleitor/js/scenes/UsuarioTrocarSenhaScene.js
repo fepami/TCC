@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {
 	StyleSheet,
 	View,
+	Modal,
 	Text,
 	TextInput,
 	ScrollView,
@@ -13,74 +14,101 @@ import Header from '../components/Header';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default class UsuarioTrocarSenhaScene extends Component {
+	closeModal(){
+		this.props.changeModalVisibility(false);
+	}
+
 	render(){
 		const deviceHeight = Platform.select({
 			ios: 28,
 			android: 35
 		})
+
+		const cancelLeft = {
+			icon: 'md-close',
+			onPress: this.closeModal.bind(this)
+		};
+		const saveRight = [{
+			title: 'Salvar',
+			iconName: 'md-checkmark',
+			show: 'always',
+			onActionSelected: this.onSavePress.bind(this)
+		}];
+
 		return(
-			<View style={{flex: 1, backgroundColor: 'white'}}>
-				<Header
-					navigator={this.props.navigator}
-					title='Trocar a Senha' />
-				<KeyboardAwareScrollView style={{flex: 1}}>
-					<View style={styles.view}>
-						<Text>Senha antiga:</Text>	
-						<TextInput 
-							ref={'currentpwd'}
-							style={[styles.input, {height: deviceHeight}]}
-							autoCapitalize='none'
-							secureTextEntry={true}
-							autoCorrect={false}
-							enablesReturnKeyAutomatically={true}
-							keyboardAppearance='default'
-							returnKeyType='next'
-							underlineColorAndroid='transparent'
-							numberOfLines={1}
-							/>		
-						<Text>Nova senha:</Text>	
-						<TextInput 
-							ref={'newpwd'}
-							style={[styles.input, {height: deviceHeight}]}
-							autoCapitalize='none'
-							secureTextEntry={true}
-							autoCorrect={false}
-							enablesReturnKeyAutomatically={true}
-							keyboardAppearance='default'
-							returnKeyType='next'
-							underlineColorAndroid='transparent'
-							numberOfLines={1}
-							/>				
-						<Text>Confirmação da nova senha:</Text>	
-						<TextInput 
-							ref={'newpwd2'}
-							style={[styles.input, {height: deviceHeight}]}
-							autoCapitalize='none'
-							secureTextEntry={true}
-							autoCorrect={false}
-							enablesReturnKeyAutomatically={true}
-							keyboardAppearance='default'
-							returnKeyType='done'
-							underlineColorAndroid='transparent'
-							numberOfLines={1}
-							/>		
-						<View style={styles.box}>
-							<TouchableElement onPress={this.onPress.bind(this)} style={styles.button}>
-								<Text style={{fontWeight: 'bold', color: 'white'}}>Salvar</Text>
-							</TouchableElement>
+			<Modal 
+				animationType={'slide'}
+				transparent={false}
+				visible={this.props.modalVisible}
+				onRequestClose={() => this.props.changeModalVisibility(false)} >
+				<View style={[Platform.select({android: styles.androidView}), {flex: 1, backgroundColor: 'white'}]}>
+					<Header
+						navigator={this.props.navigator}
+						title='Trocar a Senha' 
+						actions={saveRight}
+						leftItem={cancelLeft} />
+					<KeyboardAwareScrollView style={{flex: 1}}>
+						<View style={styles.view}>
+							<Text>Senha antiga:</Text>	
+							<TextInput 
+								ref={'currentpwd'}
+								style={[styles.input, {height: deviceHeight}]}
+								autoCapitalize='none'
+								secureTextEntry={true}
+								autoCorrect={false}
+								enablesReturnKeyAutomatically={true}
+								keyboardAppearance='default'
+								returnKeyType='next'
+								underlineColorAndroid='transparent'
+								numberOfLines={1}
+								/>		
+							<Text>Nova senha:</Text>	
+							<TextInput 
+								ref={'newpwd'}
+								style={[styles.input, {height: deviceHeight}]}
+								autoCapitalize='none'
+								secureTextEntry={true}
+								autoCorrect={false}
+								enablesReturnKeyAutomatically={true}
+								keyboardAppearance='default'
+								returnKeyType='next'
+								underlineColorAndroid='transparent'
+								numberOfLines={1}
+								/>				
+							<Text>Confirmação da nova senha:</Text>	
+							<TextInput 
+								ref={'newpwd2'}
+								style={[styles.input, {height: deviceHeight}]}
+								autoCapitalize='none'
+								secureTextEntry={true}
+								autoCorrect={false}
+								enablesReturnKeyAutomatically={true}
+								keyboardAppearance='default'
+								returnKeyType='done'
+								underlineColorAndroid='transparent'
+								numberOfLines={1}
+								/>		
+							<View style={styles.box}>
+								<TouchableElement onPress={this.onSavePress.bind(this)} style={styles.button}>
+									<Text style={{fontWeight: 'bold', color: 'white'}}>Salvar</Text>
+								</TouchableElement>
+							</View>
 						</View>
-					</View>
-				</KeyboardAwareScrollView>
-			</View>
+					</KeyboardAwareScrollView>
+				</View>
+			</Modal>
 		)
 	}
 
-	onPress() {
+	onSavePress() {
 		dismissKeyboard();
 	}
 }
 
 const styles = StyleSheet.create({
+	androidView: {
+		paddingTop: -25
+	},
 	view: {
 		padding: 15,
 		flexDirection: 'column',

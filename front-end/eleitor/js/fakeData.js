@@ -6,7 +6,6 @@ export const fakePoliticos = [fakePolitico0, fakePolitico1, fakePolitico2, fakeP
 export const fakeFilter = [{topic: 'Localização', options: ['São Paulo', 'Rio de Janeiro']}, 
 						   {topic: 'Cargo', options: ['Prefeito', 'Vereador']},
 						   {topic: 'Partido', options: ['PT', 'PSDB', 'PSOL']}, 
-						   {topic: 'Assunto', options: ['Saúde', 'Educação', 'Transporte', 'Animais']},
 						   {topic: 'Aprovação', options: ['Melhores Aprovados', 'Piores Aprovados']}];
 
 export const fakeProposta0 = {id: 0, nome: 'NOME DA PROPOSTA', data: 'dd/mm/AA', categoria: 'CATEGORIA', ranking: '999', approval: '0.70', nomePolitico: 'NOME DO POLITICO', politicoID: 0,

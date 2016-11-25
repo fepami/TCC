@@ -13,8 +13,8 @@ export default class DefaultNavigator extends Component {
 				ref='navigator'
 				style={{flex: 1}}
 				//mudar de NavigationManager para login
-				// initialRoute={{component: LoginScene}}
-				initialRoute={{component: NavigationManager}}
+				initialRoute={{component: LoginScene}}
+				// initialRoute={{component: NavigationManager}}
 				renderScene={this.renderScene}
 				configureScene={route => {
 					if(Platform.OS === 'android'){

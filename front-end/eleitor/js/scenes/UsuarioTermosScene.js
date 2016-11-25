@@ -3,7 +3,8 @@ import {
 	StyleSheet,
 	View,
 	ScrollView,
-	Text
+	Text,
+	Linking
 } from 'react-native';
 import Header from '../components/Header';
 
@@ -45,7 +46,7 @@ export default class UsuarioTermosScene extends Component {
 						<Text style={styles.h2}>4 - SEGURANÇA</Text>
 						<Text>4.1. O Usuário concorda e compreende que será responsável por manter a confidencialidade das senhas associadas a qualquer conta que utilize para acessar o Aplicativo.</Text>
 						<Text>4.2. Dessa forma, o Usuário declara que será o único responsável por todas as atividades que ocorram na respectiva conta.</Text>
-						<Text>4.3. Se tomar conhecimento de qualquer utilização não autorizada da sua senha ou da sua conta, o Usuário deverá nos notificar imediatamente no endereço: contato@eleitor.com.br</Text>
+						<Text>4.3. Se tomar conhecimento de qualquer utilização não autorizada da sua senha ou da sua conta, o Usuário deverá nos notificar imediatamente no endereço: <Text style={{color: 'blue', textDecorationLine: 'underline'}} onPress={() => {Linking.openURL('mailto:contato@eleitor.com.br')}}>contato@eleitor.com.br</Text></Text>
 						<Text/>
 					</View>
 				</ScrollView>

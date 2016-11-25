@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {
 	StyleSheet,
 	View,
+	Modal,
 	Image,
 	Text,
 	TextInput,
@@ -9,11 +10,13 @@ import {
 	AsyncStorage
 } from 'react-native';
 import TouchableElement from '../components/TouchableElement';
+import LoadingOverlay from '../components/LoadingOverlay';
 import CadastroScene from './CadastroScene';
 import HomeScene from './HomeScene';
 import FBSDK from 'react-native-fbsdk';
 import NavigationManager from '../navigation/NavigationManager';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import dismissKeyboard from 'dismissKeyboard';
 
 const {
 	LoginButton,
@@ -26,13 +29,16 @@ export default class LoginScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			emailText: '',
-			passwordText: '',
+			emailText: 'marcela_teste@eleitor.com',
+			passwordText: '123',
 			emailError: false,
-			passwordError: false
+			passwordError: false,
+			user: {},
+			loadingVisible: false
 		}
 
 		this.saveCredentials = this.saveCredentials.bind(this);
+		this.getLogin = this.getLogin.bind(this);
 	}
 
 	render(){
@@ -42,7 +48,7 @@ export default class LoginScene extends Component {
 		})
 
 		return(
-			<KeyboardAwareScrollView style={{flex: 1}}>
+			<KeyboardAwareScrollView style={{flex: 1, backgroundColor: 'white'}}>
 				<View style={{flex: 1, backgroundColor: 'white', padding: 15}}>
 					<View style={{alignItems: 'center', paddingTop: 30}}>
 						<Image
@@ -55,7 +61,7 @@ export default class LoginScene extends Component {
 						<TextInput 
 							ref={'email-input'}
 							style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
-							autoCapitalize='words'							
+							autoCapitalize='none'							
 							autoCorrect={false}
 							enablesReturnKeyAutomatically={true}
 							keyboardAppearance='default'
@@ -65,6 +71,7 @@ export default class LoginScene extends Component {
 							numberOfLines={1}
 							onChangeText={(text) => this.setState({emailText: text})}
 							onSubmitEditing={() => this.refs['password-input'].focus()}
+							value='marcela_teste@eleitor.com'
 							/>	
 						<Text>Senha:</Text>
 						<TextInput 
@@ -80,6 +87,7 @@ export default class LoginScene extends Component {
 							numberOfLines={1}
 							onChangeText={(text) => this.setState({passwordText: text})}
 							onSubmitEditing={this.onLoginPress.bind(this)}
+							value='123'
 							/>	
 					</View>
 					<View style={styles.box}>
@@ -91,13 +99,20 @@ export default class LoginScene extends Component {
 								style={{flex: 1, height: 40, marginTop: 15}}
 								readPermissions={['public_profile', 'email', 'user_birthday']}
 								onLoginFinished={this.onFBLoginFinished.bind(this)}
-								onLogoutFinished={() => alert("User logged out")}/>
+								onLogoutFinished={() => console.log("User logged out")}/>
 							</View>
 					</View>	
 					<TouchableElement onPress={this.onNewAccountPress.bind(this)} style={{alignSelf: 'center', height: 40, justifyContent: 'center'}}>
 						<Text>Criar uma conta</Text>
 					</TouchableElement>
 				</View>
+				<Modal
+					animationType={'fade'}
+					transparent={true}
+					visible={this.state.loadingVisible}
+					onRequestClose={() => this.state.setState({loadingVisible: false})} >
+					<LoadingOverlay style={{backgroundColor: 'rgba(0,0,0,0.5)'}}/>
+				</Modal>
 			</KeyboardAwareScrollView>
 		)
 	}
@@ -113,7 +128,7 @@ export default class LoginScene extends Component {
 					alert('Erro de autenticação');
 				} else {
 					const age = this.getAge(result.birthday);
-					this.setState({usuario: {nome: result.name, email: result.email, sexo: result.gender, foto: result.picture.data.url, idade: age}}, this.saveCredentials());
+					this.setState({loadingVisible: true, user: {name: result.name, email: result.email, gender: (result.gender === 'female') ? 'Feminino' : 'Masculino', picture: result.picture.data.url, age: age, id: result.id}}, this.getLogin('fb', result.email, result.id));
 				}
 			}
 
@@ -126,11 +141,11 @@ export default class LoginScene extends Component {
 			// Start the graph request.
 			new GraphRequestManager().addRequest(infoRequest).start();
 			
-			AccessToken.getCurrentAccessToken().then(
-				(data) => {
-					this.setState({token: data.accessToken}, () => console.log(this.state.token));
-				}
-			)
+			// AccessToken.getCurrentAccessToken().then(
+			// 	(data) => {
+			// 		this.setState({token: data.accessToken}, () => console.log(this.state.token));
+			// 	}
+			// )
 		}
 	}
 
@@ -147,6 +162,9 @@ export default class LoginScene extends Component {
 	}
 
 	onLoginPress() {
+		this.setState({loadingVisible: true});
+		dismissKeyboard();
+		
 		let emailError = false;
 		let passwordError = false;
 
@@ -160,18 +178,53 @@ export default class LoginScene extends Component {
 		
 		this.setState({emailError: emailError, passwordError: passwordError}, () => {
 			if (!emailError && !passwordError) {
-				// this.props.navigator.push({component: HomeScene});
-				this.props.navigator.replace({component: NavigationManager})
+				this.getLogin('manual', this.state.emailText, this.state.passwordText);
 			}	
 		})
 	}
 
-	saveCredentials() {
-		AsyncStorage.setItem('nome', this.state.nome);
-		AsyncStorage.setItem('email', this.state.email);
-		AsyncStorage.setItem('sexo', this.state.sexo);
-		AsyncStorage.setItem('foto', this.state.foto);
-		AsyncStorage.setItem('idade', this.state.idade);
+	getLogin(type, email, param) {
+		var request = new XMLHttpRequest();
+		var _this = this;
+		request.onreadystatechange = (e) => {
+			_this.setState({loadingVisible: false});
+
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+				_this.saveCredentials(jsonResponse);
+			} else if (request.status === 404) {
+				alert("Email ou senha incorreto.")
+			} else if (request.status === 418) {
+				console.log("I'm a teapot! I should be brewing!")
+				_this.props.navigator.push({component: CadastroScene, passProps: _this.state.user});
+			} else {
+				console.warn('Erro: não foi possível conectar ao servidor.');
+			}
+		};
+
+		if (type === 'fb') {
+			request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login?email=' + email + '&profile_id=' + param);
+		} else {
+			request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login?email=' + email + '&password=' + param);
+		}
+		request.send();
+	}
+
+	saveCredentials(jsonResponse) {
+		AsyncStorage.multiSet([
+			['name', jsonResponse.name], 
+			['email', jsonResponse.email], 
+			['state', jsonResponse.state], 
+			['city', jsonResponse.city], 
+			['age', jsonResponse.age.toString()], 
+			['gender', jsonResponse.gender], 
+			['picture', jsonResponse.photo_url ? jsonResponse.photo_url : this.state.user.picture ? this.state.user.picture : ''], 
+			['token', jsonResponse.token]
+		], this.props.navigator.replace({component: NavigationManager}));
 	}
 
 	onNewAccountPress() {

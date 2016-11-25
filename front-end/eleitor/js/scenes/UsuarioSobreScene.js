@@ -3,7 +3,8 @@ import {
 	StyleSheet,
 	View,
 	ScrollView,
-	Text
+	Text,
+	Linking
 } from 'react-native';
 import Header from '../components/Header';
 
@@ -32,7 +33,7 @@ export default class UsuarioSobreScene extends Component {
 						<Text>Você pode votar em quantos políticos e propostas de projeto de lei quiser, além de poder acompanhar a carreira política de diversos políticos, ler a descrição de propostas na íntegra e conferir a aprovação de cada um deles.</Text>
 						<Text/>
 						<Text style={styles.h2}>4 - CONTATO</Text>
-						<Text>Quer entrar em contato com a gente? Mande um email para: contato@eleitor.com.br</Text>
+						<Text>Quer entrar em contato com a gente? Mande um email para: <Text style={{color: 'blue', textDecorationLine: 'underline'}} onPress={() => {Linking.openURL('mailto:contato@eleitor.com.br')}}>contato@eleitor.com.br</Text></Text>				
 						<Text/>
 					</View>
 				</ScrollView>

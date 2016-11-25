@@ -2,12 +2,14 @@ import React, {Component} from 'react';
 import {
 	StyleSheet,
 	View,
+	Modal,
 	Image,
 	Picker,
 	Text,
 	TextInput,
 	ScrollView,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-picker';
@@ -22,20 +24,49 @@ export default class UsuarioEditarScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			nomeText: this.props.nome ? this.props.nome : '',
-			emailText: this.props.email ? this.props.email : '',
-			cidadeText: this.props.cidade ? this.props.cidade : '',
-			estadoText: this.props.estado ? this.props.estado : '',
-			idadeText: this.props.idade ? this.props.idade : '',
-			sexoText: this.props.sexo ? this.props.sexo : '',
-			fotoText: this.props.foto,
-			nomeError: false,
+			nameText: '',
+			emailText: '',
+			cityText: '',
+			stateText: '',
+			ageText: '',
+			genderText: '',
+			pictureText: '',
+			nameError: false,
 			emailError: false,
-			cidadeError: false,
-			estadoError: false,
-			idadeError: false,
-			sexoError: false
+			cityError: false,
+			stateError: false,
+			ageError: false,
+			genderError: false
 		}
+	}
+
+	componentDidMount() {
+		var _this = this;
+		AsyncStorage.getItem('name', (err, result) => {
+			_this.setState({nameText: result});
+		});
+		AsyncStorage.getItem('email', (err, result) => {
+			_this.setState({emailText: result});
+		});
+		AsyncStorage.getItem('state', (err, result) => {
+			_this.setState({stateText: result});
+		});
+		AsyncStorage.getItem('city', (err, result) => {
+			_this.setState({cityText: result});
+		});
+		AsyncStorage.getItem('age', (err, result) => {
+			_this.setState({ageText: result});
+		});
+		AsyncStorage.getItem('gender', (err, result) => {
+			_this.setState({genderText: result});
+		});
+		AsyncStorage.getItem('picture', (err, result) => {
+			_this.setState({pictureText: result});
+		});
+	}
+
+	closeModal(){
+		this.props.changeModalVisibility(false);
 	}
 
 	render(){
@@ -51,119 +82,138 @@ export default class UsuarioEditarScene extends Component {
 		const devicePaddingTop = Platform.select({
 			android: -7
 		})
+
+		const cancelLeft = {
+			icon: 'md-close',
+			onPress: this.closeModal.bind(this)
+		};
+		const saveRight = [{
+			title: 'Salvar',
+			iconName: 'md-checkmark',
+			show: 'always',
+			onActionSelected: this.onSavePress.bind(this)
+		}];
 		return(
-			<View style={{flex: 1, backgroundColor: 'white'}}>
-				<Header
-					navigator={this.props.navigator}
-					title='Editar Perfil' />
-				<KeyboardAwareScrollView style={{flex: 1}}>
-					<View style={styles.view}>
-						<View style={{alignItems: 'center', borderBottomColor: 'black', borderBottomWidth: 2, paddingBottom: 15}}>
-							<View style={{width: 110, height: 112}}>
-								<View style={styles.roundedView}>
-									<Image
-										style={styles.roundedImage}
-										source={this.state.fotoText}/>
+			<Modal 
+				animationType={'slide'}
+				transparent={false}
+				visible={this.props.modalVisible}
+				onRequestClose={() => this.props.changeModalVisibility(false)} >
+				<View style={[Platform.select({android: styles.androidView}), {flex: 1, backgroundColor: 'white'}]}>
+					<Header
+						navigator={this.props.navigator}
+						title='Editar Perfil' 
+						actions={saveRight}
+						leftItem={cancelLeft}/>
+					<KeyboardAwareScrollView style={{flex: 1}}>
+						<View style={styles.view}>
+							<View style={{alignItems: 'center', borderBottomColor: 'black', borderBottomWidth: 2, paddingBottom: 15}}>
+								<View style={{width: 110, height: 112}}>
+									<View style={styles.roundedView}>
+										<Image
+											style={styles.roundedImage}
+											source={this.state.pictureText ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png')}/>
+									</View>
+									<TouchableElement onPress={() => this.onChangePhotoPress()} style={styles.line}>
+										<Text style={{color: 'black'}}>Mudar a foto</Text>
+									</TouchableElement>
 								</View>
-								<TouchableElement onPress={() => this.onChangePhotoPress()} style={styles.line}>
-									<Text style={{color: 'black'}}>Mudar a foto</Text>
-								</TouchableElement>
-							</View>
-						</View>	
-						<View style={{paddingTop: 15}}>
-							<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Informações pessoais:</Text>
-							<View style={{flexDirection: 'row'}}>
-								<Icon name='account-box' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<TextInput 
-									ref={'name-input'}
-									style={[styles.input, {height: deviceHeight, borderColor: this.state.nomeError ? 'red' : 'lightgray'}]}
-									autoCapitalize='words'							
-									autoCorrect={false}
-									enablesReturnKeyAutomatically={true}
-									keyboardAppearance='default'
-									returnKeyType='next'
-									underlineColorAndroid='transparent'
-									numberOfLines={1}
-									value={this.state.nomeText}
-									placeholder='Nome' 
-									onChangeText={(text) => this.setState({nomeText: text})}
-									onSubmitEditing={() => this.refs['email-input'].focus()}
-									/>	
 							</View>	
-							<View style={{flexDirection: 'row'}}>	
-								<Icon name='email' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<TextInput 
-									ref={'email-input'}
-									style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
-									autoCapitalize='none'							
-									autoCorrect={false}
-									enablesReturnKeyAutomatically={true}
-									keyboardAppearance='default'
-									returnKeyType='next'
-									underlineColorAndroid='transparent'
-									numberOfLines={1}
-									value={this.state.emailText}
-									placeholder='Email'
-									onChangeText={(text) => this.setState({emailText: text})}
-									onSubmitEditing={() => dismissKeyboard()}
-									/>	
+							<View style={{paddingTop: 15}}>
+								<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Informações pessoais:</Text>
+								<View style={{flexDirection: 'row'}}>
+									<Icon name='account-box' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+									<TextInput 
+										ref={'name-input'}
+										style={[styles.input, {height: deviceHeight, borderColor: this.state.nameError ? 'red' : 'lightgray'}]}
+										autoCapitalize='words'							
+										autoCorrect={false}
+										enablesReturnKeyAutomatically={true}
+										keyboardAppearance='default'
+										returnKeyType='next'
+										underlineColorAndroid='transparent'
+										numberOfLines={1}
+										value={this.state.nameText}
+										placeholder='Nome' 
+										onChangeText={(text) => this.setState({nameText: text})}
+										onSubmitEditing={() => this.refs['email-input'].focus()}
+										/>	
+								</View>	
+								<View style={{flexDirection: 'row'}}>	
+									<Icon name='email' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+									<TextInput 
+										ref={'email-input'}
+										style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
+										autoCapitalize='none'							
+										autoCorrect={false}
+										enablesReturnKeyAutomatically={true}
+										keyboardAppearance='default'
+										returnKeyType='next'
+										underlineColorAndroid='transparent'
+										numberOfLines={1}
+										value={this.state.emailText}
+										placeholder='Email'
+										onChangeText={(text) => this.setState({emailText: text})}
+										onSubmitEditing={() => dismissKeyboard()}
+										/>	
+								</View>
+								<View style={{flexDirection: 'row'}} >
+									<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.ageError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+										<CustomPicker
+											mode='dropdown'
+											selectedValue={this.state.ageText}
+											onValueChange={(age) => this.setState({ageText: age})}>
+											{agesPickerItems}
+										</CustomPicker>
+									</View>
+									<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
+									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.genderError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+										<CustomPicker
+											mode='dropdown'
+											selectedValue={this.state.genderText}
+											onValueChange={(gender) => this.setState({genderText: gender})}>
+											<Picker.Item color="rgba(0,0,0,.2)" label="Sexo" value="" />							
+											<Picker.Item color="rgba(0,0,0,.87)" label="Feminino" value="Feminino" />							
+											<Picker.Item color="rgba(0,0,0,.87)" label="Masculino" value="Masculino" />
+										</CustomPicker>
+									</View>
+								</View>
+								<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Estado e Cidade em que vota:</Text>
+								<View style={{flexDirection: 'row'}} >
+									<Icon name='map' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.stateError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+										<CustomPicker
+											mode='dropdown'
+											selectedValue={this.state.stateText}
+											onValueChange={(state) => this.setState({stateText: state})}>
+											<Picker.Item color="rgba(0,0,0,.2)" label="Estado" value="" />							
+											<Picker.Item color="rgba(0,0,0,.87)" label="SP" value="SP" />							
+											<Picker.Item color="rgba(0,0,0,.87)" label="RJ" value="RJ" />
+										</CustomPicker>
+									</View>
+									<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
+									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cityError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+										<CustomPicker
+											mode='dropdown'
+											selectedValue={this.state.cityText}
+											onValueChange={(city) => this.setState({cityText: city})}>
+											<Picker.Item color="rgba(0,0,0,.2)" label="Cidade" value="" />							
+											<Picker.Item color="rgba(0,0,0,.87)" label="São Paulo" value="São Paulo" />							
+											<Picker.Item color="rgba(0,0,0,.87)" label="Rio de Janeiro" value="Rio de Janeiro" />
+										</CustomPicker>
+									</View>
+								</View>
 							</View>
-							<View style={{flexDirection: 'row'}} >
-								<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.idadeError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
-									<CustomPicker
-										mode='dropdown'
-										selectedValue={this.state.idadeText}
-										onValueChange={(age) => this.setState({idadeText: age})}>
-										{agesPickerItems}
-									</CustomPicker>
-								</View>
-								<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.sexoError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
-									<CustomPicker
-										mode='dropdown'
-										selectedValue={this.state.sexoText}
-										onValueChange={(gender) => this.setState({sexoText: gender})}>
-										<Picker.Item color="rgba(0,0,0,.2)" label="Sexo" value="" />							
-										<Picker.Item color="rgba(0,0,0,.87)" label="Feminino" value="Feminino" />							
-										<Picker.Item color="rgba(0,0,0,.87)" label="Masculino" value="Masculino" />
-									</CustomPicker>
-								</View>
-							</View>
-							<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Estado e cidade em que vota:</Text>
-							<View style={{flexDirection: 'row'}} >
-								<Icon name='map' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.estadoError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
-									<CustomPicker
-										mode='dropdown'
-										selectedValue={this.state.estadoText}
-										onValueChange={(state) => this.setState({estadoText: state})}>
-										<Picker.Item color="rgba(0,0,0,.2)" label="Estado" value="" />							
-										<Picker.Item color="rgba(0,0,0,.87)" label="SP" value="SP" />							
-										<Picker.Item color="rgba(0,0,0,.87)" label="RJ" value="RJ" />
-									</CustomPicker>
-								</View>
-								<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cidadeError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
-									<CustomPicker
-										mode='dropdown'
-										selectedValue={this.state.cidadeText}
-										onValueChange={(city) => this.setState({cidadeText: city})}>
-										<Picker.Item color="rgba(0,0,0,.2)" label="Cidade" value="" />							
-										<Picker.Item color="rgba(0,0,0,.87)" label="São Paulo" value="São Paulo" />							
-										<Picker.Item color="rgba(0,0,0,.87)" label="Rio de Janeiro" value="Rio de Janeiro" />
-									</CustomPicker>
-								</View>
-							</View>
+							<View style={styles.box}>
+								<TouchableElement onPress={this.onSavePress.bind(this)} style={styles.button}>
+									<Text style={{fontWeight: 'bold', color: 'white'}}>Salvar</Text>
+								</TouchableElement>
+							</View>	
 						</View>
-						<View style={styles.box}>
-							<TouchableElement onPress={this.onSavePress.bind(this)} style={styles.button}>
-								<Text style={{fontWeight: 'bold', color: 'white'}}>Salvar</Text>
-							</TouchableElement>
-						</View>	
-					</View>
-				</KeyboardAwareScrollView>
-			</View>
+					</KeyboardAwareScrollView>
+				</View>
+			</Modal>
 		)
 	}
 
@@ -185,56 +235,96 @@ export default class UsuarioEditarScene extends Component {
 				console.log('User tapped custom button: ', response.customButton);
 			} else {
 				// You can display the image using either data...
-				const source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
+				const source = 'data:image/jpeg;base64,' + response.data;
 
 				// or a reference to the platform specific asset location
 				if (Platform.OS === 'ios') {
-					const source = {uri: response.uri.replace('file://', ''), isStatic: true};
+					const source = response.uri.replace('file://', '');
 				} else {
-					const source = {uri: response.uri, isStatic: true};
+					const source = response.uri;
 				}
 
-				this.setState({fotoText: source});
+				this.setState({pictureText: source});
 			}
 		});
 	}
 
 	onSavePress() {
-		let nomeError = false;
-		let emailError = false;
-		let cidadeError = false;
-		let estadoError = false;
-		let idadeError = false;
-		let sexoError = false;
+		dismissKeyboard();
 
-		if (this.state.nomeText === '') {
-			nomeError = true;
+		let nameError = false;
+		let emailError = false;
+		let cityError = false;
+		let stateError = false;
+		let ageError = false;
+		let genderError = false;
+
+		if (this.state.nameText === '') {
+			nameError = true;
 		}
 		if (this.state.emailText === '') {
 			emailError = true;
 		} 
-		if (this.state.cidadeText === '') {
-			cidadeError = true;
+		if (this.state.cityText === '') {
+			cityError = true;
 		} 
-		if (this.state.estadoText === '') {
-			estadoError = true;
+		if (this.state.stateText === '') {
+			stateError = true;
 		} 
-		if (this.state.idadeText === '') {
-			idadeError = true;
+		if (this.state.ageText === '') {
+			ageError = true;
 		} 
-		if (this.state.sexoText === '') {
-			sexoError = true;
+		if (this.state.genderText === '') {
+			genderError = true;
 		}
 
-		this.setState({nomeError: nomeError, emailError: emailError, cidadeError: cidadeError, estadoError: estadoError, idadeError: idadeError, sexoError: sexoError}, () => {
-			if (!nomeError && !emailError && !cidadeError && !estadoError && !idadeError && !sexoError) {
+		this.setState({nameError: nameError, emailError: emailError, cityError: cityError, stateError: stateError, ageError: ageError, genderError: genderError}, () => {
+			if (!nameError && !emailError && !cityError && !stateError && !ageError && !genderError) {
 				this.props.navigator.push({component: HomeScene});
 			}	
 		})
 	}
+
+	getUpdateCadastro() {
+		var request = new XMLHttpRequest();
+		var _this = this;
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+				_this.saveCredentials(jsonResponse);
+			} else if (request.status === 400) {
+				alert("Email já cadastrado no sistema.")
+			} else {
+				console.warn('Erro: não foi possível conectar ao servidor.');
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login/update?name=' + this.state.nameText + '&email=' + this.state.emailText + '&token=' + this.state.tokenText + '&state=' + this.state.stateText + '&city=' + this.state.cityText + '&age=' + this.state.ageText + '&gender=' + this.state.genderText);
+		request.send();
+	}
+
+	saveCredentials(jsonResponse) {
+		AsyncStorage.multiSet([
+			['name', jsonResponse.name], 
+			['email', jsonResponse.email], 
+			['state', jsonResponse.state], 
+			['city', jsonResponse.city], 
+			['age', jsonResponse.age], 
+			['gender', jsonResponse.gender], 
+			['picture', jsonResponse.photo_url], 
+			['token', jsonResponse.token]
+		], this.props.navigator.push({component: HomeScene}));
+	}
 }
 
 const styles = StyleSheet.create({
+	androidView: {
+		paddingTop: -25
+	},
 	view: {
 		padding: 15,
 		flexDirection: 'column',

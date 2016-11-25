@@ -2,17 +2,20 @@ import React, {Component} from 'react';
 import {
 	StyleSheet,
 	View,
+	Modal,
 	Image,
 	Picker,
 	Text,
 	TextInput,
 	ScrollView,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-picker';
 import TouchableElement from '../components/TouchableElement';
 import CustomPicker from '../components/CustomPicker';
+import LoadingOverlay from '../components/LoadingOverlay';
 import Header from '../components/Header';
 import dismissKeyboard from 'dismissKeyboard';
 import HomeScene from './HomeScene';
@@ -22,30 +25,84 @@ export default class CadastroScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			nomeText: this.props.nome ? this.props.nome : '',
+			nameText: this.props.name ? this.props.name : '',
 			emailText: this.props.email ? this.props.email : '',
-			cidadeText: this.props.cidade ? this.props.cidade : '',
-			estadoText: this.props.estado ? this.props.estado : '',
-			idadeText: this.props.idade ? this.props.idade : '',
-			sexoText: this.props.sexo ? this.props.sexo : '',
-			fotoText: this.props.foto,
+			cityText: this.props.city ? this.props.city : '',
+			stateText: this.props.state ? this.props.state : '',
+			ageText: this.props.age ? this.props.age : '',
+			genderText: this.props.gender ? this.props.gender : '',
+			pictureText: this.props.picture,
 			passwordText: '',
 			password2Text: '',
-			nomeError: false,
+			nameError: false,
 			emailError: false,
-			cidadeError: false,
-			estadoError: false,
-			idadeError: false,
-			sexoError: false,
+			cityError: false,
+			stateError: false,
+			ageError: false,
+			genderError: false,
 			passwordError: false,
-			password2Error: false
+			password2Error: false,
+			fbIDText: this.props.id,
+			isUsingFB: this.props.id ? true : false,
+			loadingVisible: false
+		}
+
+		this.showPasswordFields = this.showPasswordFields.bind(this);
+	}
+
+	showPasswordFields() {
+		if (!this.state.isUsingFB) {
+			const deviceHeight = Platform.select({
+				ios: 28,
+				android: 35
+			})
+			return (
+				<View>
+					<View style={{flexDirection: 'row'}}>	
+						<Icon name='vpn-key' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+						<TextInput 
+							ref={'password-input'}
+							style={[styles.input, {height: deviceHeight, borderColor: this.state.passwordError ? 'red' : 'lightgray'}]}
+							autoCapitalize='none'							
+							secureTextEntry={true}
+							autoCorrect={false}
+							enablesReturnKeyAutomatically={true}
+							keyboardAppearance='default'
+							returnKeyType='next'
+							underlineColorAndroid='transparent'
+							numberOfLines={1}
+							placeholder='Senha'
+							onChangeText={(text) => this.setState({passwordText: text})}
+							onSubmitEditing={() => this.refs['password2-input'].focus()}
+							/>	
+					</View>
+					<View style={{flexDirection: 'row'}}>	
+						<Icon name='vpn-key' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
+						<TextInput 
+							ref={'password2-input'}
+							style={[styles.input, {height: deviceHeight, borderColor: this.state.password2Error ? 'red' : 'lightgray'}]}
+							autoCapitalize='none'							
+							secureTextEntry={true}
+							autoCorrect={false}
+							enablesReturnKeyAutomatically={true}
+							keyboardAppearance='default'
+							returnKeyType='done'
+							underlineColorAndroid='transparent'
+							numberOfLines={1}
+							placeholder='Confirme a senha'
+							onChangeText={(text) => this.setState({password2Text: text})}
+							onSubmitEditing={() => dismissKeyboard()}
+							/>	
+					</View>
+				</View>
+			)
 		}
 	}
 
 	render(){
 		const agesArray = Array.apply(null, Array(55)).map(function (_, i) {return i+16;});
 		let agesPickerItems = agesArray.map((age, ii) => (
-			<Picker.Item label={age.toString()} color="rgba(0,0,0,.87)" value={age.toString()} key={age.toString()}/>
+			<Picker.Item label={age.toString()} color="rgba(0,0,0,.87)" value={age} key={age.toString()}/>
 		));
 		agesPickerItems.unshift(<Picker.Item color="rgba(0,0,0,.2)" label="Idade" value="" key={Math.random()}/>);
 		const deviceHeight = Platform.select({
@@ -67,7 +124,7 @@ export default class CadastroScene extends Component {
 								<View style={styles.roundedView}>
 									<Image
 										style={styles.roundedImage}
-										source={this.state.fotoText}/>
+										source={this.state.pictureText ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png')}/>
 								</View>
 								<TouchableElement onPress={() => this.onChangePhotoPress()} style={styles.line}>
 									<Text style={{color: 'black'}}>Escolher uma foto</Text>
@@ -80,7 +137,7 @@ export default class CadastroScene extends Component {
 								<Icon name='account-box' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
 								<TextInput 
 									ref={'name-input'}
-									style={[styles.input, {height: deviceHeight, borderColor: this.state.nomeError ? 'red' : 'lightgray'}]}
+									style={[styles.input, {height: deviceHeight, borderColor: this.state.nameError ? 'red' : 'lightgray'}]}
 									autoCapitalize='words'							
 									autoCorrect={false}
 									enablesReturnKeyAutomatically={true}
@@ -88,9 +145,9 @@ export default class CadastroScene extends Component {
 									returnKeyType='next'
 									underlineColorAndroid='transparent'
 									numberOfLines={1}
-									value={this.state.nomeText}
+									value={this.state.nameText}
 									placeholder='Nome' 
-									onChangeText={(text) => this.setState({nomeText: text})}
+									onChangeText={(text) => this.setState({nameText: text})}
 									onSubmitEditing={() => this.refs['email-input'].focus()}
 									/>	
 							</View>	
@@ -112,83 +169,48 @@ export default class CadastroScene extends Component {
 									onSubmitEditing={() => this.refs['password-input'].focus()}
 									/>	
 							</View>
-							<View style={{flexDirection: 'row'}}>	
-								<Icon name='vpn-key' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<TextInput 
-									ref={'password-input'}
-									style={[styles.input, {height: deviceHeight, borderColor: this.state.passwordError ? 'red' : 'lightgray'}]}
-									autoCapitalize='none'							
-									secureTextEntry={true}
-									autoCorrect={false}
-									enablesReturnKeyAutomatically={true}
-									keyboardAppearance='default'
-									returnKeyType='next'
-									underlineColorAndroid='transparent'
-									numberOfLines={1}
-									placeholder='Senha'
-									onChangeText={(text) => this.setState({passwordText: text})}
-									onSubmitEditing={() => this.refs['password2-input'].focus()}
-									/>	
-							</View>
-							<View style={{flexDirection: 'row'}}>	
-								<Icon name='vpn-key' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<TextInput 
-									ref={'password2-input'}
-									style={[styles.input, {height: deviceHeight, borderColor: this.state.password2Error ? 'red' : 'lightgray'}]}
-									autoCapitalize='none'							
-									secureTextEntry={true}
-									autoCorrect={false}
-									enablesReturnKeyAutomatically={true}
-									keyboardAppearance='default'
-									returnKeyType='done'
-									underlineColorAndroid='transparent'
-									numberOfLines={1}
-									placeholder='Confirme a senha'
-									onChangeText={(text) => this.setState({password2Text: text})}
-									onSubmitEditing={() => dismissKeyboard()}
-									/>	
-							</View>
+							{this.showPasswordFields()}
 							<View style={{flexDirection: 'row'}} >
 								<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.idadeError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.ageError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 									<CustomPicker
 										mode='dropdown'
-										selectedValue={this.state.idadeText}
-										onValueChange={(age) => this.setState({idadeText: age})}>
+										selectedValue={this.state.ageText}
+										onValueChange={(age) => this.setState({ageText: age})}>
 										{agesPickerItems}
 									</CustomPicker>
 								</View>
 								<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.sexoError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.genderError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 									<CustomPicker
 										mode='dropdown'
-										selectedValue={this.state.sexoText}
-										onValueChange={(gender) => this.setState({sexoText: gender})}>
+										selectedValue={this.state.genderText}
+										onValueChange={(gender) => this.setState({genderText: gender})}>
 										<Picker.Item color="rgba(0,0,0,.2)" label="Sexo" value="" />							
 										<Picker.Item color="rgba(0,0,0,.87)" label="Feminino" value="Feminino" />							
 										<Picker.Item color="rgba(0,0,0,.87)" label="Masculino" value="Masculino" />
 									</CustomPicker>
 								</View>
 							</View>
-							<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Estado e cidade em que vota:</Text>
+							<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Estado e Cidade em que vota:</Text>
 							<View style={{flexDirection: 'row'}} >
 								<Icon name='map' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.estadoError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.stateError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 									<CustomPicker
 										mode='dropdown'
-										selectedValue={this.state.estadoText}
-										onValueChange={(state) => this.setState({estadoText: state})}>
+										selectedValue={this.state.stateText}
+										onValueChange={(state) => this.setState({stateText: state})}>
 										<Picker.Item color="rgba(0,0,0,.2)" label="Estado" value="" />							
 										<Picker.Item color="rgba(0,0,0,.87)" label="SP" value="SP" />							
 										<Picker.Item color="rgba(0,0,0,.87)" label="RJ" value="RJ" />
 									</CustomPicker>
 								</View>
 								<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cidadeError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cityError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 									<CustomPicker
 										mode='dropdown'
-										selectedValue={this.state.cidadeText}
-										onValueChange={(city) => this.setState({cidadeText: city})}>
+										selectedValue={this.state.cityText}
+										onValueChange={(city) => this.setState({cityText: city})}>
 										<Picker.Item color="rgba(0,0,0,.2)" label="Cidade" value="" />							
 										<Picker.Item color="rgba(0,0,0,.87)" label="São Paulo" value="São Paulo" />							
 										<Picker.Item color="rgba(0,0,0,.87)" label="Rio de Janeiro" value="Rio de Janeiro" />
@@ -203,6 +225,13 @@ export default class CadastroScene extends Component {
 						</View>
 					</View>	
 				</KeyboardAwareScrollView>
+				<Modal
+					animationType={'fade'}
+					transparent={true}
+					visible={this.state.loadingVisible}
+					onRequestClose={() => this.state.setState({loadingVisible: false})} >
+					<LoadingOverlay style={{backgroundColor: 'rgba(0,0,0,0.5)'}}/>
+				</Modal>
 			</View>
 		)
 	}
@@ -225,60 +254,104 @@ export default class CadastroScene extends Component {
 				console.log('User tapped custom button: ', response.customButton);
 			} else {
 				// You can display the image using either data...
-				const source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
+				const source = 'data:image/jpeg;base64,' + response.data;
 
 				// or a reference to the platform specific asset location
 				if (Platform.OS === 'ios') {
-					const source = {uri: response.uri.replace('file://', ''), isStatic: true};
+					const source = response.uri.replace('file://', '');
 				} else {
-					const source = {uri: response.uri, isStatic: true};
+					const source = response.uri;
 				}
 
-				this.setState({fotoText: source});
+				this.setState({pictureText: source});
 			}
 		});
 	}
 
 	onSavePress() {
-		let nomeError = false;
+		this.setState({loadingVisible: true});
+		dismissKeyboard();
+		
+		let nameError = false;
 		let emailError = false;
-		let cidadeError = false;
-		let estadoError = false;
-		let idadeError = false;
-		let sexoError = false;
+		let cityError = false;
+		let stateError = false;
+		let ageError = false;
+		let genderError = false;
 		let passwordError = false;
 		let password2Error = false;
 
-		if (this.state.nomeText === '') {
-			nomeError = true;
+		if (this.state.nameText === '') {
+			nameError = true;
 		}
 		if (this.state.emailText === '') {
 			emailError = true;
 		} 
-		if (this.state.cidadeText === '') {
-			cidadeError = true;
+		if (this.state.cityText === '') {
+			cityError = true;
 		} 
-		if (this.state.estadoText === '') {
-			estadoError = true;
+		if (this.state.stateText === '') {
+			stateError = true;
 		} 
-		if (this.state.idadeText === '') {
-			idadeError = true;
+		if (this.state.ageText === '') {
+			ageError = true;
 		} 
-		if (this.state.sexoText === '') {
-			sexoError = true;
+		if (this.state.genderText === '') {
+			genderError = true;
 		} 
-		if (this.state.passwordText === '') {
+		if (this.state.passwordText === '' && !this.state.isUsingFB) {
 			passwordError = true;
 		} 
-		if (this.state.password2Text === '') {
+		if (this.state.password2Text === '' && !this.state.isUsingFB) {
 			password2Error = true;
 		} 
 
-		this.setState({nomeError: nomeError, emailError: emailError, cidadeError: cidadeError, estadoError: estadoError, idadeError: idadeError, sexoError: sexoError, passwordError: passwordError,  password2Error: password2Error}, () => {
-			if (!nomeError && !emailError && !cidadeError && !estadoError && !idadeError && !sexoError && !passwordError && !password2Error) {
-				this.props.navigator.push({component: HomeScene});
+		this.setState({nameError: nameError, emailError: emailError, cityError: cityError, stateError: stateError, ageError: ageError, genderError: genderError, passwordError: passwordError,  password2Error: password2Error}, () => {
+			if (!nameError && !emailError && !cityError && !stateError && !ageError && !genderError && !passwordError && !password2Error) {
+				this.getCadastro();
 			}	
 		})
+	}
+
+	getCadastro() {
+		var request = new XMLHttpRequest();
+		var _this = this;
+		request.onreadystatechange = (e) => {
+			_this.setState({loadingVisible: false});
+
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+				_this.saveCredentials(jsonResponse);
+			} else if (request.status === 400) {
+				alert("Email já cadastrado no sistema.")
+			} else {
+				console.warn('Erro: não foi possível conectar ao servidor.');
+			}
+		};
+
+		if (this.state.isUsingFB) {
+			request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login/cadastrar?name=' + this.state.nameText + '&email=' + this.state.emailText + '&profile_id=' + this.state.fbIDText + '&state=' + this.state.stateText + '&city=' + this.state.cityText + '&age=' + this.state.ageText + '&gender=' + this.state.genderText + '&photo_url=' + this.state.pictureText);
+		} else {
+			request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login/cadastrar?name=' + this.state.nameText + '&email=' + this.state.emailText + '&password=' + this.state.passwordText + '&state=' + this.state.stateText + '&city=' + this.state.cityText + '&age=' + this.state.ageText + '&gender=' + this.state.genderText + '&photo_url=' + this.state.pictureText);
+		}
+		request.send();
+	}
+
+	saveCredentials(jsonResponse) {
+		AsyncStorage.multiSet([
+			['name', jsonResponse.name], 
+			['email', jsonResponse.email], 
+			['state', jsonResponse.state], 
+			['city', jsonResponse.city], 
+			['age', jsonResponse.age], 
+			['gender', jsonResponse.gender], 
+			['picture', jsonResponse.photo_url ? jsonResponse.photo_url : this.state.pictureText ? this.state.pictureText : ''], 
+			['token', jsonResponse.token]
+		], this.props.navigator.replace({component: NavigationManager}));
 	}
 }
 

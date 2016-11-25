@@ -10,6 +10,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from './TouchableElement';
 
 export default class PoliticosListItem extends Component {
+	constructor(props) {
+		super(props);
+		this.getCargo = this.getCargo.bind(this);
+	}
+
 	renderIcon() {
 		return Platform.select({
 			ios: <Icon name='ios-arrow-forward' size={24} style={styles.icon}/>
@@ -26,6 +31,11 @@ export default class PoliticosListItem extends Component {
 		}
 	}
 
+	getCargo() {
+		if (this.props.politico.cargo) {
+			return (<Text>{this.props.politico.cargo}</Text>)
+		}
+	}
 	render() {
 		if (this.props.politico != null) {
 			return(
@@ -37,7 +47,7 @@ export default class PoliticosListItem extends Component {
 							source={{uri: this.props.politico.foto_url}} />
 						<View style={styles.info}>
 							<Text style={styles.h1}>{this.props.politico.nome}</Text>
-							<Text>{this.props.politico.cargo}</Text>
+							{this.getCargo()}
 							<Text>{this.props.politico.partido}</Text>
 						</View>
 						{this.renderIcon()}

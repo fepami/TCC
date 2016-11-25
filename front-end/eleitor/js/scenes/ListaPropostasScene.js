@@ -5,8 +5,11 @@ import {
 	Text,
 	TextInput,
 	ListView,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
+import LoadingOverlay from '../components/LoadingOverlay';
+import Placeholder from '../components/Placeholder';
 import PropostasListItem from '../components/PropostasListItem';
 import SearchBarIOS from '../components/SearchBarIOS';
 import Filter from '../components/Filter';
@@ -15,16 +18,58 @@ import Header from '../components/Header';
 import PropostaDetalheScene from './PropostaDetalheScene';
 import {fakePropostas, fakeFilter} from '../fakeData';
 
+const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+
 export default class ListaPropostasScene extends Component {	
 	constructor(props){
 		super(props);
 		this.state = {
 			modalVisible: false,
-			selectedFilters: []
+			selectedFilters: [],
+			propostasDataSource: ds.cloneWithRows([]),
+			loading: true,
+			listIsEmpty: false,
+			errorState: false
 		}
 		this.onShowFilter = this.onShowFilter.bind(this);
 		this.onCloseFilter = this.onCloseFilter.bind(this);
 		this.onSubmitSearch = this.onSubmitSearch.bind(this);
+		this.getPropostas = this.getPropostas.bind(this);
+		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
+	}
+
+	getPropostas(token) {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				let jsonResponse = JSON.parse(request.response);	
+				// mudar pra const e apagar linha abaixo
+				jsonResponse = [jsonResponse, jsonResponse, jsonResponse];
+
+				if (Array.isArray(jsonResponse)) {
+					this.setState({propostasDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});					
+				} else {
+					this.setState({errorState: true, loading: false});
+				}
+			} else {
+				this.setState({errorState: true});
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas?token=' + token);
+		request.send();
+	}
+
+	componentDidMount() {
+		var _this = this;
+		AsyncStorage.getItem('token', (err, result) => {
+			_this.setState({token: result});
+			_this.getPropostas(result);
+		});
 	}
 
 	renderSearchBarIOS() {
@@ -56,6 +101,26 @@ export default class ListaPropostasScene extends Component {
 
 	}
 
+	renderLoadingOrView() {
+		if (this.state.loading) {
+			return (<LoadingOverlay/>)
+		} else if (this.state.listIsEmpty) {
+			return (<Placeholder type='search' />)
+		} else if (this.state.errorState) {
+			return (<Placeholder type='error' onPress={() => {
+				this.setState({errorState: false, loading: true}, this.getPropostas(this.state.token))}} />)
+		} else {
+			let type = this.props.type ? this.props.type : 'lista';
+			return (
+				<ListView
+                    enableEmptySections={true}
+                    automaticallyAdjustContentInsets={false}
+                    dataSource={this.state.propostasDataSource} 
+                    renderRow={(rowData) => <PropostasListItem onPress={()=>this.onPropostaPress(rowData)} proposta={rowData} cellType={type}/>} />
+			)
+		}
+	}
+
 	render(){
 		let filterIcon = this.chooseFilterIcon();
 		const actions = [
@@ -73,10 +138,8 @@ export default class ListaPropostasScene extends Component {
 		// }
 		];
 
-		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-		let type = this.props.type ? this.props.type : 'lista';
 		let title = this.props.type ? 'Ranking de Propostas' : 'Propostas';
-		const propostasDataSource = ds.cloneWithRows(fakePropostas);
+		// const propostasDataSource = ds.cloneWithRows(fakePropostas);
 		const filterDataSource = ds.cloneWithRows(fakeFilter);
 
 		return(
@@ -86,11 +149,7 @@ export default class ListaPropostasScene extends Component {
 					title={title}
 					actions={actions} />
 				<SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)} />
-				<ListView
-                    enableEmptySections={true}
-                    automaticallyAdjustContentInsets={false}
-                    dataSource={propostasDataSource} 
-                    renderRow={(rowData) => <PropostasListItem onPress={()=>this.onPropostaPress(rowData)} proposta={rowData} cellType={type}/>} />
+				{this.renderLoadingOrView()}
                 <Filter 
                 	navigator={this.props.navigator} 
                 	modalVisible={this.state.modalVisible} 

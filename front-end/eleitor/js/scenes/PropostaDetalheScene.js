@@ -5,8 +5,12 @@ import {
 	Image,
 	Text,
 	ScrollView,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
+import LoadingOverlay from '../components/LoadingOverlay';
+import Gradient from '../components/Gradient';
+import Placeholder from '../components/Placeholder';
 import Dimensions from 'Dimensions';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
@@ -20,29 +24,63 @@ export default class PropostaDetalheScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			likeIcon: 'ios-thumbs-up',
-			dislikeIcon: 'ios-thumbs-down'
+			propostaInfo: {},
+			user_vote: 0,
+			loading: true,
+			errorState: false
 		}
 		this.onLikeActionSelected = this.onLikeActionSelected.bind(this);
 		this.onDislikeActionSelected = this.onDislikeActionSelected.bind(this);
+		this.getPoliticos = this.getPoliticos.bind(this);
+		this.postVoto = this.postVoto.bind(this);
+		this.getProposta = this.getProposta.bind(this);
+		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
+
 	}
 
-	onLikeActionSelected(){
-		if(this.state.likeIcon === 'ios-thumbs-up-outline'){
-			this.setState({likeIcon: 'ios-thumbs-up'});	
-		} else {
-			this.setState({likeIcon: 'ios-thumbs-up-outline'});
-			this.setState({dislikeIcon: 'ios-thumbs-down'});
-		}
+	getProposta(token) {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+				this.setState({propostaInfo: jsonResponse, user_vote: jsonResponse.user_vote, loading: false});
+			} else {
+				this.setState({errorState: true});
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas/' + this.props.proposal_id + '?token=' + token);
+		request.send();
 	}
 
-	onDislikeActionSelected(){
-		if(this.state.dislikeIcon === 'ios-thumbs-down-outline'){
-			this.setState({dislikeIcon: 'ios-thumbs-down'});	
-		} else {
-			this.setState({dislikeIcon: 'ios-thumbs-down-outline'});
-			this.setState({likeIcon: 'ios-thumbs-up'});	
-		}
+	postVoto(user_vote) {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);
+			} else {
+				console.warn('Erro: não foi possível conectar ao servidor.');
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas/' + this.props.proposal_id + '/votar?token=' + this.state.token + '&user_vote=' + user_vote);
+		request.send();
+	}
+
+	componentDidMount() {
+		var _this = this;
+		AsyncStorage.getItem('token', (err, result) => {
+			_this.setState({token: result});
+			_this.getProposta(result);
+		});
 	}
 
 	renderIcon() {
@@ -51,56 +89,87 @@ export default class PropostaDetalheScene extends Component {
 		})
 	}
 
-	getPoliticoByID(id) {
-		switch(id) {
-			case 0:
-				return fakePolitico0;
-			case 1:
-				return fakePolitico1;
-			case 2:
-				return fakePolitico2;
-			default:
-				return fakePolitico0;
-				break;
+	getPoliticos() {
+		return this.state.propostaInfo.politicos.map((politicoData, ii) => (
+			<TouchableElement onPress={() => this.onPoliticoPress(politicoData)} key={politicoData.id.toString()}>
+				<View style={styles.cell}>
+					<Image
+						style={styles.roundedimage}
+						source={{uri: politicoData.photo_url}} />
+					<Text style={styles.h2}>{politicoData.name}</Text>
+					{this.renderIcon()}
+				</View>
+			</TouchableElement>
+		));
+	}
+
+	renderLoadingOrView() {
+		if (this.state.loading) {
+			return (<LoadingOverlay/>)
+		} else if (this.state.errorState) {
+			return (<Placeholder type='error' onPress={() => {
+				this.setState({errorState: false, loading: true}, this.getProposta(this.state.token))}} />)
+		} else {
+			let like_bgcolor = (this.state.user_vote === 1) ? 'limegreen' : 'white';
+			let likeIcon_color = (this.state.user_vote === 1) ? 'white' : 'limegreen';
+			let dislike_bgcolor = (this.state.user_vote === -1) ? 'red' : 'white';
+			let dislikeIcon_color = (this.state.user_vote === -1) ? 'white' : 'red';
+
+			const approval_width = Dimensions.get('window').width - 30;
+
+			return (
+				<View style={{flex: 1}}>
+					<ScrollView style={{flex: 1}}>
+						<View style={styles.view}>
+							<Text style={styles.h1}>{this.state.propostaInfo.nome}</Text>
+							<Text>Categoria: {this.state.propostaInfo.categoria}</Text>
+							<Text>Proposta em: {this.state.propostaInfo.data}</Text>
+							<ApprovalBar viewSize={approval_width} approvalPercentage={this.state.propostaInfo.approval} />
+							<Text style={{fontWeight: 'bold', paddingBottom: 15}}>Políticos responsáveis:</Text>
+							{this.getPoliticos()}
+							<Text style={{fontWeight: 'bold', paddingTop: 15}}>Descrição:</Text>
+							<Text>{this.state.propostaInfo.descricao}</Text>
+						</View>
+					</ScrollView>
+					<Gradient />
+					<View style={styles.box}>
+						<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
+							<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
+						</TouchableElement>
+						<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
+							<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
+						</TouchableElement>
+					</View>
+				</View>
+			)
 		}
 	}
 
 	render(){
-		let like_bgcolor = (this.state.likeIcon === 'ios-thumbs-up-outline') ? 'limegreen' : 'white';
-		let likeIcon_color = (this.state.likeIcon === 'ios-thumbs-up-outline') ? 'white' : 'limegreen';
-		let dislike_bgcolor = (this.state.dislikeIcon === 'ios-thumbs-down-outline') ? 'red' : 'white';
-		let dislikeIcon_color = (this.state.dislikeIcon === 'ios-thumbs-down-outline') ? 'white' : 'red';
-
-		const approval_width = Dimensions.get('window').width - 30;
-		const politicoData = this.getPoliticoByID(this.props.politicoID);
-		
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 					navigator={this.props.navigator}
 					title={this.props.categoria} />
-				<ScrollView style={{flex: 1}}>
-					<View style={styles.view}>
-						<Text style={styles.h1}>{this.props.nome}</Text>
-						<Text>Categoria: {this.props.categoria}</Text>
-						<Text>Proposta em: {this.props.data}</Text>
-						<Text>Por: {this.props.nomePolitico}</Text>
-						<ApprovalBar viewSize={approval_width} approvalPercentage={this.props.approval} />
-						<Text>Descrição:</Text>
-						<Text style={{paddingBottom: 15}}>{this.props.descricao}</Text>
-						<PoliticosListItem style={styles.cell} onPress={()=>this.onPoliticoPress(politicoData)} politico={politicoData} cellType='lista'/>
-						<View style={styles.box}>
-							<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
-								<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
-							</TouchableElement>
-							<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
-								<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
-							</TouchableElement>
-						</View>
-					</View>
-				</ScrollView>
+				{this.renderLoadingOrView()}
 			</View>
 		)
+	}
+
+	onLikeActionSelected(){
+		if(this.state.user_vote === 1){
+			this.setState({user_vote: 0}, this.postVoto(0));	
+		} else {
+			this.setState({user_vote: 1}, this.postVoto(1));
+		}
+	}
+
+	onDislikeActionSelected(){
+		if(this.state.user_vote === -1){
+			this.setState({user_vote: 0}, this.postVoto(0));	
+		} else {
+			this.setState({user_vote: -1}, this.postVoto(-1));
+		}
 	}
 
 	onPoliticoPress(data){
@@ -118,17 +187,33 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: 'bold'
 	},
-	cell: {
-		paddingHorizontal: 0,
-		borderTopWidth:1,
-		borderBottomWidth: 1,
-		borderColor: 'black'
-	},
 	arrowIcon: {
 		alignSelf: 'center'
 	},
+	cell: {
+		borderTopWidth:1,
+		borderBottomWidth: 1,
+		borderColor: 'black',
+		paddingHorizontal: 0,
+		paddingVertical: 10,
+		flexDirection: 'row'
+	},
+	h2: {
+		flex: 1,
+		fontWeight: 'bold',
+		paddingHorizontal: 15,
+		alignSelf: 'center'
+	},
+	roundedimage: {
+		width: 50, 
+		height: 50, 
+		borderRadius: 25,
+		borderColor: 'black',
+		borderWidth: 1,
+		alignSelf: 'center'
+	},
 	box: {
-		height: 100,
+		height: 70,
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center'

@@ -26,6 +26,17 @@ const {
 } = FBSDK;
 
 class UsuarioConfiguracoesScene extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			editSceneVisibility: false,
+			passwordSceneVisibility: false
+		}
+
+		this.changePasswordSceneVisibility = this.changePasswordSceneVisibility.bind(this);
+		this.changeEditSceneVisibility = this.changeEditSceneVisibility.bind(this);
+	}
+
 	renderIcon() {
 		return Platform.select({
 			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrowIcon}/>
@@ -83,17 +94,32 @@ class UsuarioConfiguracoesScene extends Component {
 						</View>
 					</View>
 				</ScrollView>
+				<UsuarioEditarScene 
+					navigator={this.props.navigator} 
+                	modalVisible={this.state.editSceneVisibility} 
+                	changeModalVisibility={this.changeEditSceneVisibility} />
+				<UsuarioTrocarSenhaScene 
+					navigator={this.props.navigator} 
+                	modalVisible={this.state.passwordSceneVisibility} 
+                	changeModalVisibility={this.changePasswordSceneVisibility} />
 			</View>
 		)
 	}
 
 	onPressEditar() {
-		const usuario = {nome: 'Marcela', email: 'marcela@gmail.com', idade: '24', sexo: 'Feminino', cidade: 'São Paulo', estado: 'SP'};
-		this.props.navigator.push({component: UsuarioEditarScene, passProps: usuario});
+		this.changeEditSceneVisibility(true);
+	}
+
+	changeEditSceneVisibility(visibility) {
+		this.setState({editSceneVisibility: visibility});
 	}
 
 	onPressPassword() {
-		this.props.navigator.push({component: UsuarioTrocarSenhaScene});
+		this.changePasswordSceneVisibility(true);
+	}
+
+	changePasswordSceneVisibility(visibility) {
+		this.setState({passwordSceneVisibility: visibility});
 	}
 
 	onPressPerfis() {
@@ -117,19 +143,15 @@ class UsuarioConfiguracoesScene extends Component {
 	}
 
 	onPressDeslogar() {
-		// LoginManager.logout();
-		// this.removeCredentials.bind(this);
+		LoginManager.logOut();
+		this.removeCredentials.bind(this);
 
 		Platform.OS === 'ios' ? this.props.rootNavigator.resetTo({component: LoginScene}) : this.props.navigator.resetTo({component: LoginScene});
 		this.props.dispatch(switchTab('home'));
 	}
 
 	removeCredentials() {
-		AsyncStorage.removeItem('nome');
-		AsyncStorage.removeItem('email');
-		AsyncStorage.removeItem('sexo');
-		AsyncStorage.removeItem('foto');
-		AsyncStorage.removeItem('idade');
+		AsyncStorage.multiRemove(['name', 'email', 'state', 'city', 'age', 'gender', 'picture', 'token']);
 	}
 }
 

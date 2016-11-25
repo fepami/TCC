@@ -5,7 +5,8 @@ import {
 	Image,
 	Text,
 	ScrollView,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
@@ -14,6 +15,42 @@ import UsuarioConfiguracoesScene from './UsuarioConfiguracoesScene';
 import UsuarioEditarScene from './UsuarioEditarScene';
 
 export default class UsuarioPerfilScene extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			name: 'Nome',
+			email: 'Email',
+			state: 'Estado',
+			city: 'Cidade',
+			age: 'Idade',
+			picture: '',
+			editSceneVisibility: false
+		}
+		this.changeEditSceneVisibility = this.changeEditSceneVisibility.bind(this);
+	}
+
+	componentDidMount() {
+		var _this = this;
+		AsyncStorage.getItem('name', (err, result) => {
+			_this.setState({name: result});
+		});
+		AsyncStorage.getItem('email', (err, result) => {
+			_this.setState({email: result});
+		});
+		AsyncStorage.getItem('state', (err, result) => {
+			_this.setState({state: result});
+		});
+		AsyncStorage.getItem('city', (err, result) => {
+			_this.setState({city: result});
+		});
+		AsyncStorage.getItem('age', (err, result) => {
+			_this.setState({age: result});
+		});
+		AsyncStorage.getItem('picture', (err, result) => {
+			_this.setState({picture: result});
+		});
+	}
+
 	renderIcon() {
 		return Platform.select({
 			ios: <Icon name='ios-arrow-forward' size={24} style={styles.arrowIcon} color='black'/>
@@ -40,8 +77,6 @@ export default class UsuarioPerfilScene extends Component {
 				onPress: this.onPressConfiguracoes.bind(this)
 		}});
 
-		const usuario = {nome: 'NOME DO USUARIO', idade: 'IDADE', email: 'EMAIL@GMAIL.COM', cidade: 'CIDADE', estado: 'ESTADO', sexo: 'FEM/MASC'};
-
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
@@ -54,11 +89,10 @@ export default class UsuarioPerfilScene extends Component {
 						<View style={styles.line}>
 							<Image
 								style={styles.roundedImage}
-								source={{uri: 'http://facebook.github.io/react/img/logo_og.png'}} />
-							<Text style={styles.h1}>{usuario.nome}, {usuario.idade}</Text>
-							<Text >{usuario.email}</Text>
-							<Text >Vota em: {usuario.cidade}, {usuario.estado}</Text>
-							<Text >{usuario.sexo}</Text>
+								source={this.state.picture ? {uri: this.state.picture} : require('../resources/image/placeholder.png')} />
+							<Text style={styles.h1}>{this.state.name}, {this.state.age} anos</Text>
+							<Text >{this.state.email}</Text>
+							<Text >Vota em: {this.state.city}, {this.state.state}</Text>
 						</View>
 						<TouchableElement onPress={this.onPressConfiguracoes.bind(this)}>
 							<View style={styles.cellTop}>
@@ -74,6 +108,10 @@ export default class UsuarioPerfilScene extends Component {
 						</TouchableElement>
 					</View>
 				</ScrollView>
+				<UsuarioEditarScene 
+					navigator={this.props.navigator} 
+                	modalVisible={this.state.editSceneVisibility} 
+                	changeModalVisibility={this.changeEditSceneVisibility} />
 			</View>
 		)
 	}
@@ -82,9 +120,12 @@ export default class UsuarioPerfilScene extends Component {
 		this.props.navigator.push({component: UsuarioConfiguracoesScene});
 	}
 
-	onPressEditar(){
-		const usuario = {nome: 'Marcela', email: 'marcela@gmail.com', idade: '24', sexo: 'Feminino', cidade: 'São Paulo', estado: 'SP'};
-		this.props.navigator.push({component: UsuarioEditarScene, passProps: usuario});
+	onPressEditar() {
+		this.changeEditSceneVisibility(true);
+	}
+
+	changeEditSceneVisibility(visibility) {
+		this.setState({editSceneVisibility: visibility});
 	}
 
 	onPressAtividades(){
@@ -108,8 +149,8 @@ const styles = StyleSheet.create({
 		height: 100, 
 		borderRadius: 50,
 		alignSelf: 'center',
-		borderColor: 'white',
-		borderWidth: 1
+		borderColor: 'black',
+		borderWidth: 2
 	},
 	line: {
 		alignItems: 'center',

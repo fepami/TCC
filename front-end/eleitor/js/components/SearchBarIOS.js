@@ -34,7 +34,7 @@ export default class SearchBar extends Component {
 		if(this.state.showCancel === true) {
 			return(
 				<TouchableElement onPress={this.hideCancel} style={{height: 50, alignItems: 'center', justifyContent: 'center', marginRight: 10}}>
-					<Text style={{alignSelf: 'center'}}>Cancelar</Text>
+					<Text style={{alignSelf: 'center', color: 'white'}}>Cancelar</Text>
 				</TouchableElement>
 			)
 		}

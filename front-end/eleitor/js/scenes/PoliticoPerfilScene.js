@@ -5,9 +5,13 @@ import {
 	Image,
 	Text,
 	ScrollView,
-	Platform
+	Platform,
+	AsyncStorage,
+	Linking
 } from 'react-native';
 import LoadingOverlay from '../components/LoadingOverlay';
+import Gradient from '../components/Gradient';
+import Placeholder from '../components/Placeholder';
 import Dimensions from 'Dimensions';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
@@ -22,7 +26,8 @@ export default class PoliticoPerfilScene extends Component {
 			politicoInfo: {},
 			user_vote: 0,
 			user_follow: false,
-			loading: true
+			loading: true,
+			errorState: false
 		}
 		this.onStarActionSelected = this.onStarActionSelected.bind(this);
 		this.onLikeActionSelected = this.onLikeActionSelected.bind(this);
@@ -31,9 +36,12 @@ export default class PoliticoPerfilScene extends Component {
 		this.postVoto = this.postVoto.bind(this);
 		this.postFollow = this.postFollow.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
+		this.getCargoEvigenciaText = this.getCargoEvigenciaText.bind(this);
+		this.getPartidoText = this.getPartidoText.bind(this);
+		this.getEmailText = this.getEmailText.bind(this);
 	}
 
-	getPolitico() {
+	getPolitico(token) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = (e) => {
 			if (request.readyState !== 4) {
@@ -44,11 +52,11 @@ export default class PoliticoPerfilScene extends Component {
 				const jsonResponse = JSON.parse(request.response);
 				this.setState({politicoInfo: jsonResponse[0], user_vote: jsonResponse[0].user_vote, user_follow: jsonResponse[0].user_follow, loading: false});
 			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
+				this.setState({errorState: true});
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '?device_id=device_id1');
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '?token=' + token);
 		request.send();
 	}
 
@@ -66,7 +74,7 @@ export default class PoliticoPerfilScene extends Component {
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/votar?device_id=device_id1&user_vote=' + user_vote);
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/votar?token=' + this.state.token + '&user_vote=' + user_vote);
 		request.send();
 	}
 
@@ -84,41 +92,44 @@ export default class PoliticoPerfilScene extends Component {
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/seguir?device_id=device_id1&user_follow=' + user_follow);
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/seguir?token=' + this.state.token + '&user_follow=' + user_follow);
 		request.send();
 	}
 
 	componentDidMount() {
-		this.getPolitico();
+		var _this = this;
+		AsyncStorage.getItem('token', (err, result) => {
+			_this.setState({token: result});
+			_this.getPolitico(result);
+		});
 	}
 
-	onStarActionSelected(){
-		if(this.state.user_follow === true){
-			this.setState({user_follow: false}, this.postFollow(false));	
-		} else {
-			this.setState({user_follow: true}, this.postFollow(true));
+	getCargoEvigenciaText() {
+		if (this.state.politicoInfo.cargo && this.state.politicoInfo.vigencia) {
+			return(<Text>{this.state.politicoInfo.cargo + '\n' + this.state.politicoInfo.vigencia}</Text>)
+		} else if (this.state.politicoInfo.cargo) {
+			return(<Text>{this.state.politicoInfo.cargo}</Text>)
+		} 
+	}
+
+	getPartidoText() {
+		if (this.state.politicoInfo.partido) {
+			return(<Text>Partido: {this.state.politicoInfo.partido}</Text>);
 		}
 	}
 
-	onLikeActionSelected(){
-		if(this.state.user_vote === 1){
-			this.setState({user_vote: 0}, this.postVoto(0));	
-		} else {
-			this.setState({user_vote: 1}, this.postVoto(1));
-		}
-	}
-
-	onDislikeActionSelected(){
-		if(this.state.user_vote === -1){
-			this.setState({user_vote: 0}, this.postVoto(0));	
-		} else {
-			this.setState({user_vote: -1}, this.postVoto(-1));
+	getEmailText() {
+		if (this.state.politicoInfo.email) {
+			return(<Text>Email: <Text style={{color: 'blue', textDecorationLine: 'underline'}} onPress={() => {Linking.openURL('mailto:' + this.state.politicoInfo.email)}}>{this.state.politicoInfo.email}</Text></Text>);
 		}
 	}
 
 	renderLoadingOrView() {
 		if (this.state.loading) {
 			return (<LoadingOverlay/>)
+		} else if (this.state.errorState) {
+			return (<Placeholder type='error' onPress={() => {
+				this.setState({errorState: false, loading: true}, this.getPolitico(this.state.token))}} />)
 		} else {
 			let like_bgcolor = (this.state.user_vote === 1) ? 'limegreen' : 'white';
 			let likeIcon_color = (this.state.user_vote === 1) ? 'white' : 'limegreen';
@@ -126,8 +137,13 @@ export default class PoliticoPerfilScene extends Component {
 			let dislikeIcon_color = (this.state.user_vote === -1) ? 'white' : 'red';
 
 			const approval_width = Dimensions.get('window').width - 30;
-			
+			let nomeEidadeText = this.state.politicoInfo.nome;
+			if (this.state.politicoInfo.idade) {
+				nomeEidadeText = nomeEidadeText + ', ' + this.state.politicoInfo.idade;
+			}
+
 			return (
+				<View style={{flex: 1}}>
 				<ScrollView style={{flex: 1}}>
 					<View style={styles.view}>
 						<View style={{alignItems: 'center'}}>
@@ -141,11 +157,12 @@ export default class PoliticoPerfilScene extends Component {
 							</View>
 						</View>
 						<ApprovalBar viewSize={approval_width} approvalPercentage={this.state.politicoInfo.approval} />
-						<Text style={styles.h1}>{this.state.politicoInfo.nome}, {this.state.politicoInfo.idade}</Text>
-						<Text>{this.state.politicoInfo.cargo}</Text>
-						<Text>{this.state.politicoInfo.vigencia}</Text>
-						<Text>Partido: {this.state.politicoInfo.partido}</Text>
-						<Text style={{paddingBottom: 15}}>email: {this.state.politicoInfo.email}</Text>
+						<View style={{marginBottom: 15}}>
+							<Text style={styles.h1}>{nomeEidadeText}</Text>
+							{this.getCargoEvigenciaText()}
+							{this.getPartidoText()}
+							{this.getEmailText()}
+						</View>
 						<TouchableElement onPress={this.onPressHistorico.bind(this)}>
 							<View style={styles.cellTop}>
 								<Text style={styles.cellText}>Histórico de Propostas</Text>
@@ -158,16 +175,18 @@ export default class PoliticoPerfilScene extends Component {
 								{this.renderIcon()}
 							</View>
 						</TouchableElement>
-						<View style={styles.box}>
-							<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
-								<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
-							</TouchableElement>
-							<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
-								<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
-							</TouchableElement>
-						</View>
 					</View>
 				</ScrollView>
+				<Gradient />
+				<View style={styles.box}>
+					<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
+						<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
+					</TouchableElement>
+					<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
+						<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
+					</TouchableElement>
+				</View>
+				</View>
 			)
 		}
 	}
@@ -195,6 +214,30 @@ export default class PoliticoPerfilScene extends Component {
 				{this.renderLoadingOrView()}
 			</View>
 		)
+	}
+
+	onStarActionSelected(){
+		if(this.state.user_follow === true){
+			this.setState({user_follow: false}, this.postFollow(false));	
+		} else {
+			this.setState({user_follow: true}, this.postFollow(true));
+		}
+	}
+
+	onLikeActionSelected(){
+		if(this.state.user_vote === 1){
+			this.setState({user_vote: 0}, this.postVoto(0));	
+		} else {
+			this.setState({user_vote: 1}, this.postVoto(1));
+		}
+	}
+
+	onDislikeActionSelected(){
+		if(this.state.user_vote === -1){
+			this.setState({user_vote: 0}, this.postVoto(0));	
+		} else {
+			this.setState({user_vote: -1}, this.postVoto(-1));
+		}
 	}
 
 	onPressHistorico(){
@@ -257,7 +300,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center'
 	},
 	box: {
-		height: 100,
+		height: 70,
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center'
