@@ -187,8 +187,41 @@ function login(req, res) {
 	}
 }
 
+function update_user(req, res) {
+	var name = req.query['name'];
+	var email = req.query['email'];
+	var state = req.query['state'];
+	var city = req.query['city'];
+	var age = req.query['age'];
+	var gender =  req.query['gender'];
+	var photo_url =  req.query['photo_url'] || null;
+
+	var user_id = req.user['id'];
+
+	var user_params = {
+		'name': name,
+		'email': email,
+		'state': state,
+		'city': city,
+		'age': age,
+		'gender': gender,
+		'photo_url': photo_url,
+	};
+
+	var update_user_query = 'update user set ? where id=?';
+
+	mysql_handler(update_user_query, [user_params, user_id], function(err, result){
+		if (err) {
+			return res.json(err);
+		}
+
+		return res.json('ok')
+	});
+}
+
 
 module.exports = {
   'login': login,
   'create_user': create_user,
+  'update_user': update_user,
 }

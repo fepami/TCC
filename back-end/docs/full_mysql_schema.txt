@@ -35,6 +35,7 @@ CREATE TABLE politician (
 	photo_url text,
 	PRIMARY KEY (id)
 );
+alter table politician auto_increment=1;
 
 CREATE TABLE politician_vote (
 	id int NOT NULL AUTO_INCREMENT,

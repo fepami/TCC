@@ -99,6 +99,7 @@ const fs = require('fs');
 var politicians_controller = require("./politicians.js");
 var proposals_controller = require("./proposals.js");
 var user_controller = require("./user.js");
+var filter_controller = require("./filter.js");
 
 app.get("/",(req,res) => {
 	if ('database' in req.query && 'execute_query' in req.query) {
@@ -134,6 +135,8 @@ app.get("/login/cadastrar", user_controller.create_user);
 app.get("/login", user_controller.login);
 // /login?email=felipe@toyoda.com.br&password=bacon&profile_id=afafkanjkbasjinjkasn
 
+app.get("/usuario/editar", helpers.jwt_mw, user_controller.update_user);
+
 app.get("/test_token", function(req, res){
 	var token = req.query['token'];
 
@@ -154,6 +157,11 @@ app.get("/politicos/:politician_id/propostas",helpers.jwt_mw, proposals_controll
 
 app.get("/politicos/:politician_id/votar",helpers.jwt_mw, politicians_controller.vote);
 app.get("/politicos/:politician_id/seguir",helpers.jwt_mw, politicians_controller.follow);
+
+
+app.get("/filtro/politicos", filter_controller.get_politician_filter);
+app.get("/filtro/propostas", filter_controller.get_proposal_filter);
+
 
 
 

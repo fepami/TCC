@@ -31,6 +31,10 @@ var get_proposals_func = function(type){
 		query_for_props[2] = 'group by prop.id';
 
 		var parse_proposals = function(proposals, callback) {
+			if (proposals.length === 0) {
+				return callback(null, []);
+			}
+
 			var parsed_proposals = [];
 
 			var politician_ids = proposals.map(function(prop){return prop['politician_ids'].split(',')});
@@ -51,8 +55,6 @@ var get_proposals_func = function(type){
 				for (var i = 0; i < politicians.length; i++) {
 					politicians_by_id[politicians[i]['id'].toString()] = politicians[i];
 				}
-				helpers.debug_print(politicians_by_id);
-
 
 				// if (err) {return res.json(err)}
 
@@ -91,7 +93,10 @@ var get_proposals_func = function(type){
 			mysql_handler(query_for_props.join('\n'), [user_id, politician_id], function(err, proposals){
 				if (err) {return res.json(err)}
 
-				res.json(parse_proposals(proposals));
+				parse_proposals(proposals, function(err, parsed_props){
+					if (err) {return res.json(err)}
+					return res.json(parsed_props);
+				});
 			});
 
 		} else if ('proposal_id' in req.params) {
@@ -105,7 +110,7 @@ var get_proposals_func = function(type){
 				parse_proposals(proposals, function(err, parsed_props){
 					if (err) {return res.json(err)}
 					return res.json(parsed_props);
-				})
+				});
 			});
 		} else {
 			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
@@ -114,7 +119,7 @@ var get_proposals_func = function(type){
 				parse_proposals(proposals, function(err, parsed_props){
 					if (err) {return res.json(err)}
 					return res.json(parsed_props);
-				})
+				});
 			});
 		}
 	}

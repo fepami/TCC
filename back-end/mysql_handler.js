@@ -1,53 +1,65 @@
 const mysql = require('mysql');
 
 const pool = mysql.createPool({
-  connectionLimit : 100, //important
-  host     : 'localhost',
-  user     : 'root',
-  password : 'ehissoae',
-  database : 'eleitor',
-  debug    :  false
+	connectionLimit : 100, //important
+	host     : 'localhost',
+	user     : 'root',
+	password : 'ehissoae',
+	database : 'eleitor',
+	debug    :  false
 });
 
 // INSERT INTO politician VALUES (1,'Felipe','1993-04-05', 'TCC')
 // INSERT INTO politician VALUES (2,'Yay','1999-04-05', 'TCC')
 
 function handler(query, params_or_callback, callback) {
-  pool.getConnection(function(err, connection){
-    if (err) {
-      callback(err, null)
-      return;
-    }
+	pool.getConnection(function(err, connection){
+		if (err) {
+			callback(err, null)
+			return;
+		}
 
-    console.log('connected as id ' + connection.threadId);
+		console.log('connected as id ' + connection.threadId);
 
-    if (typeof callback === "undefined") {
-      connection.query(query, function(err,rows){
-        connection.release();
-        params_or_callback(err, rows)
-      });
-    } else {
-      connection.query(query, params_or_callback, function(err,rows){
-        connection.release();
-        callback(err, rows)
-      });
-    }
+		if (typeof callback === "undefined") {
+			var yay = connection.query(query, function(err,rows){
+				if (err) {
+					console.log('*** MYSQL ERROR ***');
+					console.log(yay.sql.replace(/\t/g, '\n'));
+					console.log('*** MYSQL ERROR ***');
+				}
 
-    connection.on('error', function(err) {
-      callback(err, null)
-      return;
-    });
-  });
+				connection.release();
+				params_or_callback(err, rows)
+			});
+		} else {
+			var yay = connection.query(query, params_or_callback, function(err,rows){
+				if (err) {
+					console.log('*** MYSQL ERROR ***');
+					console.log(yay.sql.replace(/\t/g, '\n'));
+					console.log('*** MYSQL ERROR ***');
+				}
+
+				connection.release();
+				callback(err, rows)
+			});
+		}
+
+		connection.on('error', function(err) {
+			callback(err, null)
+			return;
+		});
+	});
 }
 
 handler('select 1', function(err){
-  if (err) {
-    console.log(err);
-  } else {
-    console.log('MySql loaded!');
-  }
+	if (err) {
+		console.log(err);
+	} else {
+		console.log('MySql loaded!');
+	}
 });
 
 module.exports = {
-  'handler': handler
+	'handler': handler
 }

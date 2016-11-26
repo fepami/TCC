@@ -23,7 +23,7 @@ var get_politicians_func = function(type){
 			USER_VOTE_T.is_positive as user_vote,\
 			CUR_POS_T.name as position,\
 			CUR_POS_T.location as position_location,\
-			CUR_POS_T.vote_code as vote_code,\
+			LAST_ELEC_T.vote_code as vote_code,\
 			CUR_POS_T.start_date as start_date,\
 			CUR_POS_T.predicted_end_date as predicted_end_date,\
 			USER_FOLLOW_T.politician_id as user_follow\
@@ -41,6 +41,11 @@ var get_politicians_func = function(type){
 								inner join position pos on pos.id = pp.position_id\
 								where pp.end_date is null AND pp.start_date is not null\
 			) CUR_POS_T on CUR_POS_T.politician_id=pol.id\
+		left join (select pp.politician_id, pp.vote_code\
+								from politician_position pp\
+								inner join position pos on pos.id = pp.position_id\
+								where pp.election_year = 2016\
+			) LAST_ELEC_T on LAST_ELEC_T.politician_id=pol.id\
 		left join (select f.politician_id\
 								from politician_follow f\
 								where f.user_id=?\
@@ -61,7 +66,7 @@ var get_politicians_func = function(type){
 					'idade': helpers.get_age_from_birthday(poli['date_of_birth']) + ' anos',
 					'partido': poli['party'],
 					'email': poli['email'],
-					'approval': poli['approval'],
+					'approval': poli['approval'] || 0,
 					'user_vote': helpers.format_null_bool(poli['user_vote']),
 					'n_p_votar': poli['vote_code'],
 					'foto_url': poli['photo_url'],
@@ -88,7 +93,6 @@ var get_politicians_func = function(type){
 			return parsed_politicians;
 		}
 
-		// var device_id = req.query['device_id'];
 		var user_id = req.user['id'];
 		if (type === 'follow') {
 			query_for_polis[1] = 'inner join politician_follow f on f.politician_id = pol.id where f.user_id=?';
@@ -126,10 +130,7 @@ var get_politicians_func = function(type){
 }
 
 var vote = function(req,res) {
-	// assumindo q vai vir device_id e user_vote pelo get
-	// http://localhost:3000/politicos/1/votar?device_id=device_id4&user_vote=1
 	var politician_id = req.params['politician_id'];
-	// var device_id = req.query['device_id'];
 	var user_id = req.user['id'];
 	var existing_vote_query = 'select\
 	  v.id as vote_id,\
@@ -207,10 +208,7 @@ var vote = function(req,res) {
 }
 
 var follow = function(req,res) {
-	// assumindo q vai vir device_id e is_positive pelo get
-	// http://localhost:3000/politicos/1/seguir?device_id=device_id4&user_follow=true
 	var politician_id = req.params['politician_id'];
-	// var device_id = req.query['device_id'];
 	var user_id = req.user['id'];
 
 	var existing_follow_query = 'select\
