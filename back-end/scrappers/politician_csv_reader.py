@@ -257,11 +257,30 @@ for file_name in os.listdir(POLITICIANS_DIR):
 					politician['photo_url'] = 'http://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/2/%s' % row['SEQUENCIAL_CANDIDATO']
 
 					try:
-						insert_query = u"""
-							INSERT INTO
-							politician (name, congress_name, party, email, photo_url, date_of_birth)
-							VALUES (%(name)s, %(congress_name)s, %(party)s, %(email)s, %(photo_url)s, %(date_of_birth)s);
-						"""
+						if normalize_string(name) == 'fernando haddad':
+							politician['id'] = 1
+
+							insert_query = u"""
+								INSERT INTO
+								politician (id, name, congress_name, party, email, photo_url, date_of_birth)
+								VALUES (%(id)s, %(name)s, %(congress_name)s, %(party)s, %(email)s, %(photo_url)s, %(date_of_birth)s);
+							"""
+						elif normalize_string(name) == 'joao agripino da costa doria junior':
+							politician['id'] = 2
+
+							insert_query = u"""
+								INSERT INTO
+								politician (id, name, congress_name, party, email, photo_url, date_of_birth)
+								VALUES (%(id)s, %(name)s, %(congress_name)s, %(party)s, %(email)s, %(photo_url)s, %(date_of_birth)s);
+							"""
+
+						else:
+							insert_query = u"""
+								INSERT INTO
+								politician (name, congress_name, party, email, photo_url, date_of_birth)
+								VALUES (%(name)s, %(congress_name)s, %(party)s, %(email)s, %(photo_url)s, %(date_of_birth)s);
+							"""
+
 						print '**** new politician ****'
 						cur.execute(insert_query, politician)
 					except Exception as e:
