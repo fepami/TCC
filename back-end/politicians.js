@@ -19,7 +19,7 @@ var get_politicians_func = function(type){
 			pol.ranking,\
 			pol.email,\
 			pol.photo_url,\
-			APPROVAL_T.approval as approval,\
+			COALESCE(APPROVAL_T.approval, 0.5) as approval,\
 			USER_VOTE_T.is_positive as user_vote,\
 			CUR_POS_T.name as position,\
 			CUR_POS_T.location as position_location,\
@@ -28,7 +28,7 @@ var get_politicians_func = function(type){
 			CUR_POS_T.predicted_end_date as predicted_end_date,\
 			USER_FOLLOW_T.politician_id as user_follow\
 		from politician pol\
-		left join (select politician_id, COALESCE(avg(is_positive), 0.5) as approval\
+		left join (select politician_id, avg(is_positive) as approval\
 							from politician_vote\
 							group by politician_id\
 			) APPROVAL_T on APPROVAL_T.politician_id=pol.id\
@@ -103,26 +103,33 @@ var get_politicians_func = function(type){
 				}
 				res.json(parse_politicians(politicians));
 			});
+		} else if (type === 'ranking') {
+			query_for_polis[1] = 'order by pol.ranking limit 99';
+
+			mysql_handler(query_for_polis.join('\n'), [user_id ,user_id], function(err, politicians){
+				if (err) {
+					return res.json(err);
+				}
+				res.json(parse_politicians(politicians));
+			});
+		} else if ('politician_id' in req.params) {
+			var politician_id = req.params['politician_id'];
+
+			query_for_polis[1] = 'where pol.id=?';
+
+			mysql_handler(query_for_polis.join('\n'), [user_id, user_id, parseInt(politician_id)], function(err, politicians){
+				if (err) {
+					return res.json(err);
+				}
+				res.json(parse_politicians(politicians));
+			});
 		} else {
-			if ('politician_id' in req.params) {
-				var politician_id = req.params['politician_id'];
-
-				query_for_polis[1] = 'where pol.id=?';
-
-				mysql_handler(query_for_polis.join('\n'), [user_id, user_id, parseInt(politician_id)], function(err, politicians){
-					if (err) {
-						return res.json(err);
-					}
-					res.json(parse_politicians(politicians));
-				});
-			} else {
-				mysql_handler(query_for_polis.join('\n'), [user_id, user_id], function(err, politicians){
-					if (err) {
-						return res.json(err);
-					}
-					res.json(parse_politicians(politicians));
-				});
-			}
+			mysql_handler(query_for_polis.join('\n'), [user_id, user_id], function(err, politicians){
+				if (err) {
+					return res.json(err);
+				}
+				res.json(parse_politicians(politicians));
+			});
 		}
 	}
 
@@ -152,9 +159,9 @@ var vote = function(req,res) {
 			  FROM (\
 			    SELECT\
 			      pol.id,\
-			      avg(vote.is_positive) AS approval\
+			      COALESCE(avg(vote.is_positive), 0.5) AS approval\
 			    FROM politician pol\
-			    INNER join politician_vote vote ON vote.politician_id=pol.id\
+			    LEFT join politician_vote vote ON vote.politician_id=pol.id\
 			    GROUP BY pol.id\
 			    ORDER BY approval DESC\
 			  ) AS APPROVAL_T, (SELECT @rank:=0) meh\
@@ -215,7 +222,6 @@ var vote = function(req,res) {
 						if (err) {return res.json(err);}
 						return res.json(new_approval);
 					});
-					// mudar para retornar a nova aprovação do politico
 					// fazer o serviço de ranking de politico e propostas
 				}
 			});
@@ -310,7 +316,11 @@ var history = function(req,res) {
 }
 
 module.exports = {
-  'get_politicians_func': get_politicians_func,
+  'get_politicians': get_politicians_func(),
+  'get_politician': get_politicians_func(),
+  'get_followed': get_politicians_func('follow'),
+  'get_ranking': get_politicians_func('ranking'),
+
   'vote': vote,
   'follow': follow,
   'history': history,

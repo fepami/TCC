@@ -19,16 +19,17 @@ var get_proposals_func = function(type){
 			prop.ranking,\
 			prop.received_at,\
 			GROUP_CONCAT(pp.politician_id) as politician_ids,\
-			APPROVAL_T.approval as approval,\
+			COALESCE(APPROVAL_T.approval, 0.5) as approval,\
 			USER_VOTE_T.is_positive as user_vote\
 		from proposal prop\
 		inner join politician_proposal pp on pp.proposal_id = prop.id\
-		left join (select proposal_id, COALESCE(avg(is_positive), 0.5) as approval from proposal_vote group by proposal_id\
+		left join (select proposal_id, avg(is_positive) as approval from proposal_vote group by proposal_id\
 			) APPROVAL_T on APPROVAL_T.proposal_id=prop.id\
 		left join (select v.proposal_id, v.is_positive from proposal_vote v where v.user_id=?\
 			) USER_VOTE_T on USER_VOTE_T.proposal_id = prop.id';
 		query_for_props[1] = '';
 		query_for_props[2] = 'group by prop.id';
+		query_for_props[3] = '';
 
 		var parse_proposals = function(proposals, callback) {
 			if (proposals.length === 0) {
@@ -95,7 +96,18 @@ var get_proposals_func = function(type){
 					return res.json(parsed_props);
 				});
 			});
+		} else if (type === 'ranking') {
+			query_for_props[3] = 'order by prop.ranking limit 99';
 
+			mysql_handler(query_for_props.join('\n'), [user_id ,user_id], function(err, proposals){
+				if (err) {
+					return res.json(err);
+				}
+				parse_proposals(proposals, function(err, parsed_props){
+					if (err) {return res.json(err)}
+					return res.json(parsed_props);
+				});
+			});
 		} else if ('proposal_id' in req.params) {
 			var proposal_id = req.params['proposal_id'];
 
@@ -147,9 +159,9 @@ var vote = function(req,res) {
 			  FROM (\
 			    SELECT\
 			      pro.id,\
-			      avg(vote.is_positive) AS approval\
+			      COALESCE(avg(vote.is_positive), 0.5) AS approval\
 			    FROM proposal pro\
-			    INNER join proposal_vote vote ON vote.proposal_id=pro.id\
+			    LEFT join proposal_vote vote ON vote.proposal_id=pro.id\
 			    GROUP BY pro.id\
 			    ORDER BY approval DESC\
 			  ) AS APPROVAL_T, (SELECT @rank:=0) meh\
@@ -223,6 +235,14 @@ var vote = function(req,res) {
 }
 
 module.exports = {
-  'get_proposals_func': get_proposals_func,
+  'get_proposals': get_proposals_func(),
+  'get_ranking': get_proposals_func('ranking'),
+  'get_proposal': get_proposals_func(),
+  'get_politician_proposals': get_proposals_func('politician'),
+
+
+
+
+
   'vote': vote,
 }

@@ -154,11 +154,12 @@ app.get("/test_token", function(req, res){
 // /test_token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNDc5Njg4MTk4LCJleHAiOjE0Nzk2OTE3OTh9.iu_qS6-QsJAX2kVeBx8Mx-QketCUly8lRy7wOb39bU0
 
 
-app.get("/politicos",helpers.jwt_mw, politicians_controller.get_politicians_func());
-app.get("/politicos/:politician_id",helpers.jwt_mw, politicians_controller.get_politicians_func());
-app.get("/politicos_seguidos",helpers.jwt_mw, politicians_controller.get_politicians_func('follow')); // /politicos/seguidos?device_id=device_id1
+app.get("/politicos",helpers.jwt_mw, politicians_controller.get_politicians);
+app.get("/politicos/ranking",helpers.jwt_mw, politicians_controller.get_ranking);
+app.get("/politicos/:politician_id",helpers.jwt_mw, politicians_controller.get_politician);
+app.get("/politicos_seguidos",helpers.jwt_mw, politicians_controller.get_followed); // /politicos/seguidos?device_id=device_id1
 
-app.get("/politicos/:politician_id/propostas",helpers.jwt_mw, proposals_controller.get_proposals_func('politician'));
+app.get("/politicos/:politician_id/propostas",helpers.jwt_mw, proposals_controller.get_politician_proposals);
 
 app.get("/politicos/:politician_id/votar",helpers.jwt_mw, politicians_controller.vote);
 app.get("/politicos/:politician_id/seguir",helpers.jwt_mw, politicians_controller.follow);
@@ -173,8 +174,9 @@ app.get("/filtro/propostas", filter_controller.get_proposal_filter);
 
 
 
-app.get("/propostas",helpers.jwt_mw, proposals_controller.get_proposals_func());
-app.get("/propostas/:proposal_id",helpers.jwt_mw, proposals_controller.get_proposals_func());
+app.get("/propostas",helpers.jwt_mw, proposals_controller.get_proposals);
+app.get("/propostas/ranking",helpers.jwt_mw, proposals_controller.get_ranking);
+app.get("/propostas/:proposal_id",helpers.jwt_mw, proposals_controller.get_proposal);
 
 app.get("/propostas/:proposal_id/votar",helpers.jwt_mw, proposals_controller.vote);
 
