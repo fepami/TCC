@@ -10,24 +10,33 @@ const helpers = require("./helpers")
 
 
 
-function _verify_password(email, password, callback) {
-	var user_query = 'select id, password, name, email, state, city, age, gender, photo_url from user where email = ?';
+function _get_validated_user(user_id, email, password, callback) {
+	var user_query = '';
+	var user_query_param = null;
+	if (user_id) {
+		user_query = 'select id, password, name, email, state, city, age, gender, photo_url from user where id = ?';
+		user_query_param = user_id;
+	} else {
+		user_query = 'select id, password, name, email, state, city, age, gender, photo_url from user where email = ?';
+		user_query_param = email;
+	}
 
-	mysql_handler(user_query, [email], function(err, user){
+
+	mysql_handler(user_query, [user_query_param], function(err, user){
 		if (err) {
 			return callback(err);
 		}
 
 		if (user.length == 0) {
-			return callback(err);
+			return callback(null);
 		}
 
 		user = user[0];
-		// provavelmente precisa mudar pra async
 		if (!user['password']) {
-			return callback(err);
+			return callback(null);
 		}
 
+		// provavelmente precisa mudar pra async
 		if (!bcrypt.compareSync(password, user['password'])) {
 			return callback(null, null);
 		}
@@ -165,7 +174,7 @@ function login(req, res) {
 	} else {
 		var password = req.query['password'];
 
-		_verify_password(email, password, function(err, user){
+		_get_validated_user(null, email, password, function(err, user){
 			if (err) {
 				return res.json(err);
 			}
@@ -219,9 +228,37 @@ function update_user(req, res) {
 	});
 }
 
+function update_password(req, res) {
+	var new_password =  req.query['nova'];
+	var old_password =  req.query['antiga'];
+	var user_id = req.user['id'];
+
+	_get_validated_user(user_id, null, old_password, function(err, user){
+		if (err) {
+			return res.json(err);
+		}
+
+		if (!user) {
+			res.status(404);
+			return res.json('Senha incorreta');
+		}
+
+		var update_user_query = 'update user set ? where id=?';
+		var encrypted_pass = bcrypt.hashSync(new_password, 8);
+		mysql_handler(update_user_query, [{'password': encrypted_pass}, user_id], function(err, result){
+			if (err) {
+				return res.json(err);
+			}
+
+			return res.json('ok')
+		});
+	});
+}
+
 
 module.exports = {
   'login': login,
   'create_user': create_user,
   'update_user': update_user,
+  'update_password': update_password,
 }
