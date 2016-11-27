@@ -198,7 +198,7 @@ function login(req, res) {
 
 function update_user(req, res) {
 	var name = req.query['name'];
-	var email = req.query['email'];
+	// var email = req.query['email'];
 	var state = req.query['state'];
 	var city = req.query['city'];
 	var age = req.query['age'];
@@ -209,7 +209,7 @@ function update_user(req, res) {
 
 	var user_params = {
 		'name': name,
-		'email': email,
+		// 'email': email,
 		'state': state,
 		'city': city,
 		'age': age,

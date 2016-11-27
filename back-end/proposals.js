@@ -56,10 +56,6 @@ var get_proposals_func = function(type){
 					politicians_by_id[politicians[i]['id'].toString()] = politicians[i];
 				}
 
-				// if (err) {return res.json(err)}
-
-				// res.json(parse_proposals(proposals));
-
 				for (var i = 0; i < proposals.length; i++) {
 					var prop = proposals[i];
 					var politicians_info = prop['politician_ids'].split(',').map(function(id){return politicians_by_id[id]});
@@ -82,7 +78,7 @@ var get_proposals_func = function(type){
 				}
 
 				// return parsed_proposals;
-				return callback(null, parsed_prop);
+				return callback(null, parsed_proposals);
 			});
 		}
 

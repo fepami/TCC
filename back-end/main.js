@@ -136,7 +136,10 @@ app.get("/login", user_controller.login);
 // /login?email=felipe@toyoda.com.br&password=bacon&profile_id=afafkanjkbasjinjkasn
 
 app.get("/usuario/editar", helpers.jwt_mw, user_controller.update_user);
+// /usuario/editar?name=Felipe&state=SP&city=São Paulo&age=23&gender=Masculino&token=asfsdfsdfs
+
 app.get("/usuario/trocar", helpers.jwt_mw, user_controller.update_password);
+// /usuario/trocar?antigo=senhaAntiga&novo=senhaNova&token=asfsdfsdfs
 
 
 app.get("/test_token", function(req, res){
