@@ -249,8 +249,48 @@ var follow = function(req,res) {
 	});
 }
 
+var history = function(req,res) {
+	var politician_id = req.params['politician_id'];
+
+	var politician_history_query = 'select\
+		pp.politician_id,\
+		pos.name as position_name,\
+		pp.location as position_location,\
+		pp.election_year, \
+		case when pp.start_date is null then 0 else 1 end as was_elected\
+	from politician_position pp\
+	inner join position pos on pos.id = pp.position_id\
+	where pp.politician_id = ?';
+
+	mysql_handler(politician_history_query, [politician_id], function(err, politician_history){
+		if (err) {
+			return res.json(err);
+		}
+
+		var parsed_histories = []
+		for (var i = 0; i < politician_history.length; i++) {
+			var pol_history = politician_history[i];
+
+			history = '';
+			if (pol_history['was_elected']) {
+				history = 'Eleito ';
+			} else {
+				history = 'Concorreu para ';
+			}
+
+			history += pol_history['position_name'] + ' de ' + pol_history['position_location'];
+			history += ' em ' + pol_history['election_year'];
+
+			parsed_histories.push(history)
+		}
+
+		return res.json(parsed_histories)
+	});
+}
+
 module.exports = {
   'get_politicians_func': get_politicians_func,
   'vote': vote,
   'follow': follow,
+  'history': history,
 }

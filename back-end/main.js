@@ -158,6 +158,9 @@ app.get("/politicos/:politician_id/propostas",helpers.jwt_mw, proposals_controll
 app.get("/politicos/:politician_id/votar",helpers.jwt_mw, politicians_controller.vote);
 app.get("/politicos/:politician_id/seguir",helpers.jwt_mw, politicians_controller.follow);
 
+app.get("/politicos/:politician_id/carreira", politicians_controller.history);
+
+
 
 app.get("/filtro/politicos", filter_controller.get_politician_filter);
 app.get("/filtro/propostas", filter_controller.get_proposal_filter);
