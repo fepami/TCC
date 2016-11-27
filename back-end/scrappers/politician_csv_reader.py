@@ -42,7 +42,7 @@ cur.execute("SELECT id, name FROM politician;")
 politicians_dict = {normalize_string(x['name']):x['id'] for x in cur.fetchall()}
 
 cur.execute("SELECT politician_id, election_year FROM politician_position;")
-politician_positions_dict = {(x['politician_id'], x['election_year']) for x in cur.fetchall()}
+politician_positions_set = {(x['politician_id'], x['election_year']) for x in cur.fetchall()}
 
 
 FIELDNAMES_PER_START_YEAR = {
@@ -270,10 +270,11 @@ for file_name in os.listdir(POLITICIANS_DIR):
 						raise e
 
 					politician_id = cur.lastrowid
+					politicians_dict[normalize_string(name)] = cur.lastrowid
 
 
 				election_year = int(row['ANO_ELEICAO'])
-				if (politician_id, election_year) not in politician_positions_dict:
+				if (politician_id, election_year) not in politician_positions_set:
 					politician_position = {}
 					politician_position['politician_id'] = politician_id
 					politician_position['election_year'] = election_year
@@ -315,6 +316,8 @@ for file_name in os.listdir(POLITICIANS_DIR):
 					except Exception as e:
 						print politician_position
 						import pdb; pdb.set_trace()
+
+					politician_positions_set.add((politician_id, election_year))
 
 # raise Exception()
 db.commit()

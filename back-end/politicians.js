@@ -19,7 +19,7 @@ var get_politicians_func = function(type){
 			pol.ranking,\
 			pol.email,\
 			pol.photo_url,\
-			APPROVAL_T.approval as approval,\
+			COALESCE(APPROVAL_T.approval, 0.5) as approval,\
 			USER_VOTE_T.is_positive as user_vote,\
 			CUR_POS_T.name as position,\
 			CUR_POS_T.location as position_location,\
@@ -66,7 +66,7 @@ var get_politicians_func = function(type){
 					'idade': helpers.get_age_from_birthday(poli['date_of_birth']) + ' anos',
 					'partido': poli['party'],
 					'email': poli['email'],
-					'approval': poli['approval'] || 0,
+					'approval': poli['approval'],
 					'user_vote': helpers.format_null_bool(poli['user_vote']),
 					'n_p_votar': poli['vote_code'],
 					'foto_url': poli['photo_url'],
