@@ -23,7 +23,7 @@ var get_proposals_func = function(type){
 			USER_VOTE_T.is_positive as user_vote\
 		from proposal prop\
 		inner join politician_proposal pp on pp.proposal_id = prop.id\
-		left join (select proposal_id, avg(is_positive) as approval from proposal_vote group by proposal_id\
+		left join (select proposal_id, COALESCE(avg(is_positive), 0.5) as approval from proposal_vote group by proposal_id\
 			) APPROVAL_T on APPROVAL_T.proposal_id=prop.id\
 		left join (select v.proposal_id, v.is_positive from proposal_vote v where v.user_id=?\
 			) USER_VOTE_T on USER_VOTE_T.proposal_id = prop.id';
@@ -136,69 +136,88 @@ var vote = function(req,res) {
 
 	mysql_handler(existing_vote_query, [user_id, proposal_id], function(err, existing_vote){
 		if (err) {
-			res.json(err);
-		} else {
-			var update_ranking_query = 'UPDATE proposal p\
-				JOIN (\
-				  SELECT\
-				    @rank:=@rank+1 AS rank,\
-				    APPROVAL_T.approval AS approval,\
-				    APPROVAL_T.id AS id\
-				  FROM (\
-				    SELECT\
-				      pro.id,\
-				      avg(vote.is_positive) AS approval\
-				    FROM proposal pro\
-				    INNER join proposal_vote vote ON vote.proposal_id=pro.id\
-				    GROUP BY pro.id\
-				    ORDER BY approval DESC\
-				  ) AS APPROVAL_T, (SELECT @rank:=0) meh\
-				) RANKED_T ON RANKED_T.id = p.id\
-				SET p.ranking = RANKED_T.rank;';
+			return res.json(err);
+		}
+		var update_ranking_query = 'UPDATE proposal p\
+			JOIN (\
+			  SELECT\
+			    @rank:=@rank+1 AS rank,\
+			    APPROVAL_T.approval AS approval,\
+			    APPROVAL_T.id AS id\
+			  FROM (\
+			    SELECT\
+			      pro.id,\
+			      avg(vote.is_positive) AS approval\
+			    FROM proposal pro\
+			    INNER join proposal_vote vote ON vote.proposal_id=pro.id\
+			    GROUP BY pro.id\
+			    ORDER BY approval DESC\
+			  ) AS APPROVAL_T, (SELECT @rank:=0) meh\
+			) RANKED_T ON RANKED_T.id = p.id\
+			SET p.ranking = RANKED_T.rank;';
 
-			var is_positive = helpers.parse_null_bool(req.query['user_vote']);
-			if (existing_vote.length > 0) {
-				var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive'])
-				var vote_id = existing_vote[0]['vote_id'];
-				if (is_positive === null) {
-					// delete
-					var delete_query = 'delete from proposal_vote where id=?';
-					mysql_handler(delete_query, [vote_id], function(err){
-						if (err) {
-							res.json(err);
-						} else {
-							mysql_handler(update_ranking_query, function(err){});
-							res.json('ok, delete');
-						}
-					});
-				} else if (existing_is_positive !== is_positive) {
-					// update
-					var update_query = 'update proposal_vote set is_positive = ? where id=?';
-					mysql_handler(update_query, [is_positive, vote_id], function(err){
-						if (err) {
-							res.json(err);
-						} else {
-							mysql_handler(update_ranking_query, function(err){});
-							res.json('ok, update');
-						}
-					});
-				} else {
-					res.json('ok, do nothing');
-				}
-			} else if (is_positive !== null){
-				// create
-				var create_query = 'INSERT INTO proposal_vote (user_id, proposal_id, is_positive) VALUES (?, ?, ?);';
-				mysql_handler(create_query, [user_id, proposal_id, is_positive], function(err){
+		var get_approval_query = 'select\
+			COALESCE(avg(is_positive), 0.5) as approval\
+		from proposal_vote\
+		where proposal_id = ?'
+
+		var is_positive = helpers.parse_null_bool(req.query['user_vote']);
+		if (existing_vote.length > 0) {
+			var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive'])
+			var vote_id = existing_vote[0]['vote_id'];
+			if (is_positive === null) {
+				// delete
+				var delete_query = 'delete from proposal_vote where id=?';
+				mysql_handler(delete_query, [vote_id], function(err){
 					if (err) {
-						res.json(err);
-					} else {
-						mysql_handler(update_ranking_query, function(err){});
-						res.json('ok, create');
+						return res.json(err);
 					}
+
+					mysql_handler(update_ranking_query, function(err){});
+					mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
+						if (err) {return res.json(err);}
+						return res.json(new_approval);
+					});
+				});
+
+			} else if (existing_is_positive !== is_positive) {
+				// update
+				var update_query = 'update proposal_vote set is_positive = ? where id=?';
+				mysql_handler(update_query, [is_positive, vote_id], function(err){
+					if (err) {
+						return res.json(err);
+					}
+					mysql_handler(update_ranking_query, function(err){});
+					mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
+						if (err) {return res.json(err);}
+						return res.json(new_approval);
+					});
 				});
 			} else {
-				res.json('ok, do nothing');
+				mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
+					if (err) {return res.json(err);}
+					return res.json(new_approval);
+				});
 			}
+		} else if (is_positive !== null){
+			// create
+			var create_query = 'INSERT INTO proposal_vote (user_id, proposal_id, is_positive) VALUES (?, ?, ?);';
+			mysql_handler(create_query, [user_id, proposal_id, is_positive], function(err){
+				if (err) {
+					return res.json(err);
+				}
+
+				mysql_handler(update_ranking_query, function(err){});
+				mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
+					if (err) {return res.json(err);}
+					return res.json(new_approval);
+				});
+			});
+		} else {
+			mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
+				if (err) {return res.json(err);}
+				return res.json(new_approval);
+			});
 		}
 	});
 }

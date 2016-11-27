@@ -19,7 +19,7 @@ var get_politicians_func = function(type){
 			pol.ranking,\
 			pol.email,\
 			pol.photo_url,\
-			COALESCE(APPROVAL_T.approval, 0.5) as approval,\
+			APPROVAL_T.approval as approval,\
 			USER_VOTE_T.is_positive as user_vote,\
 			CUR_POS_T.name as position,\
 			CUR_POS_T.location as position_location,\
@@ -28,7 +28,7 @@ var get_politicians_func = function(type){
 			CUR_POS_T.predicted_end_date as predicted_end_date,\
 			USER_FOLLOW_T.politician_id as user_follow\
 		from politician pol\
-		left join (select politician_id, avg(is_positive) as approval\
+		left join (select politician_id, COALESCE(avg(is_positive), 0.5) as approval\
 							from politician_vote\
 							group by politician_id\
 			) APPROVAL_T on APPROVAL_T.politician_id=pol.id\
@@ -140,82 +140,90 @@ var vote = function(req,res) {
 
 	mysql_handler(existing_vote_query, [user_id, politician_id], function(err, existing_vote){
 		if (err) {
-			res.json(err);
-		} else {
-			var update_ranking_query = 'UPDATE politician p\
-				JOIN (\
-				  SELECT\
-				    @rank:=@rank+1 AS rank,\
-				    APPROVAL_T.approval AS approval,\
-				    APPROVAL_T.id AS id\
-				  FROM (\
-				    SELECT\
-				      pol.id,\
-				      avg(vote.is_positive) AS approval\
-				    FROM politician pol\
-				    INNER join politician_vote vote ON vote.politician_id=pol.id\
-				    GROUP BY pol.id\
-				    ORDER BY approval DESC\
-				  ) AS APPROVAL_T, (SELECT @rank:=0) meh\
-				) RANKED_T ON RANKED_T.id = p.id\
-				SET p.ranking = RANKED_T.rank;';
+			return res.json(err);
+		}
 
-			var get_approval_query = 'select\
-				COALESCE(avg(is_positive), 0.5) as approval\
-			from politician_vote\
-			where politician_id = ?'
+		var update_ranking_query = 'UPDATE politician p\
+			JOIN (\
+			  SELECT\
+			    @rank:=@rank+1 AS rank,\
+			    APPROVAL_T.approval AS approval,\
+			    APPROVAL_T.id AS id\
+			  FROM (\
+			    SELECT\
+			      pol.id,\
+			      avg(vote.is_positive) AS approval\
+			    FROM politician pol\
+			    INNER join politician_vote vote ON vote.politician_id=pol.id\
+			    GROUP BY pol.id\
+			    ORDER BY approval DESC\
+			  ) AS APPROVAL_T, (SELECT @rank:=0) meh\
+			) RANKED_T ON RANKED_T.id = p.id\
+			SET p.ranking = RANKED_T.rank;';
 
-			var is_positive = helpers.parse_null_bool(req.query['user_vote']);
-			if (existing_vote.length > 0) {
-				var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive'])
-				var vote_id = existing_vote[0]['vote_id'];
-				if (is_positive === null) {
-					// delete
-					var delete_query = 'delete from politician_vote where id=?';
-					mysql_handler(delete_query, [vote_id], function(err){
-						if (err) {
-							return res.json(err);
-						}
-						mysql_handler(update_ranking_query, function(err){});
-						mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-							return res.json(new_approval);
-						});
+		var get_approval_query = 'select\
+			COALESCE(avg(is_positive), 0.5) as approval\
+		from politician_vote\
+		where politician_id = ?'
 
-					});
-				} else if (existing_is_positive !== is_positive) {
-					// update
-					var update_query = 'update politician_vote set is_positive = ? where id=?';
-					mysql_handler(update_query, [is_positive, vote_id], function(err){
-						if (err) {
-							return res.json(err);
-						}
-						mysql_handler(update_ranking_query, function(err){});
-						mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-							return res.json(new_approval);
-						});
-
-					});
-				} else {
-					return res.json('ok, do nothing');
-				}
-			} else if (is_positive !== null){
-				// create
-				var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (?, ?, ?);';
-				mysql_handler(create_query, [user_id, politician_id, is_positive], function(err){
+		var is_positive = helpers.parse_null_bool(req.query['user_vote']);
+		if (existing_vote.length > 0) {
+			var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive'])
+			var vote_id = existing_vote[0]['vote_id'];
+			if (is_positive === null) {
+				// delete
+				var delete_query = 'delete from politician_vote where id=?';
+				mysql_handler(delete_query, [vote_id], function(err){
 					if (err) {
 						return res.json(err);
-					} else {
-						mysql_handler(update_ranking_query, function(err){});
-						mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-							return res.json(new_approval);
-						});
-						// mudar para retornar a nova aprovação do politico
-						// fazer o serviço de ranking de politico e propostas
 					}
+					mysql_handler(update_ranking_query, function(err){});
+					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+						if (err) {return res.json(err);}
+						return res.json(new_approval);
+					});
+				});
+			} else if (existing_is_positive !== is_positive) {
+				// update
+				var update_query = 'update politician_vote set is_positive = ? where id=?';
+				mysql_handler(update_query, [is_positive, vote_id], function(err){
+					if (err) {
+						return res.json(err);
+					}
+					mysql_handler(update_ranking_query, function(err){});
+					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+						if (err) {return res.json(err);}
+						return res.json(new_approval);
+					});
+
 				});
 			} else {
-				return res.json('ok, do nothing');
+				mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+					if (err) {return res.json(err);}
+					return res.json(new_approval);
+				});
 			}
+		} else if (is_positive !== null){
+			// create
+			var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (?, ?, ?);';
+			mysql_handler(create_query, [user_id, politician_id, is_positive], function(err){
+				if (err) {
+					return res.json(err);
+				} else {
+					mysql_handler(update_ranking_query, function(err){});
+					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+						if (err) {return res.json(err);}
+						return res.json(new_approval);
+					});
+					// mudar para retornar a nova aprovação do politico
+					// fazer o serviço de ranking de politico e propostas
+				}
+			});
+		} else {
+			mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+				if (err) {return res.json(err);}
+				return res.json(new_approval);
+			});
 		}
 	});
 }
