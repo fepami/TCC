@@ -43,8 +43,8 @@ var get_proposals_func = function(type){
 
 			query_for_polis = 'select\
 				pol.id,\
-				pol.name,\
-				pol.photo_url\
+				pol.name as nome,\
+				pol.photo_url as foto_url\
 			from politician pol\
 			where pol.id in (?);';
 
@@ -74,6 +74,7 @@ var get_proposals_func = function(type){
 						'user_vote': prop['user_vote'],
 						'politicos': politicians_info,
 						'data': moment(prop['received_at']).format('LL'),
+						'codigo': prop['code'],
 						'cargo': null
 					}
 
