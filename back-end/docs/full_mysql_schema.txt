@@ -35,7 +35,7 @@ CREATE TABLE politician (
 	photo_url text,
 	PRIMARY KEY (id)
 );
-alter table politician auto_increment=1;
+alter table politician auto_increment=3;
 
 CREATE TABLE politician_vote (
 	id int NOT NULL AUTO_INCREMENT,
@@ -58,6 +58,7 @@ CREATE TABLE proposal (
 	summary text,
 	content text NOT NULL,
 	category varchar(255),
+	status varchar(255),
 	received_at date,
 	ranking int,
 	PRIMARY KEY (id)

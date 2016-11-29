@@ -146,6 +146,48 @@ def get_category(subjects):
 	return None
 	raise Exception('Proposta sem categoria!')
 
+def get_status(proposal_node):
+	end_node = contrived_get_node(proposal_node, 'Encerramento:')
+	if end_node:
+		if 'PROMULGADO' in end_node.text:
+			return 'approved'
+
+		if 'RETIRADO PELO AUTOR' in end_node.text:
+			return 'canceled'
+
+	actions = []
+	end_node = contrived_get_node(proposal_node, 'Encaminhamento:')
+	if end_node:
+		actions.extend(end_node.get_text(separator='\n||\n').split('\n||\n'))
+
+	end_node = contrived_get_node(proposal_node, 'Deliberação:')
+	if end_node:
+		actions.extend(end_node.get_text(separator='\n||\n').split('\n||\n'))
+
+
+	REPROVAL_KEYWORDS = ['VETO']
+	APPROVAL_KEYWORDS = ['APROVADO', 'PROMULGACAO']
+	ACTION_KEYWORDS = APPROVAL_KEYWORDS + REPROVAL_KEYWORDS
+	def sort_actions_key(action):
+		if not any([x in action for x in ACTION_KEYWORDS]):
+			return datetime.datetime(1500, 1, 1)
+
+		match = re.search(r'\d{2}/\d{2}/\d{4}', action)
+		if not match:
+			return datetime.datetime(1500, 1, 1)
+
+		date = datetime.datetime.strptime(match.group(1), "%d/%m/%Y")
+
+		return date
+
+
+	print '-----------'
+
+	if printed:
+		import pdb; pdb.set_trace()
+
+	return 'ongoing'
+
 uncategorized_summary_and_subjects = []
 def get_proposals(post_data):
 	cur.execute("SELECT code, YEAR(received_at) as year FROM proposal;")
@@ -163,7 +205,18 @@ def get_proposals(post_data):
 	# proposal_nodes = proposal_nodes[0:1]
 
 	def contrived_get_node(node, label):
-		return node.find('td', string=label).find_next_siblings('td')[1]
+		result = node.find('td', string=label)
+		if not result:
+			return None
+
+		result = result.find_next_siblings('td')
+		if not result:
+			return None
+
+		if len(result) < 2:
+			return None
+
+		return result[1]
 
 	proposals = []
 	for proposal_node in proposal_nodes:
@@ -176,8 +229,35 @@ def get_proposals(post_data):
 		code = ' '.join(code_and_date[0:2])
 		date_obj = datetime.datetime.strptime(code_and_date[2], "%d/%m/%Y")
 
-		print '**********'
-		print 'code: %s' % code
+		# print '**********'
+		# print 'code: %s' % code
+
+		# printed = False
+		# end_node = contrived_get_node(proposal_node, 'Encerramento:')
+		# if end_node:
+		# 	print '** Encerramento:'
+		# 	print end_node.get_text(separator='\n\n')
+		# 	printed = True
+
+		# end_node = contrived_get_node(proposal_node, 'Encaminhamento:')
+		# if end_node:
+		# 	print '** Encaminhamento:'
+		# 	print end_node.get_text(separator='\n\n')
+		# 	printed = True
+
+		# end_node = contrived_get_node(proposal_node, 'Deliberação:')
+		# if end_node:
+		# 	print '** Deliberação:'
+		# 	print end_node.get_text(separator='\n\n')
+		# 	printed = True
+
+		# print authors
+		# print '-----------'
+
+		# if printed:
+		# 	import pdb; pdb.set_trace()
+		# continue
+
 
 
 		code_with_year = "%s %s" % (code, date_obj.year)
@@ -259,7 +339,7 @@ post_data = [
 		('form','A'),
 	# ('pathImages','/iah/pt/image/'),
 		('navBar','ON'),
-		('hits','200'), # numero de propostas
+		('hits','50'), # numero de propostas
 	('format','detalhado.pft'),
 		('lang','pt'),
 	# ('isisTotal','215'),
@@ -284,8 +364,8 @@ post_data = [
 
 
 	# mudar de pagina
-	# ('Page2.x','1'),
-	# ('Page2.y','1'),
+	# ('Page10.x','1'),
+	# ('Page10.y','1'),
 ]
 
 proposals = get_proposals(post_data)

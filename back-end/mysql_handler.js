@@ -6,7 +6,8 @@ const pool = mysql.createPool({
 	user     : 'root',
 	password : 'ehissoae',
 	database : 'eleitor',
-	debug    :  false
+	debug    :  false,
+	charset	 : 'utf8'
 });
 
 // INSERT INTO politician VALUES (1,'Felipe','1993-04-05', 'TCC')

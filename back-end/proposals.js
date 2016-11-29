@@ -43,7 +43,7 @@ var get_proposals_func = function(type){
 
 
 			query_for_polis = 'select\
-				pol.id,\
+				pol.id as politician_id,\
 				pol.name as nome,\
 				pol.photo_url as foto_url\
 			from politician pol\
@@ -54,7 +54,7 @@ var get_proposals_func = function(type){
 
 				politicians_by_id = {};
 				for (var i = 0; i < politicians.length; i++) {
-					politicians_by_id[politicians[i]['id'].toString()] = politicians[i];
+					politicians_by_id[politicians[i]['politician_id'].toString()] = politicians[i];
 				}
 
 				for (var i = 0; i < proposals.length; i++) {
