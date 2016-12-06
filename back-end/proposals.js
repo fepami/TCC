@@ -45,6 +45,7 @@ var get_proposals_func = function(type){
 			query_for_polis = 'select\
 				pol.id as politician_id,\
 				pol.name as nome,\
+				pol.party as partido,\
 				pol.photo_url as foto_url\
 			from politician pol\
 			where pol.id in (?);';
