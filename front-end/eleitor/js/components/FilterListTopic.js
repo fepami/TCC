@@ -24,7 +24,7 @@ export default class FilterListTopic extends Component {
 				title={option}
 				key={ii}
 				isChecked={this.props.selectedOptions.includes(option)}
-				onSelectFilter={(option) => this.props.onSelectFilter(option)}
+				onSelectFilter={(option) => this.props.onSelectFilter(this.props.title, option)}
 			/>
 		));
 

@@ -16,7 +16,6 @@ import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PoliticoPerfilScene from './PoliticoPerfilScene';
-import {fakePolitico0, fakePolitico1, fakeFilter} from '../fakeData';
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
@@ -25,7 +24,6 @@ export default class SeguindoScene extends Component {
 		super(props);
 		this.state = {
 			modalVisible: false,
-			selectedFilters: [],
 			politicosDataSource: ds.cloneWithRows([]),
 			loading: true,
 			listIsEmpty: false,
@@ -126,9 +124,6 @@ export default class SeguindoScene extends Component {
 		// }
 		];
 
-		// const politicosDataSource = ds.cloneWithRows([fakePolitico0, fakePolitico1]);
-		const filterDataSource = ds.cloneWithRows(fakeFilter);
-
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
@@ -141,32 +136,11 @@ export default class SeguindoScene extends Component {
                 	navigator={this.props.navigator} 
                 	modalVisible={this.state.modalVisible} 
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
-                	dataSource={filterDataSource}
+                	type={'politicos'}
                 	title='Filtrar Políticos'
-                	selectedFilters={this.state.selectedFilters}
-                	onSelectFilter={(option) => this.onSelectFilter(option)} 
-                	onClearActionSelected={() => this.onClearActionSelected()}
                 	onFilterActionSelected={() => this.onFilterActionSelected()} />
 			</View>
 		)
-	}
-
-	onSelectFilter(option) {
-		console.log(option);
-		let newSelectedOptions = this.state.selectedFilters;
-		if (newSelectedOptions.includes(option)) {
-			let index = newSelectedOptions.indexOf(option);
-			newSelectedOptions.splice(index, 1);
-		} else {
-			newSelectedOptions.push(option);
-		}
-		this.setState({selectedFilters: newSelectedOptions});
-		console.log(this.state.selectedFilters);
-	}
-
-	onClearActionSelected() {
-		console.log('onClearActionSelected');
-		this.setState({selectedFilters: []});
 	}
 
 	onFilterActionSelected() {

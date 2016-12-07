@@ -179,7 +179,9 @@ export default class LoginScene extends Component {
 		this.setState({emailError: emailError, passwordError: passwordError}, () => {
 			if (!emailError && !passwordError) {
 				this.getLogin('manual', this.state.emailText, this.state.passwordText);
-			}	
+			} else {
+				this.setState({loadingVisible: false});
+			}
 		})
 	}
 

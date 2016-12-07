@@ -18,6 +18,7 @@ import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
 import ApprovalBar from '../components/ApprovalBar';
 import PoliticoHistoricoPropostasScene from './PoliticoHistoricoPropostasScene';
+import PoliticoCarreiraScene from './PoliticoCarreiraScene';
 
 export default class PoliticoPerfilScene extends Component {
 	constructor(props){
@@ -245,7 +246,7 @@ export default class PoliticoPerfilScene extends Component {
 	}
 
 	onPressCarreira(){
-		// this.props.navigator.push({component: PoliticoPerfilScene, passProps: {nome: data.nome}});
+		this.props.navigator.push({component: PoliticoCarreiraScene, passProps: this.props});
 	}
 }
 

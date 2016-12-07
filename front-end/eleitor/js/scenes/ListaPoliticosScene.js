@@ -16,7 +16,6 @@ import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PoliticoPerfilScene from './PoliticoPerfilScene';
-import {fakePoliticos, fakeFilter} from '../fakeData';
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
@@ -53,7 +52,8 @@ export default class ListaPoliticosScene extends Component {
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos?token=' + token);
+		let type = this.props.type ? '/' + this.props.type : '';
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos' + type + '?token=' + token);
 		request.send();
 	}
 
@@ -110,8 +110,6 @@ export default class ListaPoliticosScene extends Component {
 		];
 
 		let title = this.props.type ? 'Ranking de Políticos' : 'Políticos';
-		// this.state.politicosDataSource = ds.cloneWithRows(fakePoliticos);
-		const filterDataSource = ds.cloneWithRows(fakeFilter);
 
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
@@ -125,7 +123,7 @@ export default class ListaPoliticosScene extends Component {
                 	navigator={this.props.navigator} 
                 	modalVisible={this.state.modalVisible} 
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
-                	dataSource={filterDataSource}
+                	type={'politicos'}
                 	title='Filtrar Políticos'
                 	selectedFilters={this.state.selectedFilters}
                 	onSelectFilter={(option) => this.onSelectFilter(option)} 

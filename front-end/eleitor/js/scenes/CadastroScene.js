@@ -20,6 +20,7 @@ import Header from '../components/Header';
 import dismissKeyboard from 'dismissKeyboard';
 import HomeScene from './HomeScene';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import NavigationManager from '../navigation/NavigationManager';
 
 export default class CadastroScene extends Component {
 	constructor(props) {
@@ -280,6 +281,7 @@ export default class CadastroScene extends Component {
 		let genderError = false;
 		let passwordError = false;
 		let password2Error = false;
+		let passwordTextMatch = false;
 
 		if (this.state.nameText === '') {
 			nameError = true;
@@ -305,11 +307,18 @@ export default class CadastroScene extends Component {
 		if (this.state.password2Text === '' && !this.state.isUsingFB) {
 			password2Error = true;
 		} 
+		if (!passwordError && !password2Error && this.state.passwordText === this.state.password2Text) {
+			passwordTextMatch = true;
+		} else {
+			password2Error = true;
+		}
 
 		this.setState({nameError: nameError, emailError: emailError, cityError: cityError, stateError: stateError, ageError: ageError, genderError: genderError, passwordError: passwordError,  password2Error: password2Error}, () => {
-			if (!nameError && !emailError && !cityError && !stateError && !ageError && !genderError && !passwordError && !password2Error) {
+			if (!nameError && !emailError && !cityError && !stateError && !ageError && !genderError && !passwordError && !password2Error && passwordTextMatch) {
 				this.getCadastro();
-			}	
+			} else {
+				this.setState({loadingVisible: false});
+			}
 		})
 	}
 

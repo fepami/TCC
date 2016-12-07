@@ -29,7 +29,7 @@ export default class PropostasListItem extends Component {
 
 	render() {
 		const like = this.props.proposta.approval ? this.props.proposta.approval * 100 : 1;
-		const dislike = 100 - like;
+		const dislike = like === 100 ? 1 : 100 - like;
 		const pieData = [{name: ' ', approval: like}, {name: '  ', approval: dislike}];
 		const pieOptions = {
 			center: [25,25],

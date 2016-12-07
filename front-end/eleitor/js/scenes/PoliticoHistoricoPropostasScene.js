@@ -5,25 +5,66 @@ import {
 	Image,
 	Text,
 	ListView,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
+import LoadingOverlay from '../components/LoadingOverlay';
+import Placeholder from '../components/Placeholder';
 import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PropostasListItem from '../components/PropostasListItem';
 import PropostaDetalheScene from './PropostaDetalheScene';
-import {fakePropostas, fakeFilter} from '../fakeData';
+
+const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
 export default class PoliticoHistoricoPropostasScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
 			modalVisible: false,
-			selectedFilters: []
+			selectedFilters: [],
+			loading: true,
+			listIsEmpty: false,
+			errorState: false
 		}
 		this.onShowFilter = this.onShowFilter.bind(this);
 		this.onCloseFilter = this.onCloseFilter.bind(this);
 		this.onSubmitSearch = this.onSubmitSearch.bind(this);
+		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
+		this.getHistoricoPropostas = this.getHistoricoPropostas.bind(this);
+		this.getCargoText = this.getCargoText.bind(this);
+	}
+
+	getHistoricoPropostas(token) {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = (e) => {
+			if (request.readyState !== 4) {
+				return;
+			}
+
+			if (request.status === 200) {
+				const jsonResponse = JSON.parse(request.response);	
+				if (Array.isArray(jsonResponse)) {
+					this.setState({propostasDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});					
+				} else {
+					this.setState({errorState: true, loading: false});
+				}
+			} else {
+				this.setState({errorState: true});
+			}
+		};
+
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/propostas?token=' + token);
+		request.send();
+	}
+
+	componentDidMount() {
+		var _this = this;
+		AsyncStorage.getItem('token', (err, result) => {
+			_this.setState({token: result});
+			_this.getHistoricoPropostas(result);
+		});
 	}
 
 	chooseFilterIcon() {
@@ -31,6 +72,74 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 			ios: 'md-funnel',
 			android: 'md-options'
 		})
+	}
+
+	getCargoText() {
+		if (this.props.cargo) {
+			return(<Text>{this.props.cargo}</Text>)
+		} 
+	}
+
+	renderLoadingOrView() {
+		if (this.state.loading) {
+			return (<LoadingOverlay/>)
+		} else if (this.state.listIsEmpty) {
+			return (<Placeholder type='search' />)
+		} else if (this.state.errorState) {
+			return (<Placeholder type='error' onPress={() => {
+				this.setState({errorState: false, loading: true}, this.getHistoricoPropostas(this.state.token))}} />)
+		} else {
+			let type = this.props.type ? this.props.type : 'lista';
+			return (
+				<ListView
+                    enableEmptySections={true}
+                    automaticallyAdjustContentInsets={false}
+                    dataSource={this.state.propostasDataSource} 
+                    renderRow={(rowData) => <PropostasListItem onPress={()=>this.onPropostaPress(rowData)} proposta={rowData} cellType={'lista'}/>} />
+			)
+		}
+	}
+
+	render() {
+		let filterIcon = this.chooseFilterIcon();
+		const actions = [
+		{
+			title: 'Filtro',
+			iconName: filterIcon,
+			show: 'always',
+			onActionSelected: this.onShowFilter
+		}];
+
+		return(
+			<View style={{flex: 1}}>
+				<Header
+					navigator={this.props.navigator}
+					title='Histórico de Propostas'
+					actions={actions} />
+				<View style={styles.cell}>
+					<Image
+						style={styles.roundedimage}
+						source={{uri: this.props.foto_url}} />
+					<View style={styles.info}>
+						<Text style={styles.h1}>{this.props.nome}</Text>
+						{this.getCargoText()}
+						<Text>{this.props.partido}</Text>
+					</View>
+				</View>
+				<View style={{height: 3, borderBottomWidth: 1, borderColor: 'black'}}></View>
+				{this.renderLoadingOrView()}
+                <Filter 
+                	navigator={this.props.navigator} 
+                	modalVisible={this.state.modalVisible} 
+                	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
+                	dtype={'propostas'}
+                	title='Filtrar Propostas'
+                	selectedFilters={this.state.selectedFilters}
+                	onSelectFilter={(option) => this.onSelectFilter(option)} 
+                	onClearActionSelected={() => this.onClearActionSelected()}
+                	onFilterActionSelected={() => this.onFilterActionSelected()} />
+			</View>
+		)
 	}
 
 	onShowFilter() {
@@ -47,56 +156,6 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 
 	onSubmitSearch() {
 
-	}
-
-	render() {
-		let filterIcon = this.chooseFilterIcon();
-		const actions = [
-		{
-			title: 'Filtro',
-			iconName: filterIcon,
-			show: 'always',
-			onActionSelected: this.onShowFilter
-		}];
-		const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-		const propostasDataSource = ds.cloneWithRows(fakePropostas);
-		const filterDataSource = ds.cloneWithRows(fakeFilter);
-
-		return(
-			<View style={{flex: 1}}>
-				<Header
-					navigator={this.props.navigator}
-					title='Histórico de Propostas'
-					actions={actions} />
-				<View style={styles.cell}>
-					<Image
-						style={styles.roundedimage}
-						source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}} />
-					<View style={styles.info}>
-						<Text style={styles.h1}>{this.props.nome}</Text>
-						<Text>{this.props.cargo}</Text>
-						<Text>{this.props.partido}</Text>
-					</View>
-				</View>
-				<View style={{height: 3, borderBottomWidth: 1, borderColor: 'black'}}></View>
-				<ListView
-					style={{flex: 1}}
-                    enableEmptySections={true}
-                    automaticallyAdjustContentInsets={false}
-                    dataSource={propostasDataSource} 
-                    renderRow={(rowData) => <PropostasListItem onPress={()=>this.onPropostaPress(rowData)} proposta={rowData} cellType={'lista'}/>} />
-                <Filter 
-                	navigator={this.props.navigator} 
-                	modalVisible={this.state.modalVisible} 
-                	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
-                	dataSource={filterDataSource}
-                	title='Filtrar Propostas'
-                	selectedFilters={this.state.selectedFilters}
-                	onSelectFilter={(option) => this.onSelectFilter(option)} 
-                	onClearActionSelected={() => this.onClearActionSelected()}
-                	onFilterActionSelected={() => this.onFilterActionSelected()} />
-			</View>
-		)
 	}
 
 	onSelectFilter(option) {
@@ -148,7 +207,8 @@ const styles = StyleSheet.create({
 	info: {
 		flexDirection: 'column', 
 		flex: 1, 
-		paddingHorizontal: 15
+		paddingHorizontal: 15,
+		justifyContent: 'center'
 	},
 	icon: {
 		alignSelf: 'center'

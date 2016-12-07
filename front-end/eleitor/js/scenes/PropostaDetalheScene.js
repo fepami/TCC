@@ -47,7 +47,7 @@ export default class PropostaDetalheScene extends Component {
 
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
-				this.setState({propostaInfo: jsonResponse, user_vote: jsonResponse.user_vote, loading: false});
+				this.setState({propostaInfo: jsonResponse[0], approval: jsonResponse[0].approval, user_vote: jsonResponse[0].user_vote, loading: false});
 			} else {
 				this.setState({errorState: true});
 			}
@@ -66,6 +66,7 @@ export default class PropostaDetalheScene extends Component {
 
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
+				this.setState({approval: jsonResponse.approval});
 			} else {
 				console.warn('Erro: não foi possível conectar ao servidor.');
 			}
@@ -91,12 +92,12 @@ export default class PropostaDetalheScene extends Component {
 
 	getPoliticos() {
 		return this.state.propostaInfo.politicos.map((politicoData, ii) => (
-			<TouchableElement onPress={() => this.onPoliticoPress(politicoData)} key={politicoData.id.toString()}>
+			<TouchableElement onPress={() => this.onPoliticoPress(politicoData)} key={politicoData.politician_id.toString()}>
 				<View style={styles.cell}>
 					<Image
 						style={styles.roundedimage}
-						source={{uri: politicoData.photo_url}} />
-					<Text style={styles.h2}>{politicoData.name}</Text>
+						source={{uri: politicoData.foto_url}} />
+					<Text style={styles.h2}>{politicoData.nome}</Text>
 					{this.renderIcon()}
 				</View>
 			</TouchableElement>
@@ -122,9 +123,10 @@ export default class PropostaDetalheScene extends Component {
 					<ScrollView style={{flex: 1}}>
 						<View style={styles.view}>
 							<Text style={styles.h1}>{this.state.propostaInfo.nome}</Text>
+							<Text>Código: {this.state.propostaInfo.codigo}</Text>
 							<Text>Categoria: {this.state.propostaInfo.categoria}</Text>
 							<Text>Proposta em: {this.state.propostaInfo.data}</Text>
-							<ApprovalBar viewSize={approval_width} approvalPercentage={this.state.propostaInfo.approval} />
+							<ApprovalBar viewSize={approval_width} approvalPercentage={this.state.approval} />
 							<Text style={{fontWeight: 'bold', paddingBottom: 15}}>Políticos responsáveis:</Text>
 							{this.getPoliticos()}
 							<Text style={{fontWeight: 'bold', paddingTop: 15}}>Descrição:</Text>
@@ -150,7 +152,7 @@ export default class PropostaDetalheScene extends Component {
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 					navigator={this.props.navigator}
-					title={this.props.categoria} />
+					title={this.state.propostaInfo.codigo} />
 				{this.renderLoadingOrView()}
 			</View>
 		)

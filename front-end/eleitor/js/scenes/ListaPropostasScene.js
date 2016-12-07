@@ -16,7 +16,6 @@ import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PropostaDetalheScene from './PropostaDetalheScene';
-import {fakePropostas, fakeFilter} from '../fakeData';
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
@@ -46,10 +45,7 @@ export default class ListaPropostasScene extends Component {
 			}
 
 			if (request.status === 200) {
-				let jsonResponse = JSON.parse(request.response);	
-				// mudar pra const e apagar linha abaixo
-				jsonResponse = [jsonResponse, jsonResponse, jsonResponse];
-
+				const jsonResponse = JSON.parse(request.response);	
 				if (Array.isArray(jsonResponse)) {
 					this.setState({propostasDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});					
 				} else {
@@ -60,7 +56,8 @@ export default class ListaPropostasScene extends Component {
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas?token=' + token);
+		let type = this.props.type ? '/' + this.props.type : '';
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas' + type + '?token=' + token);
 		request.send();
 	}
 
@@ -139,8 +136,6 @@ export default class ListaPropostasScene extends Component {
 		];
 
 		let title = this.props.type ? 'Ranking de Propostas' : 'Propostas';
-		// const propostasDataSource = ds.cloneWithRows(fakePropostas);
-		const filterDataSource = ds.cloneWithRows(fakeFilter);
 
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
@@ -154,7 +149,7 @@ export default class ListaPropostasScene extends Component {
                 	navigator={this.props.navigator} 
                 	modalVisible={this.state.modalVisible} 
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
-                	dataSource={filterDataSource}
+                	type={'propostas'}
                 	title='Filtrar Propostas'
                 	selectedFilters={this.state.selectedFilters}
                 	onSelectFilter={(option) => this.onSelectFilter(option)} 

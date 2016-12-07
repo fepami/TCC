@@ -19,24 +19,24 @@ import Header from '../components/Header';
 import dismissKeyboard from 'dismissKeyboard';
 import HomeScene from './HomeScene';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 export default class UsuarioEditarScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			nameText: '',
-			emailText: '',
 			cityText: '',
 			stateText: '',
 			ageText: '',
 			genderText: '',
 			pictureText: '',
 			nameError: false,
-			emailError: false,
 			cityError: false,
 			stateError: false,
 			ageError: false,
-			genderError: false
+			genderError: false,
+			loadingVisible: false
 		}
 	}
 
@@ -44,9 +44,6 @@ export default class UsuarioEditarScene extends Component {
 		var _this = this;
 		AsyncStorage.getItem('name', (err, result) => {
 			_this.setState({nameText: result});
-		});
-		AsyncStorage.getItem('email', (err, result) => {
-			_this.setState({emailText: result});
 		});
 		AsyncStorage.getItem('state', (err, result) => {
 			_this.setState({stateText: result});
@@ -62,6 +59,9 @@ export default class UsuarioEditarScene extends Component {
 		});
 		AsyncStorage.getItem('picture', (err, result) => {
 			_this.setState({pictureText: result});
+		});
+		AsyncStorage.getItem('token', (err, result) => {
+			_this.setState({token: result});
 		});
 	}
 
@@ -136,27 +136,9 @@ export default class UsuarioEditarScene extends Component {
 										value={this.state.nameText}
 										placeholder='Nome' 
 										onChangeText={(text) => this.setState({nameText: text})}
-										onSubmitEditing={() => this.refs['email-input'].focus()}
-										/>	
-								</View>	
-								<View style={{flexDirection: 'row'}}>	
-									<Icon name='email' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-									<TextInput 
-										ref={'email-input'}
-										style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
-										autoCapitalize='none'							
-										autoCorrect={false}
-										enablesReturnKeyAutomatically={true}
-										keyboardAppearance='default'
-										returnKeyType='next'
-										underlineColorAndroid='transparent'
-										numberOfLines={1}
-										value={this.state.emailText}
-										placeholder='Email'
-										onChangeText={(text) => this.setState({emailText: text})}
 										onSubmitEditing={() => dismissKeyboard()}
 										/>	
-								</View>
+								</View>	
 								<View style={{flexDirection: 'row'}} >
 									<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
 									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.ageError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
@@ -213,6 +195,13 @@ export default class UsuarioEditarScene extends Component {
 						</View>
 					</KeyboardAwareScrollView>
 				</View>
+				<Modal
+					animationType={'fade'}
+					transparent={true}
+					visible={this.state.loadingVisible}
+					onRequestClose={() => this.state.setState({loadingVisible: false})} >
+					<LoadingOverlay style={{backgroundColor: 'rgba(0,0,0,0.5)'}}/>
+				</Modal>
 			</Modal>
 		)
 	}
@@ -250,10 +239,10 @@ export default class UsuarioEditarScene extends Component {
 	}
 
 	onSavePress() {
+		this.setState({loadingVisible: true});
 		dismissKeyboard();
 
 		let nameError = false;
-		let emailError = false;
 		let cityError = false;
 		let stateError = false;
 		let ageError = false;
@@ -262,9 +251,6 @@ export default class UsuarioEditarScene extends Component {
 		if (this.state.nameText === '') {
 			nameError = true;
 		}
-		if (this.state.emailText === '') {
-			emailError = true;
-		} 
 		if (this.state.cityText === '') {
 			cityError = true;
 		} 
@@ -278,9 +264,11 @@ export default class UsuarioEditarScene extends Component {
 			genderError = true;
 		}
 
-		this.setState({nameError: nameError, emailError: emailError, cityError: cityError, stateError: stateError, ageError: ageError, genderError: genderError}, () => {
-			if (!nameError && !emailError && !cityError && !stateError && !ageError && !genderError) {
-				this.props.navigator.push({component: HomeScene});
+		this.setState({nameError: nameError, cityError: cityError, stateError: stateError, ageError: ageError, genderError: genderError}, () => {
+			if (!nameError && !cityError && !stateError && !ageError && !genderError) {
+				this.getUpdateCadastro();
+			} else {
+				this.setState({loadingVisible: false});
 			}	
 		})
 	}
@@ -289,35 +277,33 @@ export default class UsuarioEditarScene extends Component {
 		var request = new XMLHttpRequest();
 		var _this = this;
 		request.onreadystatechange = (e) => {
+			_this.setState({loadingVisible: false});
+			
 			if (request.readyState !== 4) {
 				return;
 			}
 
 			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				_this.saveCredentials(jsonResponse);
-			} else if (request.status === 400) {
-				alert("Email já cadastrado no sistema.")
+				// alert("Dados salvos com sucesso!");
+				_this.saveCredentials();
 			} else {
 				console.warn('Erro: não foi possível conectar ao servidor.');
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login/update?name=' + this.state.nameText + '&email=' + this.state.emailText + '&token=' + this.state.tokenText + '&state=' + this.state.stateText + '&city=' + this.state.cityText + '&age=' + this.state.ageText + '&gender=' + this.state.genderText);
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/usuario/editar?name=' + this.state.nameText + '&token=' + this.state.token + '&state=' + this.state.stateText + '&city=' + this.state.cityText + '&age=' + this.state.ageText + '&gender=' + this.state.genderText + '&photo_url=' + this.state.pictureText);
 		request.send();
 	}
 
-	saveCredentials(jsonResponse) {
+	saveCredentials() {
 		AsyncStorage.multiSet([
-			['name', jsonResponse.name], 
-			['email', jsonResponse.email], 
-			['state', jsonResponse.state], 
-			['city', jsonResponse.city], 
-			['age', jsonResponse.age], 
-			['gender', jsonResponse.gender], 
-			['picture', jsonResponse.photo_url], 
-			['token', jsonResponse.token]
-		], this.props.navigator.push({component: HomeScene}));
+			['name', this.state.nameText], 
+			['state', this.state.stateText], 
+			['city', this.state.cityText], 
+			['age', this.state.ageText], 
+			['gender', this.state.genderText], 
+			['picture', this.state.pictureText ? this.state.pictureText : '']
+		], this.closeModal.bind(this));
 	}
 }
 
