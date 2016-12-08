@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {
 	StyleSheet,
 	View,
+	ScrollView,
 	Text,
 	Modal,
 	ListView,
@@ -9,6 +10,7 @@ import {
 	AsyncStorage
 } from 'react-native';
 import LoadingOverlay from '../components/LoadingOverlay';
+import Gradient from '../components/Gradient';
 import Placeholder from '../components/Placeholder';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from './Header';
@@ -22,7 +24,8 @@ export default class Filter extends Component {
 		super(props);
 		this.state = {
 			filterDataSource: ds.cloneWithRows([]),
-			selectedFilters: [],
+			selectedOptions: [],
+			selectedTopics: [],
 			loading: true,
 			listIsEmpty: false,
 			errorState: false
@@ -30,6 +33,7 @@ export default class Filter extends Component {
 		this.getFiltro = this.getFiltro.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
 		this.onSelectFilter = this.onSelectFilter.bind(this);
+		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
 	closeModal(){
@@ -45,7 +49,7 @@ export default class Filter extends Component {
 
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
-				this.setState({filterDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
+				this.setState({filterDataSource: jsonResponse, loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
 			} else {
 				this.setState({errorState: true});
 			}
@@ -56,11 +60,21 @@ export default class Filter extends Component {
 	}
 
 	componentDidMount() {
-		var _this = this;
 		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
-			_this.getFiltro(result);
+			this.setState({token: result});
+			this.getFiltro(result);
 		});
+	}
+
+	getFilterTopics() {
+		return this.state.filterDataSource.map((rowData, ii) => (
+			<FilterListTopic 
+				key={ii}
+				title={rowData.topic}
+				options={rowData.options}
+            	selectedOptions={this.state.selectedOptions}
+            	onSelectFilter={(title, option) => this.onSelectFilter(title, option)}/>
+		));
 	}
 
 	renderLoadingOrView() {
@@ -73,23 +87,18 @@ export default class Filter extends Component {
 				this.setState({errorState: false, loading: true}, this.getFiltro(this.state.token))}} />)
 		} else {
 			return (
-				<View>
-					<ListView
-						style={{flex: 1}}
-	                    enableEmptySections={true}
-	                    automaticallyAdjustContentInsets={false}
-	                    dataSource={this.state.filterDataSource} 
-	                    selectedOptions={this.state.selectedFilters}
-	                    renderRow={(rowData) => <FilterListTopic 
-	                    							title={rowData.topic}
-	                    							options={rowData.options}
-								                	selectedOptions={this.state.selectedFilters}
-								                	onSelectFilter={(title, option) => this.onSelectFilter(title, option)}/>} />
+				<View style={{flex: 1}}>
+					<ScrollView style={{flex: 1}}>
+						<View style={{flex: 1, paddingBottom: 30}}>
+							{this.getFilterTopics()}
+						</View>
+					</ScrollView>
+					<Gradient />
 					<View style={styles.box}>
 						<TouchableElement onPress={this.onClearActionSelected.bind(this)} style={[styles.button, {backgroundColor: '#575757'}]}>
 							<Text style={{fontWeight: 'bold', color: 'white'}}>Limpar</Text>
 						</TouchableElement>
-						<TouchableElement onPress={this.props.onFilterActionSelected} style={[styles.button, {backgroundColor: '#33CCCC'}]}>
+						<TouchableElement onPress={this.onFilterActionSelected.bind(this)} style={[styles.button, {backgroundColor: '#33CCCC'}]}>
 							<Text style={{fontWeight: 'bold', color: 'white'}}>Filtrar</Text>
 						</TouchableElement>
 					</View>
@@ -123,20 +132,34 @@ export default class Filter extends Component {
 
 	onSelectFilter(title, option) {
 		console.log(title + ' - ' + option);
-		let newSelectedOptions = this.state.selectedFilters;
+		let newSelectedOptions = this.state.selectedOptions;
+		let newSelectedTopics = this.state.selectedTopics;
+
 		if (newSelectedOptions.includes(option)) {
 			let index = newSelectedOptions.indexOf(option);
 			newSelectedOptions.splice(index, 1);
+			newSelectedTopics.splice(index, 1);
 		} else {
 			newSelectedOptions.push(option);
+			newSelectedTopics.push(title);
 		}
-		this.setState({selectedFilters: newSelectedOptions});
-		console.log(this.state.selectedFilters);
+		this.setState({selectedOptions: newSelectedOptions, selectedTopics: newSelectedTopics});
 	}
 
 	onClearActionSelected() {
-		console.log('onClearActionSelected');
-		this.setState({selectedFilters: []});
+		this.setState({selectedOptions: []});
+		this.setState({selectedTopics: []});
+	}
+
+	onFilterActionSelected() {
+		let filterText = '';
+
+		this.state.selectedOptions.map((option, ii) => {
+			let topic = this.state.selectedTopics[ii];
+			filterText = filterText + '&' + topic + '=' + option;
+		});
+
+		this.props.onFilterActionSelected(filterText);
 	}
 }
 
@@ -145,7 +168,7 @@ const styles = StyleSheet.create({
 		paddingTop: -25
 	},
 	box: {
-		height: 100,
+		height: 70,
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center'

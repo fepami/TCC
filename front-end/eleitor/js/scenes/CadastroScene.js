@@ -45,7 +45,7 @@ export default class CadastroScene extends Component {
 			password2Error: false,
 			fbIDText: this.props.id,
 			isUsingFB: this.props.id ? true : false,
-			loadingVisible: false
+			loadingIndex: -10
 		}
 
 		this.showPasswordFields = this.showPasswordFields.bind(this);
@@ -118,7 +118,7 @@ export default class CadastroScene extends Component {
 				<Header
 					navigator={this.props.navigator}
 					title='Cadastro' />
-				<KeyboardAwareScrollView style={{flex: 1}}>
+				<KeyboardAwareScrollView style={{flex: 1, backgroundColor: 'white'}}>
 					<View style={styles.view}>
 						<View style={{alignItems: 'center', borderBottomColor: 'black', borderBottomWidth: 2, paddingBottom: 15}}>
 							<View style={{width: 140, height: 112}}>
@@ -226,13 +226,7 @@ export default class CadastroScene extends Component {
 						</View>
 					</View>	
 				</KeyboardAwareScrollView>
-				<Modal
-					animationType={'fade'}
-					transparent={true}
-					visible={this.state.loadingVisible}
-					onRequestClose={() => this.state.setState({loadingVisible: false})} >
-					<LoadingOverlay style={{backgroundColor: 'rgba(0,0,0,0.5)'}}/>
-				</Modal>
+				<LoadingOverlay style={{zIndex: this.state.loadingIndex}}/>
 			</View>
 		)
 	}
@@ -255,13 +249,14 @@ export default class CadastroScene extends Component {
 				console.log('User tapped custom button: ', response.customButton);
 			} else {
 				// You can display the image using either data...
-				const source = 'data:image/jpeg;base64,' + response.data;
+				// const source = 'data:image/jpeg;base64,' + response.data;
 
 				// or a reference to the platform specific asset location
+				let source = '';
 				if (Platform.OS === 'ios') {
-					const source = response.uri.replace('file://', '');
+					source = response.uri.replace('file://', '');
 				} else {
-					const source = response.uri;
+					source = response.uri;
 				}
 
 				this.setState({pictureText: source});
@@ -270,7 +265,7 @@ export default class CadastroScene extends Component {
 	}
 
 	onSavePress() {
-		this.setState({loadingVisible: true});
+		this.setState({loadingIndex: 10});
 		dismissKeyboard();
 		
 		let nameError = false;
@@ -317,7 +312,7 @@ export default class CadastroScene extends Component {
 			if (!nameError && !emailError && !cityError && !stateError && !ageError && !genderError && !passwordError && !password2Error && passwordTextMatch) {
 				this.getCadastro();
 			} else {
-				this.setState({loadingVisible: false});
+				this.setState({loadingIndex: -10});
 			}
 		})
 	}
@@ -326,12 +321,11 @@ export default class CadastroScene extends Component {
 		var request = new XMLHttpRequest();
 		var _this = this;
 		request.onreadystatechange = (e) => {
-			_this.setState({loadingVisible: false});
-
 			if (request.readyState !== 4) {
 				return;
 			}
 
+			_this.setState({loadingIndex: -10});
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
 				_this.saveCredentials(jsonResponse);

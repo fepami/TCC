@@ -56,6 +56,7 @@ export default class Header extends Component {
 		if(this.props.leftItem){
 			this.props.leftItem.onPress();
 		} else if(this.state.hasPreviousState){
+			this.props.navigator.refresh && this.props.navigator.refresh();
 			this.props.navigator.pop();
 		} else {
 			this.context.openDrawer();

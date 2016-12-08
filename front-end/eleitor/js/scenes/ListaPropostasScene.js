@@ -35,9 +35,10 @@ export default class ListaPropostasScene extends Component {
 		this.onSubmitSearch = this.onSubmitSearch.bind(this);
 		this.getPropostas = this.getPropostas.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
+		this.refresh = this.refresh.bind(this);
 	}
 
-	getPropostas(token) {
+	getPropostas(token, filter) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = (e) => {
 			if (request.readyState !== 4) {
@@ -57,16 +58,31 @@ export default class ListaPropostasScene extends Component {
 		};
 
 		let type = this.props.type ? '/' + this.props.type : '';
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas' + type + '?token=' + token);
+		const filterText = filter ? filter : '';
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas' + type + '?token=' + token + filterText);
 		request.send();
 	}
 
+	refresh() {
+		if (this.state.token) {
+			if (!this.state.loading) {
+				setTimeout(()=>{
+					this.setState({errorState: false, listIsEmpty: false, loading: true});
+					this.getPropostas(this.state.token)
+				}, 1);
+			}
+		} else {
+			var _this = this;
+			AsyncStorage.getItem('token', (err, result) => {
+				_this.setState({token: result});
+				_this.getPropostas(result);
+			});
+		}
+	}
+
 	componentDidMount() {
-		var _this = this;
-		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
-			_this.getPropostas(result);
-		});
+		this.refresh();
+		this.props.navigator.refresh = this.refresh;
 	}
 
 	renderSearchBarIOS() {
@@ -151,34 +167,15 @@ export default class ListaPropostasScene extends Component {
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
                 	type={'propostas'}
                 	title='Filtrar Propostas'
-                	selectedFilters={this.state.selectedFilters}
-                	onSelectFilter={(option) => this.onSelectFilter(option)} 
-                	onClearActionSelected={() => this.onClearActionSelected()}
-                	onFilterActionSelected={() => this.onFilterActionSelected()} />
+                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)} />
 			</View>
 		)
 	}
 
-	onSelectFilter(option) {
-		console.log(option);
-		let newSelectedOptions = this.state.selectedFilters;
-		if (newSelectedOptions.includes(option)) {
-			let index = newSelectedOptions.indexOf(option);
-			newSelectedOptions.splice(index, 1);
-		} else {
-			newSelectedOptions.push(option);
-		}
-		this.setState({selectedFilters: newSelectedOptions});
-		console.log(this.state.selectedFilters);
-	}
-
-	onClearActionSelected() {
-		console.log('onClearActionSelected');
-		this.setState({selectedFilters: []});
-	}
-
-	onFilterActionSelected() {
+	onFilterActionSelected(filter) {
+		console.log(filter);
 		this.onCloseFilter();
+		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getPropostas(this.state.token, filter));
 	}
 
 	onPropostaPress(data) {

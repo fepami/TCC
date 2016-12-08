@@ -35,7 +35,7 @@ export default class PropostaDetalheScene extends Component {
 		this.postVoto = this.postVoto.bind(this);
 		this.getProposta = this.getProposta.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
-
+		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
 	getProposta(token) {
@@ -66,7 +66,7 @@ export default class PropostaDetalheScene extends Component {
 
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
-				this.setState({approval: jsonResponse.approval});
+				this.setState({approval: jsonResponse[0].approval});
 			} else {
 				console.warn('Erro: não foi possível conectar ao servidor.');
 			}
@@ -77,10 +77,9 @@ export default class PropostaDetalheScene extends Component {
 	}
 
 	componentDidMount() {
-		var _this = this;
 		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
-			_this.getProposta(result);
+			this.setState({token: result});
+			this.getProposta(result);
 		});
 	}
 

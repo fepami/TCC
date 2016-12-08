@@ -34,9 +34,10 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
 		this.getHistoricoPropostas = this.getHistoricoPropostas.bind(this);
 		this.getCargoText = this.getCargoText.bind(this);
+		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
-	getHistoricoPropostas(token) {
+	getHistoricoPropostas(token, filter) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = (e) => {
 			if (request.readyState !== 4) {
@@ -55,15 +56,15 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/propostas?token=' + token);
+		const filterText = filter ? filter : '';
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/propostas?token=' + token + filterText);
 		request.send();
 	}
 
 	componentDidMount() {
-		var _this = this;
 		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
-			_this.getHistoricoPropostas(result);
+			this.setState({token: result});
+			this.getHistoricoPropostas(result);
 		});
 	}
 
@@ -111,7 +112,7 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 		}];
 
 		return(
-			<View style={{flex: 1}}>
+			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 					navigator={this.props.navigator}
 					title='Histórico de Propostas'
@@ -132,12 +133,9 @@ export default class PoliticoHistoricoPropostasScene extends Component {
                 	navigator={this.props.navigator} 
                 	modalVisible={this.state.modalVisible} 
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
-                	dtype={'propostas'}
+                	type={'propostas'}
                 	title='Filtrar Propostas'
-                	selectedFilters={this.state.selectedFilters}
-                	onSelectFilter={(option) => this.onSelectFilter(option)} 
-                	onClearActionSelected={() => this.onClearActionSelected()}
-                	onFilterActionSelected={() => this.onFilterActionSelected()} />
+                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)} />
 			</View>
 		)
 	}
@@ -158,26 +156,10 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 
 	}
 
-	onSelectFilter(option) {
-		console.log(option);
-		let newSelectedOptions = this.state.selectedFilters;
-		if (newSelectedOptions.includes(option)) {
-			let index = newSelectedOptions.indexOf(option);
-			newSelectedOptions.splice(index, 1);
-		} else {
-			newSelectedOptions.push(option);
-		}
-		this.setState({selectedFilters: newSelectedOptions});
-		console.log(this.state.selectedFilters);
-	}
-
-	onClearActionSelected() {
-		console.log('onClearActionSelected');
-		this.setState({selectedFilters: []});
-	}
-
-	onFilterActionSelected() {
+	onFilterActionSelected(filter) {
+		console.log(filter);
 		this.onCloseFilter();
+		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getHistoricoPropostas(this.state.token, filter));
 	}
 
 	onPropostaPress(data) {

@@ -4,8 +4,7 @@ import {
 	View,
 	Text,
 	TabBarIOS,
-	Navigator,
-	Platform
+	Navigator
 } from 'react-native';
 import { switchTab } from '../redux/actions/navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -21,6 +20,7 @@ class NavigationManager extends Component{
 		this.props.onTabSelect(tab);
 	}
 	renderScene(route, navigator) {
+		navigator.refresh && navigator.getCurrentRoutes().length === 1 && navigator.refresh();
 		return <route.component {...route.passProps} navigator={navigator} rootNavigator={this.props.navigator} />
 	}
 	render(){
@@ -49,9 +49,6 @@ class NavigationManager extends Component{
 									initialRoute={{component: tab.component}}
 									renderScene={this.renderScene.bind(this)}
 									configureScene={route => {
-										if(Platform.OS === 'android'){
-											return Navigator.SceneConfigs.FloatFromBottomAndroid;
-										}
 										if(route.modal){
 											return Navigator.SceneConfigs.FloatFromBottom;
 										} else {
@@ -65,60 +62,6 @@ class NavigationManager extends Component{
 				})}
 			</TabBarIOS>
 		)
-		// return(
-		// 	<TabBarIOS tintColor='green' translucent={false}>
-		// 		<Icon.TabBarItem
-		// 			title='Home'
-		// 			selected={this.props.tab === 'home'}
-		// 			onPress={this.onTabSelect.bind(this, 'home')}
-		// 			iconName='ios-home-outline'
-		// 			selectedIconName='ios-home'>
-		// 			<View style={styles.container}>
-		// 				<HomeScene navigator={this.props.navigator}/>
-		// 			</View>
-		// 		</Icon.TabBarItem>
-		// 		<Icon.TabBarItem
-		// 			title='Políticos'
-		// 			selected={this.props.tab === 'politicos'}
-		// 			onPress={this.onTabSelect.bind(this, 'politicos')}
-		// 			iconName='ios-contacts-outline'
-		// 			selectedIconName='ios-contacts'>
-		// 			<View style={styles.container}>
-		// 				<ListaPoliticosScene navigator={this.props.navigator}/>
-		// 			</View>
-		// 		</Icon.TabBarItem>
-		// 		<Icon.TabBarItem
-		// 			title='Propostas'
-		// 			selected={this.props.tab === 'propostas'}
-		// 			onPress={this.onTabSelect.bind(this, 'propostas')}
-		// 			iconName='ios-bookmarks-outline'
-		// 			selectedIconName='ios-bookmarks'>
-		// 			<View style={styles.container}>
-		// 				<ListaPropostasScene navigator={this.props.navigator}/>
-		// 			</View>
-		// 		</Icon.TabBarItem>
-		// 		<Icon.TabBarItem
-		// 			title='Seguindo'
-		// 			selected={this.props.tab === 'seguindo'}
-		// 			onPress={this.onTabSelect.bind(this, 'seguindo')}
-		// 			iconName='ios-star-outline'
-		// 			selectedIconName='ios-star'>
-		// 			<View style={styles.container}>
-		// 				<SeguindoScene navigator={this.props.navigator}/>
-		// 			</View>
-		// 		</Icon.TabBarItem>
-		// 		<Icon.TabBarItem
-		// 			title='Perfil'
-		// 			selected={this.props.tab === 'perfil'}
-		// 			onPress={this.onTabSelect.bind(this, 'perfil')}
-		// 			iconName='ios-person-outline'
-		// 			selectedIconName='ios-person'>
-		// 			<View style={styles.container}>
-		// 				<UsuarioPerfilScene navigator={this.props.navigator}/>
-		// 			</View>
-		// 		</Icon.TabBarItem>
-		// 	</TabBarIOS>
-		// )
 	}
 }
 

@@ -34,7 +34,7 @@ export default class LoginScene extends Component {
 			emailError: false,
 			passwordError: false,
 			user: {},
-			loadingVisible: false
+			loadingIndex: -10
 		}
 
 		this.saveCredentials = this.saveCredentials.bind(this);
@@ -48,8 +48,8 @@ export default class LoginScene extends Component {
 		})
 
 		return(
-			<KeyboardAwareScrollView style={{flex: 1, backgroundColor: 'white'}}>
-				<View style={{flex: 1, backgroundColor: 'white', padding: 15}}>
+			<View style={{flex: 1, backgroundColor: 'white'}}>
+				<KeyboardAwareScrollView style={{flex: 1, backgroundColor: 'white', padding: 15}}>
 					<View style={{alignItems: 'center', paddingTop: 30}}>
 						<Image
 							style={styles.image}
@@ -105,15 +105,9 @@ export default class LoginScene extends Component {
 					<TouchableElement onPress={this.onNewAccountPress.bind(this)} style={{alignSelf: 'center', height: 40, justifyContent: 'center'}}>
 						<Text>Criar uma conta</Text>
 					</TouchableElement>
-				</View>
-				<Modal
-					animationType={'fade'}
-					transparent={true}
-					visible={this.state.loadingVisible}
-					onRequestClose={() => this.state.setState({loadingVisible: false})} >
-					<LoadingOverlay style={{backgroundColor: 'rgba(0,0,0,0.5)'}}/>
-				</Modal>
-			</KeyboardAwareScrollView>
+				</KeyboardAwareScrollView>
+				<LoadingOverlay style={{zIndex: this.state.loadingIndex, top: 0}}/>
+			</View>
 		)
 	}
 
@@ -128,7 +122,7 @@ export default class LoginScene extends Component {
 					alert('Erro de autenticação');
 				} else {
 					const age = this.getAge(result.birthday);
-					this.setState({loadingVisible: true, user: {name: result.name, email: result.email, gender: (result.gender === 'female') ? 'Feminino' : 'Masculino', picture: result.picture.data.url, age: age, id: result.id}}, this.getLogin('fb', result.email, result.id));
+					this.setState({loadingIndex: 10, user: {name: result.name, email: result.email, gender: (result.gender === 'female') ? 'Feminino' : 'Masculino', picture: result.picture.data.url, age: age, id: result.id}}, this.getLogin('fb', result.email, result.id));
 				}
 			}
 
@@ -162,7 +156,7 @@ export default class LoginScene extends Component {
 	}
 
 	onLoginPress() {
-		this.setState({loadingVisible: true});
+		this.setState({loadingIndex: 10});
 		dismissKeyboard();
 		
 		let emailError = false;
@@ -180,7 +174,7 @@ export default class LoginScene extends Component {
 			if (!emailError && !passwordError) {
 				this.getLogin('manual', this.state.emailText, this.state.passwordText);
 			} else {
-				this.setState({loadingVisible: false});
+				this.setState({loadingIndex: -10});
 			}
 		})
 	}
@@ -189,12 +183,11 @@ export default class LoginScene extends Component {
 		var request = new XMLHttpRequest();
 		var _this = this;
 		request.onreadystatechange = (e) => {
-			_this.setState({loadingVisible: false});
-
 			if (request.readyState !== 4) {
 				return;
 			}
 
+			_this.setState({loadingIndex: -10});
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
 				_this.saveCredentials(jsonResponse);
@@ -250,7 +243,8 @@ const styles = StyleSheet.create({
 		borderRadius: 3, 
 		backgroundColor: 'white', 
 		flexDirection: 'row', 
-		flex: 1
+		flex: 1,
+		padding: 5
 	},
 	box: {
 		paddingVertical: 15,

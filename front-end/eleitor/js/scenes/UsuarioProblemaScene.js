@@ -80,7 +80,8 @@ const styles = StyleSheet.create({
 		borderRadius: 3, 
 		backgroundColor: 'white', 
 		flexDirection: 'row', 
-		flex: 1
+		flex: 1,
+		padding: 5
 	},
 	box: {
 		flex: 1,

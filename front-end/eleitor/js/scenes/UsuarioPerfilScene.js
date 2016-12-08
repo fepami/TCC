@@ -18,36 +18,46 @@ export default class UsuarioPerfilScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			name: 'Nome',
-			email: 'Email',
-			state: 'Estado',
-			city: 'Cidade',
-			age: 'Idade',
-			picture: '',
+			nameText: 'Nome',
+			emailText: 'Email',
+			stateText: 'Estado',
+			cityText: 'Cidade',
+			ageText: 'Idade',
+			genderText: '',
+			pictureText: '',
 			editSceneVisibility: false
 		}
 		this.changeEditSceneVisibility = this.changeEditSceneVisibility.bind(this);
+		this.componentDidMount = this.componentDidMount.bind(this);
+		this.refresh = this.refresh.bind(this);
 	}
 
 	componentDidMount() {
-		var _this = this;
+		this.refresh();
+		this.props.navigator.refresh = this.refresh;
+	}
+
+	refresh() {
 		AsyncStorage.getItem('name', (err, result) => {
-			_this.setState({name: result});
+			this.setState({nameText: result});
 		});
 		AsyncStorage.getItem('email', (err, result) => {
-			_this.setState({email: result});
+			this.setState({emailText: result});
 		});
 		AsyncStorage.getItem('state', (err, result) => {
-			_this.setState({state: result});
+			this.setState({stateText: result});
 		});
 		AsyncStorage.getItem('city', (err, result) => {
-			_this.setState({city: result});
+			this.setState({cityText: result});
 		});
 		AsyncStorage.getItem('age', (err, result) => {
-			_this.setState({age: result});
+			this.setState({ageText: result});
+		});
+		AsyncStorage.getItem('gender', (err, result) => {
+			this.setState({genderText: result});
 		});
 		AsyncStorage.getItem('picture', (err, result) => {
-			_this.setState({picture: result});
+			this.setState({pictureText: result});
 		});
 	}
 
@@ -77,6 +87,8 @@ export default class UsuarioPerfilScene extends Component {
 				onPress: this.onPressConfiguracoes.bind(this)
 		}});
 
+		const imageSource = (this.state.pictureText) && (this.state.pictureText != '') && (this.state.pictureText != 'null') ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png');
+		
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
@@ -87,12 +99,14 @@ export default class UsuarioPerfilScene extends Component {
 				<ScrollView style={{flex: 1}}>
 					<View style={styles.view}>
 						<View style={styles.line}>
-							<Image
-								style={styles.roundedImage}
-								source={this.state.picture ? {uri: this.state.picture} : require('../resources/image/placeholder.png')} />
-							<Text style={styles.h1}>{this.state.name}, {this.state.age} anos</Text>
-							<Text >{this.state.email}</Text>
-							<Text >Vota em: {this.state.city}, {this.state.state}</Text>
+							<View style={styles.roundedView}>
+								<Image
+									style={styles.roundedImage}
+									source={imageSource}/>
+							</View>
+							<Text style={styles.h1}>{this.state.nameText}, {this.state.ageText} anos</Text>
+							<Text >{this.state.emailText}</Text>
+							<Text >Vota em: {this.state.cityText}, {this.state.stateText}</Text>
 						</View>
 						<TouchableElement onPress={this.onPressConfiguracoes.bind(this)}>
 							<View style={styles.cellTop}>
@@ -108,7 +122,15 @@ export default class UsuarioPerfilScene extends Component {
 						</TouchableElement>
 					</View>
 				</ScrollView>
-				<UsuarioEditarScene 
+				<UsuarioEditarScene
+					nameText={this.state.nameText}
+					emailText={this.state.emailText}
+					stateText={this.state.stateText}
+					cityText={this.state.cityText}
+					ageText={this.state.ageText}
+					genderText={this.state.genderText}
+					pictureText={this.state.pictureText}
+					callback={this.refresh}
 					navigator={this.props.navigator} 
                 	modalVisible={this.state.editSceneVisibility} 
                 	changeModalVisibility={this.changeEditSceneVisibility} />
@@ -147,10 +169,17 @@ const styles = StyleSheet.create({
 	roundedImage: {
 		width: 100, 
 		height: 100, 
-		borderRadius: 50,
+		borderRadius: 50, 
 		alignSelf: 'center',
-		borderColor: 'black',
-		borderWidth: 2
+		borderColor: 'black'
+	},
+	roundedView: {
+		width: 102, 
+		height: 102, 
+		borderRadius: 51, 
+		borderWidth: 1,
+		alignSelf: 'center',
+		borderColor: 'black'
 	},
 	line: {
 		alignItems: 'center',

@@ -18,7 +18,7 @@ export default class Header extends Component {
 		let {rightItem} = this.props;
 		const back = {
 			icon: 'ios-arrow-back',
-			onPress: this.props.navigator.pop,
+			onPress: this.props.navigator.pop
 		};
 		const leftItem = this.props.leftItem ? this.props.leftItem : this.state.hasPreviousRoute? back : null;
 		if(!rightItem && actions){

@@ -7,6 +7,7 @@ import {
 	TextInput,
 	ScrollView,
 	Platform,
+	StatusBar,
 	AsyncStorage
 } from 'react-native';
 import TouchableElement from '../components/TouchableElement';
@@ -14,6 +15,7 @@ import dismissKeyboard from 'dismissKeyboard';
 import Header from '../components/Header';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import LoadingOverlay from '../components/LoadingOverlay';
+import SuccessOverlay from '../components/SuccessOverlay';
 
 export default class UsuarioTrocarSenhaScene extends Component {
 	constructor(props) {
@@ -25,8 +27,11 @@ export default class UsuarioTrocarSenhaScene extends Component {
 			currentpwdError: false,
 			newpwdError: false,
 			newpwd2Error: false,
-			loadingVisible: false
+			loadingIndex: -10,
+			successIndex: -10
 		}
+		this.componentDidMount = this.componentDidMount.bind(this);
+		this.showSuccessOverlay = this.showSuccessOverlay.bind(this);
 	}
 
 	closeModal(){
@@ -34,9 +39,8 @@ export default class UsuarioTrocarSenhaScene extends Component {
 	}
 
 	componentDidMount() {
-		var _this = this;
 		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
+			this.setState({token: result});
 		});
 	}
 
@@ -56,6 +60,7 @@ export default class UsuarioTrocarSenhaScene extends Component {
 			show: 'always',
 			onActionSelected: this.onSavePress.bind(this)
 		}];
+		console.log(this.state.loadingIndex, ' zindex');
 
 		return(
 			<Modal 
@@ -121,19 +126,14 @@ export default class UsuarioTrocarSenhaScene extends Component {
 						</View>
 					</KeyboardAwareScrollView>
 				</View>
-				<Modal
-					animationType={'fade'}
-					transparent={true}
-					visible={this.state.loadingVisible}
-					onRequestClose={() => this.state.setState({loadingVisible: false})} >
-					<LoadingOverlay style={{backgroundColor: 'rgba(0,0,0,0.5)'}}/>
-				</Modal>
+				<LoadingOverlay style={{zIndex: this.state.loadingIndex}}/>
+				<SuccessOverlay style={{zIndex: this.state.successIndex}}/>
 			</Modal>
 		)
 	}
 
 	onSavePress() {
-		this.setState({loadingVisible: true});
+		this.setState({loadingIndex: 10});
 		dismissKeyboard();
 		
 		let currentpwdError = false;
@@ -160,7 +160,7 @@ export default class UsuarioTrocarSenhaScene extends Component {
 			if (!currentpwdError && !newpwdError && !newpwd2Error && newpwdTextMatch) {
 				this.getTrocarSenha();
 			} else {
-				this.setState({loadingVisible: false});
+				this.setState({loadingIndex: -10});
 			}
 		})
 	}
@@ -168,16 +168,17 @@ export default class UsuarioTrocarSenhaScene extends Component {
 	getTrocarSenha() {
 		var request = new XMLHttpRequest();
 		var _this = this;
+
 		request.onreadystatechange = (e) => {
-			_this.setState({loadingVisible: false});
 
 			if (request.readyState !== 4) {
 				return;
 			}
 
+			_this.setState({loadingIndex: -10});
 			if (request.status === 200) {
 				// alert("Nova senha salva com sucesso!");
-				_this.props.changeModalVisibility(false);
+				_this.showSuccessOverlay();
 			} else if (request.status === 404) {
 				alert("Senha antiga incorreta.")
 			} else {
@@ -186,7 +187,16 @@ export default class UsuarioTrocarSenhaScene extends Component {
 		};
 
 		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/usuario/trocar?antiga=' + this.state.currentpwdText + '&nova=' + this.state.newpwdText + '&token=' + this.state.token);
-		request.send();
+		request.send();			
+		
+	}
+
+	showSuccessOverlay() {
+		this.setState({successIndex: 10})
+		setTimeout(()=>{
+			this.setState({successIndex: -10});
+			this.closeModal();
+		}, 1500);
 	}
 }
 
@@ -206,7 +216,8 @@ const styles = StyleSheet.create({
 		borderRadius: 3, 
 		backgroundColor: 'white', 
 		flexDirection: 'row', 
-		flex: 1
+		flex: 1,
+		padding: 5
 	},
 	box: {
 		flex: 1,
@@ -222,5 +233,5 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#33CCCC'
-	}
+	},
 })

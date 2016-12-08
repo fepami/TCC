@@ -20,6 +20,7 @@ import dismissKeyboard from 'dismissKeyboard';
 import HomeScene from './HomeScene';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import LoadingOverlay from '../components/LoadingOverlay';
+import SuccessOverlay from '../components/SuccessOverlay';
 
 export default class UsuarioEditarScene extends Component {
 	constructor(props) {
@@ -36,33 +37,22 @@ export default class UsuarioEditarScene extends Component {
 			stateError: false,
 			ageError: false,
 			genderError: false,
-			loadingVisible: false
+			loadingIndex: -10,
+			successIndex: -10
 		}
+		this.componentDidMount = this.componentDidMount.bind(this);
+		this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+		this.showSuccessOverlay = this.showSuccessOverlay.bind(this);
 	}
 
 	componentDidMount() {
-		var _this = this;
-		AsyncStorage.getItem('name', (err, result) => {
-			_this.setState({nameText: result});
-		});
-		AsyncStorage.getItem('state', (err, result) => {
-			_this.setState({stateText: result});
-		});
-		AsyncStorage.getItem('city', (err, result) => {
-			_this.setState({cityText: result});
-		});
-		AsyncStorage.getItem('age', (err, result) => {
-			_this.setState({ageText: result});
-		});
-		AsyncStorage.getItem('gender', (err, result) => {
-			_this.setState({genderText: result});
-		});
-		AsyncStorage.getItem('picture', (err, result) => {
-			_this.setState({pictureText: result});
-		});
 		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
+			this.setState({token: result});
 		});
+	}
+
+	componentWillReceiveProps(nextProps) {
+		this.setState({nameText: this.props.nameText, cityText: this.props.cityText, stateText: this.props.stateText, ageText: this.props.ageText, genderText: this.props.genderText, pictureText: this.props.pictureText});
 	}
 
 	closeModal(){
@@ -93,6 +83,8 @@ export default class UsuarioEditarScene extends Component {
 			show: 'always',
 			onActionSelected: this.onSavePress.bind(this)
 		}];
+		const imageSource = (this.state.pictureText) && (this.state.pictureText != '') && (this.state.pictureText != 'null') ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png');
+
 		return(
 			<Modal 
 				animationType={'slide'}
@@ -112,7 +104,7 @@ export default class UsuarioEditarScene extends Component {
 									<View style={styles.roundedView}>
 										<Image
 											style={styles.roundedImage}
-											source={this.state.pictureText ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png')}/>
+											source={imageSource}/>
 									</View>
 									<TouchableElement onPress={() => this.onChangePhotoPress()} style={styles.line}>
 										<Text style={{color: 'black'}}>Mudar a foto</Text>
@@ -143,6 +135,7 @@ export default class UsuarioEditarScene extends Component {
 									<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
 									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.ageError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 										<CustomPicker
+											ref={'age-picker'}
 											mode='dropdown'
 											selectedValue={this.state.ageText}
 											onValueChange={(age) => this.setState({ageText: age})}>
@@ -152,6 +145,7 @@ export default class UsuarioEditarScene extends Component {
 									<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
 									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.genderError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 										<CustomPicker
+											ref={'gender-picker'}
 											mode='dropdown'
 											selectedValue={this.state.genderText}
 											onValueChange={(gender) => this.setState({genderText: gender})}>
@@ -166,6 +160,7 @@ export default class UsuarioEditarScene extends Component {
 									<Icon name='map' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
 									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.stateError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 										<CustomPicker
+											ref={'state-picker'}
 											mode='dropdown'
 											selectedValue={this.state.stateText}
 											onValueChange={(state) => this.setState({stateText: state})}>
@@ -177,6 +172,7 @@ export default class UsuarioEditarScene extends Component {
 									<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
 									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cityError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 										<CustomPicker
+											ref={'city-picker'}
 											mode='dropdown'
 											selectedValue={this.state.cityText}
 											onValueChange={(city) => this.setState({cityText: city})}>
@@ -195,13 +191,8 @@ export default class UsuarioEditarScene extends Component {
 						</View>
 					</KeyboardAwareScrollView>
 				</View>
-				<Modal
-					animationType={'fade'}
-					transparent={true}
-					visible={this.state.loadingVisible}
-					onRequestClose={() => this.state.setState({loadingVisible: false})} >
-					<LoadingOverlay style={{backgroundColor: 'rgba(0,0,0,0.5)'}}/>
-				</Modal>
+				<LoadingOverlay style={{zIndex: this.state.loadingIndex}}/>
+				<SuccessOverlay style={{zIndex: this.state.successIndex}}/>
 			</Modal>
 		)
 	}
@@ -224,13 +215,14 @@ export default class UsuarioEditarScene extends Component {
 				console.log('User tapped custom button: ', response.customButton);
 			} else {
 				// You can display the image using either data...
-				const source = 'data:image/jpeg;base64,' + response.data;
+				// const source = 'data:image/jpeg;base64,' + response.data;
 
 				// or a reference to the platform specific asset location
+				let source = '';
 				if (Platform.OS === 'ios') {
-					const source = response.uri.replace('file://', '');
+					source = response.uri.replace('file://', '');
 				} else {
-					const source = response.uri;
+					source = response.uri;
 				}
 
 				this.setState({pictureText: source});
@@ -239,7 +231,7 @@ export default class UsuarioEditarScene extends Component {
 	}
 
 	onSavePress() {
-		this.setState({loadingVisible: true});
+		this.setState({loadingIndex: 10});
 		dismissKeyboard();
 
 		let nameError = false;
@@ -268,7 +260,7 @@ export default class UsuarioEditarScene extends Component {
 			if (!nameError && !cityError && !stateError && !ageError && !genderError) {
 				this.getUpdateCadastro();
 			} else {
-				this.setState({loadingVisible: false});
+				this.setState({loadingIndex: -10});
 			}	
 		})
 	}
@@ -277,14 +269,14 @@ export default class UsuarioEditarScene extends Component {
 		var request = new XMLHttpRequest();
 		var _this = this;
 		request.onreadystatechange = (e) => {
-			_this.setState({loadingVisible: false});
-			
 			if (request.readyState !== 4) {
 				return;
 			}
 
+			_this.setState({loadingIndex: -10});
 			if (request.status === 200) {
 				// alert("Dados salvos com sucesso!");
+				_this.showSuccessOverlay();
 				_this.saveCredentials();
 			} else {
 				console.warn('Erro: não foi possível conectar ao servidor.');
@@ -303,7 +295,16 @@ export default class UsuarioEditarScene extends Component {
 			['age', this.state.ageText], 
 			['gender', this.state.genderText], 
 			['picture', this.state.pictureText ? this.state.pictureText : '']
-		], this.closeModal.bind(this));
+		]);
+	}
+
+	showSuccessOverlay() {
+		this.setState({successIndex: 10})
+		setTimeout(()=>{
+			this.setState({successIndex: -10});
+			this.closeModal()
+			this.props.callback && this.props.callback();
+		}, 1500);
 	}
 }
 

@@ -21,7 +21,7 @@ export default class HomeCargosScene extends Component {
 
 	render() {
 		return(
-			<View style={{flex: 1}}>
+			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 						navigator={this.props.navigator}
 						title='Entenda os Cargos' />

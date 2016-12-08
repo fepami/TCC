@@ -1,15 +1,18 @@
 import React from 'react';
 import { 
+	StyleSheet, 
 	View, 
 	ActivityIndicator,
 	Platform,
-	StatusBar,
-	StyleSheet
+	StatusBar
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default (props) => (
-    <View style={[styles.view, props.style]}>
-        <ActivityIndicator size='large' animating={true} />
+    <View style={[styles.layer, props.style]}>
+        <View style={styles.box}>
+	        <Icon name='done' color='#33CCCC' size={80}/>
+	    </View>
     </View>
 )
 
@@ -22,7 +25,7 @@ const HEADER_HEIGHT = Platform.select({
 	})
 
 const styles = StyleSheet.create({
-	view: {
+	layer: {
 		flex: 1, 
 		justifyContent: 'center', 
 		alignItems: 'center', 
@@ -32,5 +35,12 @@ const styles = StyleSheet.create({
 		right: 0, 
 		left: 0, 
 		bottom: 0
-	}
+	},
+	box: {
+		padding: 20,
+		justifyContent: 'center', 
+		alignItems: 'center', 
+		backgroundColor: 'white',
+		borderRadius: 5
+	},
 })

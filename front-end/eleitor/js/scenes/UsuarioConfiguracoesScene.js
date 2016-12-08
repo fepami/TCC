@@ -5,7 +5,8 @@ import {
 	Image,
 	Text,
 	ScrollView,
-	Platform
+	Platform,
+	AsyncStorage
 } from 'react-native';
 import {connect} from 'react-redux';
 import {switchTab} from '../redux/actions/navigation';
@@ -15,7 +16,6 @@ import Header from '../components/Header';
 import LoginScene from './LoginScene';
 import UsuarioEditarScene from './UsuarioEditarScene';
 import UsuarioTrocarSenhaScene from './UsuarioTrocarSenhaScene';
-import UsuarioPerfisAssociadosScene from './UsuarioPerfisAssociadosScene';
 import UsuarioAjudaScene from './UsuarioAjudaScene';
 import UsuarioProblemaScene from './UsuarioProblemaScene';
 import UsuarioSobreScene from './UsuarioSobreScene';
@@ -29,12 +29,43 @@ class UsuarioConfiguracoesScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			nameText: 'Nome',
+			emailText: 'Email',
+			stateText: 'Estado',
+			cityText: 'Cidade',
+			ageText: 'Idade',
+			genderText: '',
+			pictureText: '',
 			editSceneVisibility: false,
 			passwordSceneVisibility: false
 		}
 
 		this.changePasswordSceneVisibility = this.changePasswordSceneVisibility.bind(this);
 		this.changeEditSceneVisibility = this.changeEditSceneVisibility.bind(this);
+	}
+
+	componentDidMount() {
+		AsyncStorage.getItem('name', (err, result) => {
+			this.setState({nameText: result});
+		});
+		AsyncStorage.getItem('email', (err, result) => {
+			this.setState({emailText: result});
+		});
+		AsyncStorage.getItem('state', (err, result) => {
+			this.setState({stateText: result});
+		});
+		AsyncStorage.getItem('city', (err, result) => {
+			this.setState({cityText: result});
+		});
+		AsyncStorage.getItem('age', (err, result) => {
+			this.setState({ageText: result});
+		});
+		AsyncStorage.getItem('gender', (err, result) => {
+			this.setState({genderText: result});
+		});
+		AsyncStorage.getItem('picture', (err, result) => {
+			this.setState({pictureText: result});
+		});
 	}
 
 	renderIcon() {
@@ -45,7 +76,7 @@ class UsuarioConfiguracoesScene extends Component {
 
 	render() {
 		return(
-			<View style={{flex: 1}}>
+			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 						navigator={this.props.navigator}
 						title='Configurações' />
@@ -94,7 +125,15 @@ class UsuarioConfiguracoesScene extends Component {
 						</View>
 					</View>
 				</ScrollView>
-				<UsuarioEditarScene 
+				<UsuarioEditarScene
+					nameText={this.state.nameText}
+					emailText={this.state.emailText}
+					stateText={this.state.stateText}
+					cityText={this.state.cityText}
+					ageText={this.state.ageText}
+					genderText={this.state.genderText}
+					pictureText={this.state.pictureText}
+					callback={this.props.callback}
 					navigator={this.props.navigator} 
                 	modalVisible={this.state.editSceneVisibility} 
                 	changeModalVisibility={this.changeEditSceneVisibility} />

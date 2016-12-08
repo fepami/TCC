@@ -40,6 +40,7 @@ export default class PoliticoPerfilScene extends Component {
 		this.getCargoEvigenciaText = this.getCargoEvigenciaText.bind(this);
 		this.getPartidoText = this.getPartidoText.bind(this);
 		this.getEmailText = this.getEmailText.bind(this);
+		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
 	getPolitico(token) {
@@ -51,7 +52,7 @@ export default class PoliticoPerfilScene extends Component {
 
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
-				this.setState({politicoInfo: jsonResponse[0], user_vote: jsonResponse[0].user_vote, user_follow: jsonResponse[0].user_follow, loading: false});
+				this.setState({politicoInfo: jsonResponse[0], approval: jsonResponse[0].approval, user_vote: jsonResponse[0].user_vote, user_follow: jsonResponse[0].user_follow, loading: false});
 			} else {
 				this.setState({errorState: true});
 			}
@@ -70,6 +71,7 @@ export default class PoliticoPerfilScene extends Component {
 
 			if (request.status === 200) {
 				const jsonResponse = JSON.parse(request.response);
+				this.setState({approval: jsonResponse[0].approval});
 			} else {
 				console.warn('Erro: não foi possível conectar ao servidor.');
 			}
@@ -98,10 +100,9 @@ export default class PoliticoPerfilScene extends Component {
 	}
 
 	componentDidMount() {
-		var _this = this;
 		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
-			_this.getPolitico(result);
+			this.setState({token: result});
+			this.getPolitico(result);
 		});
 	}
 
@@ -145,48 +146,48 @@ export default class PoliticoPerfilScene extends Component {
 
 			return (
 				<View style={{flex: 1}}>
-				<ScrollView style={{flex: 1}}>
-					<View style={styles.view}>
-						<View style={{alignItems: 'center'}}>
-							<View style={{width: 120}}>
-								<Image
-									style={styles.roundedImage}
-									source={{uri: this.state.politicoInfo.foto_url}} />
-								<View style={styles.line}>
-									<Text style={{color: 'black', fontWeight: 'bold'}}>{this.state.politicoInfo.n_p_votar}</Text>
+					<ScrollView style={{flex: 1}}>
+						<View style={styles.view}>
+							<View style={{alignItems: 'center'}}>
+								<View style={{width: 120}}>
+									<Image
+										style={styles.roundedImage}
+										source={{uri: this.state.politicoInfo.foto_url}} />
+									<View style={styles.line}>
+										<Text style={{color: 'black', fontWeight: 'bold'}}>{this.state.politicoInfo.n_p_votar}</Text>
+									</View>
 								</View>
 							</View>
-						</View>
-						<ApprovalBar viewSize={approval_width} approvalPercentage={this.state.politicoInfo.approval} />
-						<View style={{marginBottom: 15}}>
-							<Text style={styles.h1}>{nomeEidadeText}</Text>
-							{this.getCargoEvigenciaText()}
-							{this.getPartidoText()}
-							{this.getEmailText()}
-						</View>
-						<TouchableElement onPress={this.onPressHistorico.bind(this)}>
-							<View style={styles.cellTop}>
-								<Text style={styles.cellText}>Histórico de Propostas</Text>
-								{this.renderIcon()}
+							<ApprovalBar viewSize={approval_width} approvalPercentage={this.state.approval} />
+							<View style={{marginBottom: 15}}>
+								<Text style={styles.h1}>{nomeEidadeText}</Text>
+								{this.getCargoEvigenciaText()}
+								{this.getPartidoText()}
+								{this.getEmailText()}
 							</View>
+							<TouchableElement onPress={this.onPressHistorico.bind(this)}>
+								<View style={styles.cellTop}>
+									<Text style={styles.cellText}>Histórico de Propostas</Text>
+									{this.renderIcon()}
+								</View>
+							</TouchableElement>
+							<TouchableElement onPress={this.onPressCarreira.bind(this)}>
+								<View style={styles.cellBottom}>
+									<Text style={styles.cellText}>Carreira Política</Text>
+									{this.renderIcon()}
+								</View>
+							</TouchableElement>
+						</View>
+					</ScrollView>
+					<Gradient />
+					<View style={styles.box}>
+						<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
+							<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
 						</TouchableElement>
-						<TouchableElement onPress={this.onPressCarreira.bind(this)}>
-							<View style={styles.cellBottom}>
-								<Text style={styles.cellText}>Carreira Política</Text>
-								{this.renderIcon()}
-							</View>
+						<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
+							<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
 						</TouchableElement>
 					</View>
-				</ScrollView>
-				<Gradient />
-				<View style={styles.box}>
-					<TouchableElement onPress={this.onLikeActionSelected} style={[styles.like, {backgroundColor: like_bgcolor}]}>
-						<Icon name='md-thumbs-up' color={likeIcon_color} size={30}/>
-					</TouchableElement>
-					<TouchableElement onPress={this.onDislikeActionSelected} style={[styles.dislike, {backgroundColor: dislike_bgcolor}]}>
-						<Icon name='md-thumbs-down' color={dislikeIcon_color} size={30}/>
-					</TouchableElement>
-				</View>
 				</View>
 			)
 		}

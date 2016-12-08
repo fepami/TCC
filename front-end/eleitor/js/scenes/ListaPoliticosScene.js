@@ -35,9 +35,10 @@ export default class ListaPoliticosScene extends Component {
 		this.onSubmitSearch = this.onSubmitSearch.bind(this);
 		this.getPoliticos = this.getPoliticos.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
+		this.refresh = this.refresh.bind(this);
 	}
 
-	getPoliticos(token) {
+	getPoliticos(token, filter) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = (e) => {
 			if (request.readyState !== 4) {
@@ -53,16 +54,32 @@ export default class ListaPoliticosScene extends Component {
 		};
 
 		let type = this.props.type ? '/' + this.props.type : '';
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos' + type + '?token=' + token);
+		const filterText = filter ? filter : '';
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos' + type + '?token=' + token + filterText);
+		// request.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
 		request.send();
 	}
 
+	refresh() {
+		if (this.state.token) {
+			if (!this.state.loading) {
+				setTimeout(()=>{
+					this.setState({errorState: false, listIsEmpty: false, loading: true});
+					this.getPoliticos(this.state.token)
+				}, 1);
+			}
+		} else {
+			var _this = this;
+			AsyncStorage.getItem('token', (err, result) => {
+				_this.setState({token: result});
+				_this.getPoliticos(result);
+			});
+		}
+	}
+
 	componentDidMount() {
-		var _this = this;
-		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
-			_this.getPoliticos(result);
-		});
+		this.refresh();
+		this.props.navigator.refresh = this.refresh;
 	}
 
 	chooseFilterIcon() {
@@ -125,34 +142,15 @@ export default class ListaPoliticosScene extends Component {
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
                 	type={'politicos'}
                 	title='Filtrar Políticos'
-                	selectedFilters={this.state.selectedFilters}
-                	onSelectFilter={(option) => this.onSelectFilter(option)} 
-                	onClearActionSelected={() => this.onClearActionSelected()}
-                	onFilterActionSelected={() => this.onFilterActionSelected()} />
+                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)} />
 			</View>
 		)
 	}
 
-	onSelectFilter(option) {
-		console.log(option);
-		let newSelectedOptions = this.state.selectedFilters;
-		if (newSelectedOptions.includes(option)) {
-			let index = newSelectedOptions.indexOf(option);
-			newSelectedOptions.splice(index, 1);
-		} else {
-			newSelectedOptions.push(option);
-		}
-		this.setState({selectedFilters: newSelectedOptions});
-		console.log(this.state.selectedFilters);
-	}
-
-	onClearActionSelected() {
-		console.log('onClearActionSelected');
-		this.setState({selectedFilters: []});
-	}
-
-	onFilterActionSelected() {
+	onFilterActionSelected(filter) {
+		console.log(filter);
 		this.onCloseFilter();
+		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getPoliticos(this.state.token, filter));
 	}
 
 	onPoliticoPress(data) {

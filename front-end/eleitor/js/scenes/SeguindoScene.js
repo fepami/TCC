@@ -34,10 +34,10 @@ export default class SeguindoScene extends Component {
 		this.onSubmitSearch = this.onSubmitSearch.bind(this);
 		this.getSeguindo = this.getSeguindo.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
-		this.refreshData = this.refreshData.bind(this);
+		this.refresh = this.refresh.bind(this);
 	}
 
-	getSeguindo(token) {
+	getSeguindo(token, filter) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = (e) => {
 			if (request.readyState !== 4) {
@@ -52,14 +52,18 @@ export default class SeguindoScene extends Component {
 			}
 		};
 
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos_seguidos?token=' + token);
+		const filterText = filter ? filter : '';
+		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos_seguidos?token=' + token + filterText);
 		request.send();
 	}
 
-	refreshData() {
+	refresh() {
 		if (this.state.token) {
 			if (!this.state.loading) {
-				this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getSeguindo(this.state.token));
+				setTimeout(()=>{
+					this.setState({errorState: false, listIsEmpty: false, loading: true});
+					this.getSeguindo(this.state.token)
+				}, 1);
 			}
 		} else {
 			var _this = this;
@@ -71,7 +75,8 @@ export default class SeguindoScene extends Component {
 	}
 
 	componentDidMount() {
-		this.refreshData();
+		this.refresh();
+		this.props.navigator.refresh = this.refresh;
 	}
 
 	renderSearchBarIOS() {
@@ -138,13 +143,15 @@ export default class SeguindoScene extends Component {
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
                 	type={'politicos'}
                 	title='Filtrar Políticos'
-                	onFilterActionSelected={() => this.onFilterActionSelected()} />
+                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)} />
 			</View>
 		)
 	}
 
-	onFilterActionSelected() {
+	onFilterActionSelected(filter) {
+		console.log(filter);
 		this.onCloseFilter();
+		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getSeguindo(this.state.token, filter));
 	}
 
 	onPoliticoPress(data) {

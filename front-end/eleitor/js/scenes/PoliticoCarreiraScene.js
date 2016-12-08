@@ -22,7 +22,7 @@ export default class PoliticoCarreiraScene extends Component {
 		this.getCarreira = this.getCarreira.bind(this);
 		this.getCargoText = this.getCargoText.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
-
+		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
 	getCarreira(token) {
@@ -45,10 +45,9 @@ export default class PoliticoCarreiraScene extends Component {
 	}
 
 	componentDidMount() {
-		var _this = this;
 		AsyncStorage.getItem('token', (err, result) => {
-			_this.setState({token: result});
-			_this.getCarreira(result);
+			this.setState({token: result});
+			this.getCarreira(result);
 		});
 	}
 
@@ -73,7 +72,7 @@ export default class PoliticoCarreiraScene extends Component {
 
 	render() {
 		return(
-			<View style={{flex: 1}}>
+			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 					navigator={this.props.navigator}
 					title='Carreira Politica' />
