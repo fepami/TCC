@@ -6,6 +6,25 @@ const cassandra_handler = require("./cassandra_handler").handler
 
 const helpers = require("./helpers")
 
+var _get_where_filters = function(req){
+	var filter_params = {'Partido': 'pol.party', 'Cargo':'CUR_POS_T.name', 'Localização':'CUR_POS_T.location'};
+	var query_where_components = [];
+
+	Object.keys(filter_params).forEach(function(param){
+		var filter_value = req.query[param];
+		if (req.query[param]) {
+			query_where_components.push(filter_params[param] + " = '" + filter_value + "'");
+		}
+	});
+
+	var special_filter_value = req.query['special_filter'];
+	if (special_filter_value) {
+		query_where_components.push('(' + "pol.party like '%"+ special_filter_value +"%' OR pol.name like '%"+ special_filter_value +"%' OR CUR_POS_T.name like '%"+ special_filter_value +"%'" + ')');
+	}
+
+	return query_where_components.join(' AND ');
+}
+
 
 var get_politicians_func = function(type){
 	var get_politicians = function(req, res, next) {
@@ -51,6 +70,7 @@ var get_politicians_func = function(type){
 			) USER_FOLLOW_T on USER_FOLLOW_T.politician_id = pol.id\
 		';
 		query_for_polis[1] = '';
+		query_for_polis[2] = '';
 
 		var parse_politicians = function(politicians) {
 			var parsed_politicians = [];
@@ -92,16 +112,25 @@ var get_politicians_func = function(type){
 			return parsed_politicians;
 		}
 
+		var where_filters = _get_where_filters(req);
 		var user_id = req.user['id'];
 		if (type === 'follow') {
 			query_for_polis[1] = 'inner join politician_follow f on f.politician_id = pol.id where f.user_id=?';
+
+			if (where_filters) {
+				query_for_polis[2] = 'where ' + where_filters;
+			}
 
 			mysql_handler(query_for_polis.join('\n'), [user_id, user_id ,user_id], function(err, politicians){
 				if (err) {return next(err);}
 				res.json(parse_politicians(politicians));
 			});
 		} else if (type === 'ranking') {
-			query_for_polis[1] = 'order by pol.ranking limit 99';
+			query_for_polis[2] = 'order by pol.ranking limit 99';
+
+			if (where_filters) {
+				query_for_polis[1] = 'where ' + where_filters;
+			}
 
 			mysql_handler(query_for_polis.join('\n'), [user_id ,user_id], function(err, politicians){
 				if (err) {return next(err);}
@@ -110,14 +139,9 @@ var get_politicians_func = function(type){
 		} else if (type === 'election') {
 			query_for_polis[1] = 'where LAST_ELEC_T.election_year = 2016';
 
-			mysql_handler(query_for_polis.join('\n'), [user_id ,user_id], function(err, politicians){
-				if (err) {return next(err);}
-				res.json(parse_politicians(politicians));
-			});
-		} else if (type === 'special_filter') {
-			var special_filter_value = req.query['special_filter'];
-
-			query_for_polis[1] = "where pol.party like '%"+ special_filter_value +"%' OR pol.name like '%"+ special_filter_value +"%' OR CUR_POS_T.name like '%"+ special_filter_value +"%'";
+			if (where_filters) {
+				query_for_polis[1] = query_for_polis[1] + ' AND ' + where_filters;
+			}
 
 			mysql_handler(query_for_polis.join('\n'), [user_id ,user_id], function(err, politicians){
 				if (err) {return next(err);}
@@ -133,6 +157,10 @@ var get_politicians_func = function(type){
 				res.json(parse_politicians(politicians));
 			});
 		} else {
+			if (where_filters) {
+				query_for_polis[1] = 'where ' + where_filters;
+			}
+
 			mysql_handler(query_for_polis.join('\n'), [user_id, user_id], function(err, politicians){
 				if (err) {return next(err);}
 				res.json(parse_politicians(politicians));

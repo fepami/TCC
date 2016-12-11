@@ -6,6 +6,25 @@ const cassandra_handler = require("./cassandra_handler").handler
 
 const helpers = require("./helpers")
 
+var _get_where_filters = function(req){
+	var filter_params = {'Categoria': 'prop.category', 'Partido': 'pol.party', 'Cargo':'CUR_POS_T.name', 'Localização':'CUR_POS_T.location'};
+	var query_where_components = [];
+
+	Object.keys(filter_params).forEach(function(param){
+		var filter_value = req.query[param];
+		if (req.query[param]) {
+			query_where_components.push(filter_params[param] + " = '" + filter_value + "'");
+		}
+	});
+
+	var special_filter_value = req.query['special_filter'];
+	if (special_filter_value) {
+		query_where_components.push('(' + "prop.summary like '%"+ special_filter_value +"%' OR prop.category like '%"+ special_filter_value +"%'" + ')');
+	}
+
+	return query_where_components.join(' AND ');
+}
+
 
 var get_proposals_func = function(type){
 	var get_proposals = function(req, res, next) {
@@ -23,10 +42,17 @@ var get_proposals_func = function(type){
 			USER_VOTE_T.is_positive as user_vote\
 		from proposal prop\
 		inner join politician_proposal pp on pp.proposal_id = prop.id\
+		inner join politician pol on pol.id = pp.politician_id\
 		left join (select proposal_id, avg(is_positive) as approval from proposal_vote group by proposal_id\
 			) APPROVAL_T on APPROVAL_T.proposal_id=prop.id\
 		left join (select v.proposal_id, v.is_positive from proposal_vote v where v.user_id=?\
-			) USER_VOTE_T on USER_VOTE_T.proposal_id = prop.id';
+			) USER_VOTE_T on USER_VOTE_T.proposal_id = prop.id\
+		left join (select pp.politician_id, pos.name, pp.location, pp.vote_code, pp.start_date, DATE_ADD(DATE_ADD(pp.start_date, INTERVAL pos.term_length YEAR), INTERVAL -1 DAY) as predicted_end_date \
+								from politician_position pp\
+								inner join position pos on pos.id = pp.position_id\
+								where pp.end_date is null AND pp.start_date is not null\
+			) CUR_POS_T on CUR_POS_T.politician_id=pol.id\
+			';
 		query_for_props[1] = '';
 		query_for_props[2] = 'group by prop.id';
 		query_for_props[3] = '';
@@ -84,10 +110,14 @@ var get_proposals_func = function(type){
 			});
 		}
 
+		var where_filters = _get_where_filters(req);
 		var user_id = req.user['id'];
 		if (type === 'politician') {
 			var politician_id = req.params['politician_id'];
 			query_for_props[1] = 'where pp.politician_id = ?';
+			if (where_filters) {
+				query_for_props[1] = query_for_props[1] + ' AND ' + where_filters;
+			}
 
 			mysql_handler(query_for_props.join('\n'), [user_id, politician_id], function(err, proposals){
 				if (err) {return next(err)}
@@ -100,21 +130,12 @@ var get_proposals_func = function(type){
 		} else if (type === 'ranking') {
 			query_for_props[3] = 'order by prop.ranking limit 99';
 
+			if (where_filters) {
+				query_for_props[1] = 'where ' + where_filters;
+			}
+
 			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
 				if (err) {return next(err);}
-				parse_proposals(proposals, function(err, parsed_props){
-					if (err) {return next(err)}
-					return res.json(parsed_props);
-				});
-			});
-		} else if (type === 'special_filter') {
-			var special_filter_value = req.query['special_filter'];
-
-			query_for_props[1] = "where prop.code like '%"+ special_filter_value +"%' OR prop.category like '%"+ special_filter_value  +"%'";
-
-			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
-				if (err) {return next(err)}
-
 				parse_proposals(proposals, function(err, parsed_props){
 					if (err) {return next(err)}
 					return res.json(parsed_props);
@@ -134,6 +155,10 @@ var get_proposals_func = function(type){
 				});
 			});
 		} else {
+			if (where_filters) {
+				query_for_props[1] = 'where ' + where_filters;
+			}
+
 			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
 				if (err) {return next(err)}
 
