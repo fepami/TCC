@@ -114,6 +114,15 @@ var get_politicians_func = function(type){
 				if (err) {return next(err);}
 				res.json(parse_politicians(politicians));
 			});
+		} else if (type === 'special_filter') {
+			var special_filter_value = req.query['special_filter'];
+
+			query_for_polis[1] = "where pol.party like '%"+ special_filter_value +"%' OR pol.name like '%"+ special_filter_value +"%' OR CUR_POS_T.name like '%"+ special_filter_value +"%'";
+
+			mysql_handler(query_for_polis.join('\n'), [user_id ,user_id], function(err, politicians){
+				if (err) {return next(err);}
+				res.json(parse_politicians(politicians));
+			});
 		} else if ('politician_id' in req.params) {
 			var politician_id = req.params['politician_id'];
 
@@ -300,6 +309,7 @@ module.exports = {
   'get_followed': get_politicians_func('follow'),
   'get_ranking': get_politicians_func('ranking'),
   'get_election': get_politicians_func('election'),
+  'filtered_by_special_filter': get_politicians_func('special_filter'),
 
   'vote': vote,
   'follow': follow,

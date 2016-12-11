@@ -157,6 +157,7 @@ app.get("/test_token", function(req, res){
 app.get("/politicos",helpers.jwt_mw, politicians_controller.get_politicians);
 app.get("/politicos/ranking", helpers.jwt_mw, politicians_controller.get_ranking);
 app.get("/politicos/eleicoes", helpers.jwt_mw, politicians_controller.get_election);
+app.get("/politicos/busca", helpers.jwt_mw, politicians_controller.filtered_by_special_filter);
 
 
 app.get("/politicos/:politician_id",helpers.jwt_mw, politicians_controller.get_politician);
