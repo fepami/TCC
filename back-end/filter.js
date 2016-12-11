@@ -21,7 +21,7 @@ function get_filter_options(type) {
 		SELECT group_concat(distinct location SEPARATOR ';') options, 'Localização' topic from politician_position;";
 
 		if (type === 'proposal') {
-			query_for_options = "SELECT group_concat(distinct category SEPARATOR ';') options, 'Assunto' topic from proposal UNION" + query_for_options
+			query_for_options = "SELECT group_concat(distinct category SEPARATOR ';') options, 'Categoria' topic from proposal UNION" + query_for_options
 		}
 
 
