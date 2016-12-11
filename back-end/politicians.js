@@ -118,7 +118,7 @@ var get_politicians_func = function(type){
 			query_for_polis[1] = 'inner join politician_follow f on f.politician_id = pol.id where f.user_id=?';
 
 			if (where_filters) {
-				query_for_polis[2] = 'where ' + where_filters;
+				query_for_polis[1] = query_for_polis[1] + ' AND ' + where_filters;
 			}
 
 			mysql_handler(query_for_polis.join('\n'), [user_id, user_id ,user_id], function(err, politicians){
