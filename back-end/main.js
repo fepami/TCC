@@ -180,8 +180,9 @@ app.get("/filtro/propostas", filter_controller.get_proposal_filter);
 
 app.get("/propostas",helpers.jwt_mw, proposals_controller.get_proposals);
 app.get("/propostas/ranking",helpers.jwt_mw, proposals_controller.get_ranking);
-app.get("/propostas/:proposal_id",helpers.jwt_mw, proposals_controller.get_proposal);
+app.get("/propostas/busca", helpers.jwt_mw, proposals_controller.filtered_by_special_filter);
 
+app.get("/propostas/:proposal_id",helpers.jwt_mw, proposals_controller.get_proposal);
 app.get("/propostas/:proposal_id/votar",helpers.jwt_mw, proposals_controller.vote);
 
 var cmd_args = process.argv.slice(2);

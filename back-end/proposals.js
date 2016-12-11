@@ -100,8 +100,21 @@ var get_proposals_func = function(type){
 		} else if (type === 'ranking') {
 			query_for_props[3] = 'order by prop.ranking limit 99';
 
-			mysql_handler(query_for_props.join('\n'), [user_id ,user_id], function(err, proposals){
+			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
 				if (err) {return next(err);}
+				parse_proposals(proposals, function(err, parsed_props){
+					if (err) {return next(err)}
+					return res.json(parsed_props);
+				});
+			});
+		} else if (type === 'special_filter') {
+			var special_filter_value = req.query['special_filter'];
+
+			query_for_props[1] = "where prop.code like '%"+ special_filter_value +"%' OR prop.category like '%"+ special_filter_value  +"%'";
+
+			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
+				if (err) {return next(err)}
+
 				parse_proposals(proposals, function(err, parsed_props){
 					if (err) {return next(err)}
 					return res.json(parsed_props);
@@ -230,6 +243,7 @@ module.exports = {
   'get_ranking': get_proposals_func('ranking'),
   'get_proposal': get_proposals_func(),
   'get_politician_proposals': get_proposals_func('politician'),
+  'filtered_by_special_filter': get_proposals_func('special_filter'),
 
 
 
