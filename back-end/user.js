@@ -61,7 +61,7 @@ function _get_validated_user(user_id, email, password, callback) {
 
 
 
-function create_user(req, res) {
+function create_user(req, res, next) {
 	var name = req.query['name'];
 	var email = req.query['email'];
 	var state = req.query['state'];
@@ -80,9 +80,7 @@ function create_user(req, res) {
 	}
 
 	mysql_handler(existing_user_query, existing_user_query_params, function(err, existing_user){
-		if (err) {
-			return res.json(err);
-		}
+		if (err) {return next(err);}
 
 		if (existing_user.length > 0) {
 			res.status(400);
@@ -107,9 +105,7 @@ function create_user(req, res) {
 		}
 
 		mysql_handler(create_user_query, user_params, function(err, result){
-			if (err) {
-				return res.json(err);
-			}
+			if (err) {return next(err);}
 
 			user_info = {
 				'id': result.insertId,
@@ -123,7 +119,7 @@ function create_user(req, res) {
 	});
 }
 
-function login(req, res) {
+function login(req, res, next) {
 	var facebook_user_id = req.query['profile_id']
 	var email = req.query['email'];
 
@@ -131,7 +127,7 @@ function login(req, res) {
 		var user_query = 'select id, name, email, state, city, age, gender, photo_url from user where ?? = ?';
 
 		mysql_handler(user_query, ['facebook_id', facebook_user_id], function(err, user_by_fb){
-			if (err) {res.status(500); return res.send(err.toString())}
+			if (err) {return next(err)}
 
 			// achou o user com fb
 			if (user_by_fb.length > 0) {
@@ -146,7 +142,7 @@ function login(req, res) {
 			}
 
 			mysql_handler(user_query, ['email', email], function(err, user_by_email){
-				if (err) {res.status(500); return res.send(err.toString())}
+				if (err) {return next(err)}
 
 				// linkar a conta existente com o fb
 				if (user_by_email.length > 0) {
@@ -155,7 +151,7 @@ function login(req, res) {
 					var update_user_query = 'update user set ? where id=?';
 					var user_id = user_by_email['id']
 					mysql_handler(update_user_query, [{'facebook_id': facebook_user_id}, user_id], function(err){
-						if (err) {return callback(err)}
+						if (err) {return next(err)}
 
 						user_info = {
 							'id': user_id,
@@ -176,7 +172,7 @@ function login(req, res) {
 
 		_get_validated_user(null, email, password, function(err, user){
 			if (err) {
-				return res.json(err);
+				return next(err);
 			}
 
 			if (!user) {
@@ -196,7 +192,7 @@ function login(req, res) {
 	}
 }
 
-function update_user(req, res) {
+function update_user(req, res, next) {
 	var name = req.query['name'];
 	// var email = req.query['email'];
 	var state = req.query['state'];
@@ -220,23 +216,19 @@ function update_user(req, res) {
 	var update_user_query = 'update user set ? where id=?';
 
 	mysql_handler(update_user_query, [user_params, user_id], function(err, result){
-		if (err) {
-			return res.json(err);
-		}
+		if (err) {return next(err);}
 
 		return res.json('ok')
 	});
 }
 
-function update_password(req, res) {
+function update_password(req, res, next) {
 	var new_password =  req.query['nova'];
 	var old_password =  req.query['antiga'];
 	var user_id = req.user['id'];
 
 	_get_validated_user(user_id, null, old_password, function(err, user){
-		if (err) {
-			return res.json(err);
-		}
+		if (err) {return next(err);}
 
 		if (!user) {
 			res.status(404);
@@ -246,9 +238,7 @@ function update_password(req, res) {
 		var update_user_query = 'update user set ? where id=?';
 		var encrypted_pass = bcrypt.hashSync(new_password, 8);
 		mysql_handler(update_user_query, [{'password': encrypted_pass}, user_id], function(err, result){
-			if (err) {
-				return res.json(err);
-			}
+			if (err) {return next(err);}
 
 			return res.json('ok')
 		});

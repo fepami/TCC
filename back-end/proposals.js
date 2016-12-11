@@ -8,7 +8,7 @@ const helpers = require("./helpers")
 
 
 var get_proposals_func = function(type){
-	var get_proposals = function(req, res) {
+	var get_proposals = function(req, res, next) {
 		var query_for_props = [];
 		query_for_props[0] = 'select\
 			prop.id,\
@@ -90,10 +90,10 @@ var get_proposals_func = function(type){
 			query_for_props[1] = 'where pp.politician_id = ?';
 
 			mysql_handler(query_for_props.join('\n'), [user_id, politician_id], function(err, proposals){
-				if (err) {return res.json(err)}
+				if (err) {return next(err)}
 
 				parse_proposals(proposals, function(err, parsed_props){
-					if (err) {return res.json(err)}
+					if (err) {return next(err)}
 					return res.json(parsed_props);
 				});
 			});
@@ -101,11 +101,9 @@ var get_proposals_func = function(type){
 			query_for_props[3] = 'order by prop.ranking limit 99';
 
 			mysql_handler(query_for_props.join('\n'), [user_id ,user_id], function(err, proposals){
-				if (err) {
-					return res.json(err);
-				}
+				if (err) {return next(err);}
 				parse_proposals(proposals, function(err, parsed_props){
-					if (err) {return res.json(err)}
+					if (err) {return next(err)}
 					return res.json(parsed_props);
 				});
 			});
@@ -115,19 +113,19 @@ var get_proposals_func = function(type){
 			query_for_props[1] = 'where prop.id=?';
 
 			mysql_handler(query_for_props.join('\n'), [user_id, parseInt(proposal_id)], function(err, proposals){
-				if (err) {return res.json(err)}
+				if (err) {return next(err)}
 
 				parse_proposals(proposals, function(err, parsed_props){
-					if (err) {return res.json(err)}
+					if (err) {return next(err)}
 					return res.json(parsed_props);
 				});
 			});
 		} else {
 			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
-				if (err) {return res.json(err)}
+				if (err) {return next(err)}
 
 				parse_proposals(proposals, function(err, parsed_props){
-					if (err) {return res.json(err)}
+					if (err) {return next(err)}
 					return res.json(parsed_props);
 				});
 			});
@@ -136,7 +134,7 @@ var get_proposals_func = function(type){
 	return get_proposals;
 }
 
-var vote = function(req,res) {
+var vote = function(req, res, next) {
 	// assumindo q vai vir device_id e is_positive pelo get
 	// http://localhost:3000/politicos/1/votar?device_id=device_id4&is_positive=1
 	var proposal_id = req.params['proposal_id'];
@@ -148,9 +146,7 @@ var vote = function(req,res) {
 	where v.user_id = ? and v.proposal_id = ?;';
 
 	mysql_handler(existing_vote_query, [user_id, proposal_id], function(err, existing_vote){
-		if (err) {
-			return res.json(err);
-		}
+		if (err) {return next(err);}
 		var update_ranking_query = 'UPDATE proposal p\
 			JOIN (\
 			  SELECT\
@@ -182,13 +178,11 @@ var vote = function(req,res) {
 				// delete
 				var delete_query = 'delete from proposal_vote where id=?';
 				mysql_handler(delete_query, [vote_id], function(err){
-					if (err) {
-						return res.json(err);
-					}
+					if (err) {return next(err);}
 
 					mysql_handler(update_ranking_query, function(err){});
 					mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
-						if (err) {return res.json(err);}
+						if (err) {return next(err);}
 						return res.json(new_approval);
 					});
 				});
@@ -197,18 +191,16 @@ var vote = function(req,res) {
 				// update
 				var update_query = 'update proposal_vote set is_positive = ? where id=?';
 				mysql_handler(update_query, [is_positive, vote_id], function(err){
-					if (err) {
-						return res.json(err);
-					}
+					if (err) {return next(err);}
 					mysql_handler(update_ranking_query, function(err){});
 					mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
-						if (err) {return res.json(err);}
+						if (err) {return next(err);}
 						return res.json(new_approval);
 					});
 				});
 			} else {
 				mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
-					if (err) {return res.json(err);}
+					if (err) {return next(err);}
 					return res.json(new_approval);
 				});
 			}
@@ -216,19 +208,17 @@ var vote = function(req,res) {
 			// create
 			var create_query = 'INSERT INTO proposal_vote (user_id, proposal_id, is_positive) VALUES (?, ?, ?);';
 			mysql_handler(create_query, [user_id, proposal_id, is_positive], function(err){
-				if (err) {
-					return res.json(err);
-				}
+				if (err) {return next(err);}
 
 				mysql_handler(update_ranking_query, function(err){});
 				mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
-					if (err) {return res.json(err);}
+					if (err) {return next(err);}
 					return res.json(new_approval);
 				});
 			});
 		} else {
 			mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
-				if (err) {return res.json(err);}
+				if (err) {return next(err);}
 				return res.json(new_approval);
 			});
 		}

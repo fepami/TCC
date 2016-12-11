@@ -1,41 +1,7 @@
-const moment = require('moment');
-moment.locale('pt-br');
-
 const mysql_handler = require("./mysql_handler").handler
 const cassandra_handler = require("./cassandra_handler").handler
 
-const bcrypt = require('bcryptjs');
-
 const helpers = require("./helpers")
-
-
-
-function _verify_password(email, password, callback) {
-	var user_query = 'select id, password, name, email, state, city, age, gender, photo_url from user where email = ?';
-
-	mysql_handler(user_query, [email], function(err, user){
-		if (err) {
-			return callback(err);
-		}
-
-		if (user.length == 0) {
-			return callback(err);
-		}
-
-		user = user[0];
-		// provavelmente precisa mudar pra async
-		if (!user['password']) {
-			return callback(err);
-		}
-
-		if (!bcrypt.compareSync(password, user['password'])) {
-			return callback(null, null);
-		}
-
-		delete user.password;
-		return callback(null, user);
-	});
-}
 
 
 
@@ -48,7 +14,7 @@ function _verify_password(email, password, callback) {
 
 
 function get_filter_options(type) {
-	return function(req, res) {
+	return function(req, res, next) {
 		query_for_options = "\
 		SELECT group_concat(distinct party SEPARATOR ';') options, 'Partido' topic from politician UNION\
 		SELECT group_concat(distinct name SEPARATOR ';') options, 'Cargo' topic from position UNION\
@@ -60,9 +26,7 @@ function get_filter_options(type) {
 
 
 		mysql_handler(query_for_options, function(err, topic_options){
-			if (err) {
-				return res.json(err);
-			}
+			if (err) {return next(err);}
 
 			var filters = []
 			for (var i = 0; i < topic_options.length; i++) {
@@ -75,7 +39,6 @@ function get_filter_options(type) {
 			}
 
 			filters.push({'topic': 'Aprovação', 'options':['Melhores Aprovados', 'Piores Aprovados']});
-
 
 
 			return res.json(filters);

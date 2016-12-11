@@ -7,9 +7,8 @@ const cassandra_handler = require("./cassandra_handler").handler
 const helpers = require("./helpers")
 
 
-
 var get_politicians_func = function(type){
-	var get_politicians = function(req, res) {
+	var get_politicians = function(req, res, next) {
 		var query_for_polis = [];
 		query_for_polis[0] = 'select\
 			pol.id,\
@@ -98,18 +97,14 @@ var get_politicians_func = function(type){
 			query_for_polis[1] = 'inner join politician_follow f on f.politician_id = pol.id where f.user_id=?';
 
 			mysql_handler(query_for_polis.join('\n'), [user_id, user_id ,user_id], function(err, politicians){
-				if (err) {
-					return res.json(err);
-				}
+				if (err) {return next(err);}
 				res.json(parse_politicians(politicians));
 			});
 		} else if (type === 'ranking') {
 			query_for_polis[1] = 'order by pol.ranking limit 99';
 
 			mysql_handler(query_for_polis.join('\n'), [user_id ,user_id], function(err, politicians){
-				if (err) {
-					return res.json(err);
-				}
+				if (err) {return next(err);}
 				res.json(parse_politicians(politicians));
 			});
 		} else if ('politician_id' in req.params) {
@@ -118,16 +113,12 @@ var get_politicians_func = function(type){
 			query_for_polis[1] = 'where pol.id=?';
 
 			mysql_handler(query_for_polis.join('\n'), [user_id, user_id, parseInt(politician_id)], function(err, politicians){
-				if (err) {
-					return res.json(err);
-				}
+				if (err) {return next(err);}
 				res.json(parse_politicians(politicians));
 			});
 		} else {
 			mysql_handler(query_for_polis.join('\n'), [user_id, user_id], function(err, politicians){
-				if (err) {
-					return res.json(err);
-				}
+				if (err) {return next(err);}
 				res.json(parse_politicians(politicians));
 			});
 		}
@@ -136,7 +127,7 @@ var get_politicians_func = function(type){
 	return get_politicians;
 }
 
-var vote = function(req,res) {
+var vote = function(req, res, next) {
 	var politician_id = req.params['politician_id'];
 	var user_id = req.user['id'];
 	var existing_vote_query = 'select\
@@ -146,9 +137,7 @@ var vote = function(req,res) {
 	where v.user_id = ? and v.politician_id = ?;';
 
 	mysql_handler(existing_vote_query, [user_id, politician_id], function(err, existing_vote){
-		if (err) {
-			return res.json(err);
-		}
+		if (err) {return next(err);}
 
 		var update_ranking_query = 'UPDATE politician p\
 			JOIN (\
@@ -181,12 +170,10 @@ var vote = function(req,res) {
 				// delete
 				var delete_query = 'delete from politician_vote where id=?';
 				mysql_handler(delete_query, [vote_id], function(err){
-					if (err) {
-						return res.json(err);
-					}
+					if (err) {return next(err);}
 					mysql_handler(update_ranking_query, function(err){});
 					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-						if (err) {return res.json(err);}
+						if (err) {return next(err);}
 						return res.json(new_approval);
 					});
 				});
@@ -194,19 +181,17 @@ var vote = function(req,res) {
 				// update
 				var update_query = 'update politician_vote set is_positive = ? where id=?';
 				mysql_handler(update_query, [is_positive, vote_id], function(err){
-					if (err) {
-						return res.json(err);
-					}
+					if (err) {return next(err);					}
 					mysql_handler(update_ranking_query, function(err){});
 					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-						if (err) {return res.json(err);}
+						if (err) {return next(err);}
 						return res.json(new_approval);
 					});
 
 				});
 			} else {
 				mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-					if (err) {return res.json(err);}
+					if (err) {return next(err);}
 					return res.json(new_approval);
 				});
 			}
@@ -214,27 +199,24 @@ var vote = function(req,res) {
 			// create
 			var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (?, ?, ?);';
 			mysql_handler(create_query, [user_id, politician_id, is_positive], function(err){
-				if (err) {
-					return res.json(err);
-				} else {
-					mysql_handler(update_ranking_query, function(err){});
-					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-						if (err) {return res.json(err);}
-						return res.json(new_approval);
-					});
-					// fazer o serviço de ranking de politico e propostas
-				}
+				if (err) {return next(err);}
+				mysql_handler(update_ranking_query, function(err){});
+				mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+					if (err) {return next(err);}
+					return res.json(new_approval);
+				});
+				// fazer o serviço de ranking de politico e propostas
 			});
 		} else {
 			mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-				if (err) {return res.json(err);}
+				if (err) {return next(err);}
 				return res.json(new_approval);
 			});
 		}
 	});
 }
 
-var follow = function(req,res) {
+var follow = function(req, res, next) {
 	var politician_id = req.params['politician_id'];
 	var user_id = req.user['id'];
 
@@ -244,39 +226,31 @@ var follow = function(req,res) {
 	where f.user_id = ? and f.politician_id = ?;';
 
 	mysql_handler(existing_follow_query, [user_id, politician_id], function(err, existing_follow){
-		if (err) {
-			res.json(err);
+		if (err) {return next(err);}
+
+		var follow = helpers.parse_bool(req.query['user_follow']);
+		if (existing_follow.length > 0 && !follow) {
+			// delete
+			var follow_id = existing_follow[0]['follow_id'];
+			var delete_query = 'delete from politician_follow where id=?';
+			mysql_handler(delete_query, [follow_id], function(err){
+				if (err) {return next(err);}
+				res.json('ok, delete');
+			});
+		} else if (existing_follow.length === 0 && follow) {
+			// create
+			var create_query = 'INSERT INTO politician_follow (user_id, politician_id) VALUES (?, ?);';
+			mysql_handler(create_query, [user_id, politician_id], function(err){
+				if (err) {return next(err);}
+				res.json('ok, create');
+			});
 		} else {
-			var follow = helpers.parse_bool(req.query['user_follow']);
-			if (existing_follow.length > 0 && !follow) {
-				// delete
-				var follow_id = existing_follow[0]['follow_id'];
-				var delete_query = 'delete from politician_follow where id=?';
-				mysql_handler(delete_query, [follow_id], function(err){
-					if (err) {
-						res.json(err);
-					} else {
-						res.json('ok, delete');
-					}
-				});
-			} else if (existing_follow.length === 0 && follow) {
-				// create
-				var create_query = 'INSERT INTO politician_follow (user_id, politician_id) VALUES (?, ?);';
-				mysql_handler(create_query, [user_id, politician_id], function(err){
-					if (err) {
-						res.json(err);
-					} else {
-						res.json('ok, create');
-					}
-				});
-			} else {
-				res.json('ok, do nothing');
-			}
+			res.json('ok, do nothing');
 		}
 	});
 }
 
-var history = function(req,res) {
+var history = function(req, res, next) {
 	var politician_id = req.params['politician_id'];
 
 	var politician_history_query = 'select\
@@ -290,9 +264,7 @@ var history = function(req,res) {
 	where pp.politician_id = ?';
 
 	mysql_handler(politician_history_query, [politician_id], function(err, politician_history){
-		if (err) {
-			return res.json(err);
-		}
+		if (err) {return next(err);}
 
 		var parsed_histories = []
 		for (var i = 0; i < politician_history.length; i++) {

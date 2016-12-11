@@ -65,21 +65,23 @@ function create_token(user_info) {
 	// return jwt.sign(user_info, token_secret, {'expiresIn' : '1s' });
 }
 
+
+
+
+
+
 function jwt_mw(req, res, next) {
 	var token = req.query['token'];
 
-	if (!token) {return res.json('Precisa do token!')}
+	if (!token) {return next('Precisa do token!')}
 
 	verify_token(token, function(err, user_info){
-		if (err) {
-			return res.json(err)
-		}
+		if (err) {return next(err)}
 
 		req.user = user_info;
 		return next();
 	});
 }
-
 
 
 
@@ -93,5 +95,6 @@ module.exports = {
 
 	'verify_token': verify_token,
 	'create_token': create_token,
+
 	'jwt_mw': jwt_mw,
 }
