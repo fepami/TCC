@@ -40,7 +40,7 @@ var get_politicians_func = function(type){
 								inner join position pos on pos.id = pp.position_id\
 								where pp.end_date is null AND pp.start_date is not null\
 			) CUR_POS_T on CUR_POS_T.politician_id=pol.id\
-		left join (select pp.politician_id, pp.vote_code\
+		left join (select pp.politician_id, pp.vote_code, pp.election_year\
 								from politician_position pp\
 								inner join position pos on pos.id = pp.position_id\
 								where pp.election_year = 2016\
@@ -102,6 +102,13 @@ var get_politicians_func = function(type){
 			});
 		} else if (type === 'ranking') {
 			query_for_polis[1] = 'order by pol.ranking limit 99';
+
+			mysql_handler(query_for_polis.join('\n'), [user_id ,user_id], function(err, politicians){
+				if (err) {return next(err);}
+				res.json(parse_politicians(politicians));
+			});
+		} else if (type === 'election') {
+			query_for_polis[1] = 'where LAST_ELEC_T.election_year = 2016';
 
 			mysql_handler(query_for_polis.join('\n'), [user_id ,user_id], function(err, politicians){
 				if (err) {return next(err);}
@@ -292,6 +299,7 @@ module.exports = {
   'get_politician': get_politicians_func(),
   'get_followed': get_politicians_func('follow'),
   'get_ranking': get_politicians_func('ranking'),
+  'get_election': get_politicians_func('election'),
 
   'vote': vote,
   'follow': follow,
