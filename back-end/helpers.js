@@ -61,8 +61,7 @@ function verify_token(token, callback) {
 }
 
 function create_token(user_info) {
-	return jwt.sign(user_info, token_secret, {'expiresIn' : '30d' });
-	// return jwt.sign(user_info, token_secret, {'expiresIn' : '1s' });
+	return jwt.sign(user_info, token_secret, {'expiresIn' : '10m' });
 }
 
 
@@ -76,7 +75,13 @@ function jwt_mw(req, res, next) {
 	if (!token) {return next('Precisa do token!')}
 
 	verify_token(token, function(err, user_info){
-		if (err) {return next(err)}
+		if (err) {
+			if (err.name === 'TokenExpiredError') {
+				res.status(418);
+				return res.json(err);
+			}
+			return next(err);
+		}
 
 		req.user = user_info;
 		return next();

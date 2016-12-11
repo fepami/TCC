@@ -142,19 +142,23 @@ app.get("/usuario/trocar", helpers.jwt_mw, user_controller.update_password);
 // /usuario/trocar?antigo=senhaAntiga&novo=senhaNova&token=asfsdfsdfs
 
 
-app.get("/test_token", function(req, res){
-	var token = req.query['token'];
+app.get("/test_token", helpers.jwt_mw, function(req, res){
+	var iat = req.user['iat'];
+	var exp = req.user['exp'];
 
-	helpers.verify_token(token, function(err, user_info){
-		if (err) {return res.json(err)}
+	var now = Math.floor(Date.now() / 1000);
 
-		return res.json(user_info);
-	})
+	if ((exp-now)*2 < exp-iat) {
+		res.status(419);
+	}
+
+	return res.json(req.user);
+
 });
 // /test_token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNDc5Njg4MTk4LCJleHAiOjE0Nzk2OTE3OTh9.iu_qS6-QsJAX2kVeBx8Mx-QketCUly8lRy7wOb39bU0
 
 
-app.get("/politicos",helpers.jwt_mw, politicians_controller.get_politicians);
+app.get("/politicos", helpers.jwt_mw, politicians_controller.get_politicians);
 app.get("/politicos/ranking", helpers.jwt_mw, politicians_controller.get_ranking);
 app.get("/politicos/eleicoes", helpers.jwt_mw, politicians_controller.get_election);
 app.get("/politicos/busca", helpers.jwt_mw, politicians_controller.filtered_by_special_filter);
