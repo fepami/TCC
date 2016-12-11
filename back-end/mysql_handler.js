@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 const mysql = require('mysql');
 
 const pool = mysql.createPool({
@@ -20,7 +22,7 @@ function handler(query, params_or_callback, callback) {
 			return;
 		}
 
-		console.log('connected as id ' + connection.threadId);
+		console.log(moment().format('DD/MM/YY h:mm:ss') + ': connected as id ' + connection.threadId);
 
 		if (typeof callback === "undefined") {
 			var yay = connection.query(query, function(err,rows){
