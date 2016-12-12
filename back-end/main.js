@@ -122,26 +122,6 @@ app.get("/",(req,res) => {
 	}
 });
 
-// app.get('/login/facebook', passport.authenticate('facebook', {'session': false, 'scope': 'email'}));
-// app.get('/login/facebook/return', passport.authenticate('facebook', {'session': false, 'scope': 'email'}), function(req, res){
-// 	res.json({'token': req.user});
-// });
-
-app.get('/nao_tendi', helpers.jwt_mw, function(req, res){
-	res.json({'user_info': req.user});
-});
-
-app.get("/login/cadastrar", user_controller.create_user);
-// /login/cadastrar?name=Felipe&email=felipe@toyoda.com.br&password=bacon&state=SP&city=São Paulo&age=23&gender=Masculino
-
-app.get("/login", user_controller.login);
-// /login?email=felipe@toyoda.com.br&password=bacon&profile_id=afafkanjkbasjinjkasn
-
-app.get("/usuario/editar", helpers.jwt_mw, user_controller.update_user);
-// /usuario/editar?name=Felipe&state=SP&city=São Paulo&age=23&gender=Masculino&token=asfsdfsdfs
-
-app.get("/usuario/trocar", helpers.jwt_mw, user_controller.update_password);
-// /usuario/trocar?antigo=senhaAntiga&novo=senhaNova&token=asfsdfsdfs
 
 
 app.get("/test_token", helpers.jwt_mw, function(req, res){
@@ -159,6 +139,58 @@ app.get("/test_token", helpers.jwt_mw, function(req, res){
 });
 // /test_token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNDc5Njg4MTk4LCJleHAiOjE0Nzk2OTE3OTh9.iu_qS6-QsJAX2kVeBx8Mx-QketCUly8lRy7wOb39bU0
 
+
+
+const aws = require('aws-sdk');
+const S3_BUCKET = 'eleitor';
+
+aws.config.update({
+  region: 'sa-east-1',
+});
+
+// s3-sa-east-1.amazonaws.com
+// s3.dualstack.sa-east-1.amazonaws.com
+app.get('/sign-s3', (req, res, next) => {
+  const s3 = new aws.S3();
+  const file_name = req.query['file_name'];
+  const file_type = req.query['file_type'];
+  const s3Params = {
+    Bucket: S3_BUCKET,
+    Key: file_name,
+    Expires: 60,
+    ContentType: file_type,
+    ACL: 'public-read'
+  };
+
+  s3.getSignedUrl('putObject', s3Params, (err, data) => {
+    if(err){
+      console.log(err);
+      return next(err);
+    }
+    const returnData = {
+      signedRequest: data,
+      url: `https://${S3_BUCKET}.s3-sa-east-1.amazonaws.com/${file_name}`
+    };
+    return res.json(returnData);
+  });
+});
+
+// app.get('/login/facebook', passport.authenticate('facebook', {'session': false, 'scope': 'email'}));
+// app.get('/login/facebook/return', passport.authenticate('facebook', {'session': false, 'scope': 'email'}), function(req, res){
+// 	res.json({'token': req.user});
+// });
+
+app.get("/login/cadastrar", user_controller.create_user);
+// /login/cadastrar?name=Felipe&email=felipe@toyoda.com.br&password=bacon&state=SP&city=São Paulo&age=23&gender=Masculino
+
+app.get("/login", user_controller.login);
+// /login?email=felipe@toyoda.com.br&password=bacon&profile_id=afafkanjkbasjinjkasn
+
+app.get("/usuario/editar", helpers.jwt_mw, user_controller.update_user);
+// /usuario/editar?name=Felipe&state=SP&city=São Paulo&age=23&gender=Masculino&token=asfsdfsdfs
+
+app.get("/usuario/trocar", helpers.jwt_mw, user_controller.update_password);
+// /usuario/trocar?antigo=senhaAntiga&novo=senhaNova&token=asfsdfsdfs
 
 app.get("/politicos", helpers.jwt_mw, politicians_controller.get_politicians);
 app.get("/politicos/ranking", helpers.jwt_mw, politicians_controller.get_ranking);
