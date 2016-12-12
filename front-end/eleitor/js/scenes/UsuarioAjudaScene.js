@@ -52,7 +52,7 @@ export default class UsuarioAjudaScene extends Component {
 	}
 
 	onTutorialPress() {
-		this.props.navigator.push({component: TutorialScene});
+		this.props.navigator.push({component: TutorialScene, passProps: {showButton: false}});
 	}
 }
 

@@ -21,10 +21,10 @@ import Header from '../components/Header';
 import dismissKeyboard from 'dismissKeyboard';
 import HomeScene from './HomeScene';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import NavigationManager from '../navigation/NavigationManager';
 import ApiCall from '../api/ApiCall';
 import {connect} from 'react-redux';
 import {setToken} from '../redux/actions/token';
+import TutorialScene from './TutorialScene';
 
 class CadastroScene extends Component {
 	constructor(props) {
@@ -179,7 +179,7 @@ class CadastroScene extends Component {
 							{this.showPasswordFields()}
 							<View style={{flexDirection: 'row'}} >
 								<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.ageError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+								<View style={[styles.picker, {flex: 2, height: deviceHeight, borderColor: this.state.ageError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 									<CustomPicker
 										mode='dropdown'
 										selectedValue={this.state.ageText}
@@ -187,8 +187,8 @@ class CadastroScene extends Component {
 										{agesPickerItems}
 									</CustomPicker>
 								</View>
-								<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.genderError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+								<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 10}} color='black' />	
+								<View style={[styles.picker, {flex: 3, height: deviceHeight, borderColor: this.state.genderError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 									<CustomPicker
 										mode='dropdown'
 										selectedValue={this.state.genderText}
@@ -202,7 +202,7 @@ class CadastroScene extends Component {
 							<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Estado e Cidade em que vota:</Text>
 							<View style={{flexDirection: 'row'}} >
 								<Icon name='map' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.stateError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+								<View style={[styles.picker, {flex: 2, height: deviceHeight, borderColor: this.state.stateError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 									<CustomPicker
 										mode='dropdown'
 										selectedValue={this.state.stateText}
@@ -212,8 +212,8 @@ class CadastroScene extends Component {
 										<Picker.Item color="rgba(0,0,0,.87)" label="RJ" value="RJ" />
 									</CustomPicker>
 								</View>
-								<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-								<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cityError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+								<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 10}} color='black' />	
+								<View style={[styles.picker, {flex: 3, height: deviceHeight, borderColor: this.state.cityError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 									<CustomPicker
 										mode='dropdown'
 										selectedValue={this.state.cityText}
@@ -366,7 +366,7 @@ class CadastroScene extends Component {
 		this.setState({successIndex: 10})
 		setTimeout(()=>{
 			this.setState({successIndex: -10});
-			this.props.navigator.replace({component: NavigationManager});
+			this.props.navigator.replace({component: TutorialScene, passProps: {showButton: true}});
 			this.props.setToken(token);
 		}, 1500);
 	}
