@@ -16,10 +16,12 @@ import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PoliticoPerfilScene from './PoliticoPerfilScene';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
-export default class ListaPoliticosScene extends Component {	
+class ListaPoliticosScene extends Component {	
 	constructor(props){
 		super(props);
 		this.state = {
@@ -38,42 +40,27 @@ export default class ListaPoliticosScene extends Component {
 		this.refresh = this.refresh.bind(this);
 	}
 
-	getPoliticos(token, filter) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				this.setState({politicosDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
-			} else {
-				this.setState({errorState: true});
-			}
+	getPoliticos(filter) {
+		var options = {
+			token: this.props.token,
+			...filter
 		};
-
 		let type = this.props.type ? '/' + this.props.type : '';
-		const filterText = filter ? filter : '';
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos' + type + '?token=' + token + filterText);
-		// request.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
-		request.send();
+		ApiCall(`politicos${type}`, options, (jsonResponse) => {
+			this.setState({politicosDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
+		}, (failedRequest) => {
+			this.setState({errorState: true});
+		});
 	}
 
-	refresh() {
-		if (this.state.token) {
-			if (!this.state.loading) {
-				setTimeout(()=>{
-					this.setState({errorState: false, listIsEmpty: false, loading: true});
-					this.getPoliticos(this.state.token)
-				}, 1);
-			}
+	refresh(filter) {
+		if (!this.state.loading) {
+			setTimeout(()=>{
+				this.setState({errorState: false, listIsEmpty: false, loading: true});
+				this.getPoliticos(filter);
+			}, 1);
 		} else {
-			var _this = this;
-			AsyncStorage.getItem('token', (err, result) => {
-				_this.setState({token: result});
-				_this.getPoliticos(result);
-			});
+			this.getPoliticos();
 		}
 	}
 
@@ -96,7 +83,7 @@ export default class ListaPoliticosScene extends Component {
 			return (<Placeholder type='search' />)
 		} else if (this.state.errorState) {
 			return (<Placeholder type='error' onPress={() => {
-				this.setState({errorState: false, loading: true}, this.getPoliticos(this.state.token))}} />)
+				this.refresh()}} />)
 		} else {
 			let type = this.props.type ? this.props.type : 'lista';
 			return (
@@ -134,7 +121,9 @@ export default class ListaPoliticosScene extends Component {
 					navigator={this.props.navigator}
 					title={title}
 					actions={actions} />
-				<SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)} />
+				<SearchBarIOS 
+					onSubmitSearch={(text) => this.onSearchActionSelected(text)} 
+					onCancelSearch={() => this.onSearchActionCanceled()}/>
 				{this.renderLoadingOrView()}
                 <Filter 
                 	navigator={this.props.navigator} 
@@ -142,15 +131,27 @@ export default class ListaPoliticosScene extends Component {
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
                 	type={'politicos'}
                 	title='Filtrar Políticos'
-                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)} />
+                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)}
+                	onClearFilterActionSelected={() => this.onClearFilterActionSelected()} />
 			</View>
 		)
 	}
 
+	onSearchActionSelected(filter) {
+		this.refresh({special_filter: filter});
+	}
+
+	onSearchActionCanceled() {
+		this.refresh();
+	}
+
 	onFilterActionSelected(filter) {
-		console.log(filter);
 		this.onCloseFilter();
-		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getPoliticos(this.state.token, filter));
+		this.refresh(filter);
+	}
+
+	onClearFilterActionSelected() {
+		this.refresh();
 	}
 
 	onPoliticoPress(data) {
@@ -173,6 +174,14 @@ export default class ListaPoliticosScene extends Component {
 
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(ListaPoliticosScene);
 
 const styles = StyleSheet.create({
 

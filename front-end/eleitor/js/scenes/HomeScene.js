@@ -60,7 +60,7 @@ export default class HomeScene extends Component {
 	}
 
 	onPressEleicao(){
-		// this.props.navigator.push({component: PoliticoPerfilScene, passProps: {nome: data.nome}});
+		this.props.navigator.push({component: ListaPoliticosScene, passProps: {type: 'eleicoes'}});
 	}
 
 	onPressCargos(){

@@ -16,10 +16,12 @@ import Filter from '../components/Filter';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PoliticoPerfilScene from './PoliticoPerfilScene';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
-export default class SeguindoScene extends Component {	
+class SeguindoScene extends Component {	
 	constructor(props){
 		super(props);
 		this.state = {
@@ -27,7 +29,8 @@ export default class SeguindoScene extends Component {
 			politicosDataSource: ds.cloneWithRows([]),
 			loading: true,
 			listIsEmpty: false,
-			errorState: false
+			errorState: false,
+			isUsingFilter: false
 		}
 		this.onShowFilter = this.onShowFilter.bind(this);
 		this.onCloseFilter = this.onCloseFilter.bind(this);
@@ -37,40 +40,30 @@ export default class SeguindoScene extends Component {
 		this.refresh = this.refresh.bind(this);
 	}
 
-	getSeguindo(token, filter) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				this.setState({politicosDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
-			} else {
-				this.setState({errorState: true});
-			}
+	getSeguindo(filter) {
+		if (filter) {
+			this.setState({isUsingFilter: true});
+		}
+		var options = {
+			token: this.props.token,
+			...filter
 		};
-
-		const filterText = filter ? filter : '';
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos_seguidos?token=' + token + filterText);
-		request.send();
+		let type = this.props.type ? '/' + this.props.type : '';
+		ApiCall(`politicos_seguidos`, options, (jsonResponse) => {
+			this.setState({politicosDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
+		}, (failedRequest) => {
+			this.setState({errorState: true});
+		});
 	}
 
-	refresh() {
-		if (this.state.token) {
-			if (!this.state.loading) {
-				setTimeout(()=>{
-					this.setState({errorState: false, listIsEmpty: false, loading: true});
-					this.getSeguindo(this.state.token)
-				}, 1);
-			}
+	refresh(filter) {
+		if (!this.state.loading) {
+			setTimeout(()=>{
+				this.setState({errorState: false, listIsEmpty: false, loading: true, isUsingFilter: false});
+				this.getSeguindo(filter);
+			}, 1);
 		} else {
-			var _this = this;
-			AsyncStorage.getItem('token', (err, result) => {
-				_this.setState({token: result});
-				_this.getSeguindo(result);
-			});
+			this.getSeguindo();
 		}
 	}
 
@@ -89,10 +82,14 @@ export default class SeguindoScene extends Component {
 		if (this.state.loading) {
 			return (<LoadingOverlay/>)
 		} else if (this.state.listIsEmpty) {
-			return (<Placeholder type='follow' />)
+			if (this.state.isUsingFilter) {
+				return (<Placeholder type='search' />)
+			} else {
+				return (<Placeholder type='follow' />)
+			}
 		} else if (this.state.errorState) {
 			return (<Placeholder type='error' onPress={() => {
-				this.setState({errorState: false, loading: true}, this.getSeguindo(this.state.token))}} />)
+				this.refresh()}} />)
 		} else {
 			let type = this.props.type ? this.props.type : 'lista';
 			return (
@@ -135,7 +132,9 @@ export default class SeguindoScene extends Component {
 					navigator={this.props.navigator}
 					title='Seguindo'
 					actions={actions} />
-				<SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)} />
+				<SearchBarIOS 
+					onSubmitSearch={(text) => this.onSearchActionSelected(text)} 
+					onCancelSearch={() => this.onSearchActionCanceled()}/>
 				{this.renderLoadingOrView()}
                 <Filter 
                 	navigator={this.props.navigator} 
@@ -143,17 +142,29 @@ export default class SeguindoScene extends Component {
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
                 	type={'politicos'}
                 	title='Filtrar Políticos'
-                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)} />
+                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)}
+                	onClearFilterActionSelected={() => this.onClearFilterActionSelected()} />
 			</View>
 		)
 	}
 
-	onFilterActionSelected(filter) {
-		console.log(filter);
-		this.onCloseFilter();
-		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getSeguindo(this.state.token, filter));
+	onSearchActionSelected(filter) {
+		this.refresh({special_filter: filter});
 	}
 
+	onSearchActionCanceled() {
+		this.refresh();
+	}
+
+	onFilterActionSelected(filter) {
+		this.onCloseFilter();
+		this.refresh(filter);
+	}
+
+	onClearFilterActionSelected() {
+		this.refresh();
+	}
+	
 	onPoliticoPress(data) {
 		this.props.navigator.push({component: PoliticoPerfilScene, passProps: data});
 	}
@@ -175,6 +186,14 @@ export default class SeguindoScene extends Component {
 	}
 
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(SeguindoScene);
 
 const styles = StyleSheet.create({
 

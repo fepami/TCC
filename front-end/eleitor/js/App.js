@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {View, StatusBar} from 'react-native';
 import DefaultNavigator from './DefaultNavigator';
+import Splash from './Splash';
 
 export default class App extends Component{
 	render(){
@@ -10,7 +11,7 @@ export default class App extends Component{
 					translucent={true}
 					barStyle="light-content"
 					backgroundColor='rgba(0,0,0,.2)' />
-				<DefaultNavigator />
+				<Splash />
 			</View>
 		)
 	}

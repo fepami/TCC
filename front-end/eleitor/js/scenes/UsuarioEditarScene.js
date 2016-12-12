@@ -21,8 +21,10 @@ import HomeScene from './HomeScene';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import LoadingOverlay from '../components/LoadingOverlay';
 import SuccessOverlay from '../components/SuccessOverlay';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
-export default class UsuarioEditarScene extends Component {
+class UsuarioEditarScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -40,15 +42,8 @@ export default class UsuarioEditarScene extends Component {
 			loadingIndex: -10,
 			successIndex: -10
 		}
-		this.componentDidMount = this.componentDidMount.bind(this);
 		this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
 		this.showSuccessOverlay = this.showSuccessOverlay.bind(this);
-	}
-
-	componentDidMount() {
-		AsyncStorage.getItem('token', (err, result) => {
-			this.setState({token: result});
-		});
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -83,7 +78,7 @@ export default class UsuarioEditarScene extends Component {
 			show: 'always',
 			onActionSelected: this.onSavePress.bind(this)
 		}];
-		const imageSource = (this.state.pictureText) && (this.state.pictureText != '') && (this.state.pictureText != 'null') ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png');
+		const imageSource = (this.state.pictureText) && !['','null','undefined'].includes(this.state.pictureText) ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png');
 
 		return(
 			<Modal 
@@ -266,25 +261,24 @@ export default class UsuarioEditarScene extends Component {
 	}
 
 	getUpdateCadastro() {
-		var request = new XMLHttpRequest();
-		var _this = this;
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			_this.setState({loadingIndex: -10});
-			if (request.status === 200) {
-				// alert("Dados salvos com sucesso!");
-				_this.showSuccessOverlay();
-				_this.saveCredentials();
-			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
-			}
+		var options = {
+			name: this.state.nameText,
+			email: this.state.emailText,
+			state: this.state.stateText,
+			city: this.state.cityText,
+			age: this.state.ageText,
+			gender: this.state.genderText,
+			photo_url: this.state.pictureText,
+			token: this.props.token,
 		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/usuario/editar?name=' + this.state.nameText + '&token=' + this.state.token + '&state=' + this.state.stateText + '&city=' + this.state.cityText + '&age=' + this.state.ageText + '&gender=' + this.state.genderText + '&photo_url=' + this.state.pictureText);
-		request.send();
+		ApiCall(`usuario/editar`, options, (jsonResponse) => {
+			this.setState({loadingIndex: -10});
+			this.showSuccessOverlay();
+			this.saveCredentials();
+		}, (failedRequest) => {
+			this.setState({loadingIndex: -10});
+			alert('Erro: não foi possível conectar ao servidor.');
+		});
 	}
 
 	saveCredentials() {
@@ -307,6 +301,14 @@ export default class UsuarioEditarScene extends Component {
 		}, 1500);
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(UsuarioEditarScene);
 
 const styles = StyleSheet.create({
 	androidView: {

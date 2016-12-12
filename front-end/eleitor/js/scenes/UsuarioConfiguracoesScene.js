@@ -9,6 +9,7 @@ import {
 	AsyncStorage
 } from 'react-native';
 import {connect} from 'react-redux';
+import {setToken} from '../redux/actions/token';
 import {switchTab} from '../redux/actions/navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TouchableElement from '../components/TouchableElement';
@@ -42,6 +43,7 @@ class UsuarioConfiguracoesScene extends Component {
 
 		this.changePasswordSceneVisibility = this.changePasswordSceneVisibility.bind(this);
 		this.changeEditSceneVisibility = this.changeEditSceneVisibility.bind(this);
+		this.removeCredentials = this.removeCredentials.bind(this);
 	}
 
 	componentDidMount() {
@@ -183,14 +185,15 @@ class UsuarioConfiguracoesScene extends Component {
 
 	onPressDeslogar() {
 		LoginManager.logOut();
-		this.removeCredentials.bind(this);
+		this.removeCredentials();
 
+		this.props.switchTab('home');
 		Platform.OS === 'ios' ? this.props.rootNavigator.resetTo({component: LoginScene}) : this.props.navigator.resetTo({component: LoginScene});
-		this.props.dispatch(switchTab('home'));
 	}
 
 	removeCredentials() {
 		AsyncStorage.multiRemove(['name', 'email', 'state', 'city', 'age', 'gender', 'picture', 'token']);
+		this.props.setToken('');
 	}
 }
 
@@ -230,4 +233,17 @@ const styles = StyleSheet.create({
 	}
 })
 
-export default connect()(UsuarioConfiguracoesScene);
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+function mapDispatchToProps(dispatch) {
+	return {
+		setToken: token => dispatch(setToken(token)),
+		switchTab: tab => dispatch(switchTab(tab))
+	}
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(UsuarioConfiguracoesScene);

@@ -16,13 +16,17 @@ import ImagePicker from 'react-native-image-picker';
 import TouchableElement from '../components/TouchableElement';
 import CustomPicker from '../components/CustomPicker';
 import LoadingOverlay from '../components/LoadingOverlay';
+import SuccessOverlay from '../components/SuccessOverlay';
 import Header from '../components/Header';
 import dismissKeyboard from 'dismissKeyboard';
 import HomeScene from './HomeScene';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import NavigationManager from '../navigation/NavigationManager';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
+import {setToken} from '../redux/actions/token';
 
-export default class CadastroScene extends Component {
+class CadastroScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -45,10 +49,12 @@ export default class CadastroScene extends Component {
 			password2Error: false,
 			fbIDText: this.props.id,
 			isUsingFB: this.props.id ? true : false,
-			loadingIndex: -10
+			loadingIndex: -10,
+			successIndex: -10
 		}
 
 		this.showPasswordFields = this.showPasswordFields.bind(this);
+		this.showSuccessOverlay = this.showSuccessOverlay.bind(this);
 	}
 
 	showPasswordFields() {
@@ -227,6 +233,7 @@ export default class CadastroScene extends Component {
 					</View>	
 				</KeyboardAwareScrollView>
 				<LoadingOverlay style={{zIndex: this.state.loadingIndex}}/>
+				<SuccessOverlay style={{zIndex: this.state.successIndex}}/>
 			</View>
 		)
 	}
@@ -318,30 +325,28 @@ export default class CadastroScene extends Component {
 	}
 
 	getCadastro() {
-		var request = new XMLHttpRequest();
-		var _this = this;
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			_this.setState({loadingIndex: -10});
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				_this.saveCredentials(jsonResponse);
-			} else if (request.status === 400) {
+		var options = {
+			name: this.state.nameText,
+			email: this.state.emailText,
+			state: this.state.stateText,
+			city: this.state.cityText,
+			age: this.state.ageText,
+			gender: this.state.genderText,
+			photo_url: this.state.pictureText
+		};
+		this.state.isUsingFB ? option.profile_id = this.state.fbIDText : options.password = this.state.passwordText;
+		ApiCall('login/cadastrar', options, (jsonResponse) => {
+			this.setState({loadingIndex: -10});
+			this.showSuccessOverlay(jsonResponse.token);
+			this.saveCredentials(jsonResponse);
+		}, (failedRequest) => {
+			this.setState({loadingIndex: -10});
+			if (failedRequest.status === 400) {
 				alert("Email já cadastrado no sistema.")
 			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
+				alert('Erro: não foi possível conectar ao servidor.');
 			}
-		};
-
-		if (this.state.isUsingFB) {
-			request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login/cadastrar?name=' + this.state.nameText + '&email=' + this.state.emailText + '&profile_id=' + this.state.fbIDText + '&state=' + this.state.stateText + '&city=' + this.state.cityText + '&age=' + this.state.ageText + '&gender=' + this.state.genderText + '&photo_url=' + this.state.pictureText);
-		} else {
-			request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login/cadastrar?name=' + this.state.nameText + '&email=' + this.state.emailText + '&password=' + this.state.passwordText + '&state=' + this.state.stateText + '&city=' + this.state.cityText + '&age=' + this.state.ageText + '&gender=' + this.state.genderText + '&photo_url=' + this.state.pictureText);
-		}
-		request.send();
+		});
 	}
 
 	saveCredentials(jsonResponse) {
@@ -354,9 +359,32 @@ export default class CadastroScene extends Component {
 			['gender', jsonResponse.gender], 
 			['picture', jsonResponse.photo_url ? jsonResponse.photo_url : this.state.pictureText ? this.state.pictureText : ''], 
 			['token', jsonResponse.token]
-		], this.props.navigator.replace({component: NavigationManager}));
+		]);
+	}
+
+	showSuccessOverlay(token) {
+		this.setState({successIndex: 10})
+		setTimeout(()=>{
+			this.setState({successIndex: -10});
+			this.props.navigator.replace({component: NavigationManager});
+			this.props.setToken(token);
+		}, 1500);
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+function mapDispatchToProps(dispatch) {
+	return {
+		setToken: token => dispatch(setToken(token))
+	}
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CadastroScene);
 
 const styles = StyleSheet.create({
 	view: {

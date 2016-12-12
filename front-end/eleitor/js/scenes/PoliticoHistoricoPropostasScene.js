@@ -15,10 +15,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import PropostasListItem from '../components/PropostasListItem';
 import PropostaDetalheScene from './PropostaDetalheScene';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
-export default class PoliticoHistoricoPropostasScene extends Component {
+class PoliticoHistoricoPropostasScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -37,35 +39,24 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
-	getHistoricoPropostas(token, filter) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);	
-				if (Array.isArray(jsonResponse)) {
-					this.setState({propostasDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});					
-				} else {
-					this.setState({errorState: true, loading: false});
-				}
-			} else {
-				this.setState({errorState: true});
-			}
+	getHistoricoPropostas(filter) {
+		var options = {
+			token: this.props.token,
+			...filter
 		};
-
-		const filterText = filter ? filter : '';
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/propostas?token=' + token + filterText);
-		request.send();
+		ApiCall(`politicos/${this.props.politician_id}/propostas`, options, (jsonResponse) => {
+			if (Array.isArray(jsonResponse)) {
+					this.setState({propostasDataSource: ds.cloneWithRows(jsonResponse), loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});					
+			} else {
+				this.setState({errorState: true, loading: false});
+			}
+		}, (failedRequest) => {
+			this.setState({errorState: true});
+		});
 	}
 
 	componentDidMount() {
-		AsyncStorage.getItem('token', (err, result) => {
-			this.setState({token: result});
-			this.getHistoricoPropostas(result);
-		});
+		this.getHistoricoPropostas();
 	}
 
 	chooseFilterIcon() {
@@ -88,7 +79,7 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 			return (<Placeholder type='search' />)
 		} else if (this.state.errorState) {
 			return (<Placeholder type='error' onPress={() => {
-				this.setState({errorState: false, loading: true}, this.getHistoricoPropostas(this.state.token))}} />)
+				this.setState({errorState: false, loading: true}, this.getHistoricoPropostas())}} />)
 		} else {
 			let type = this.props.type ? this.props.type : 'lista';
 			return (
@@ -135,7 +126,8 @@ export default class PoliticoHistoricoPropostasScene extends Component {
                 	changeFilterVisibility={this.changeFilterVisibility.bind(this)} 
                 	type={'propostas'}
                 	title='Filtrar Propostas'
-                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)} />
+                	onFilterActionSelected={(filter) => this.onFilterActionSelected(filter)} 
+                	onClearFilterActionSelected={() => this.onClearFilterActionSelected()} />
 			</View>
 		)
 	}
@@ -157,15 +149,26 @@ export default class PoliticoHistoricoPropostasScene extends Component {
 	}
 
 	onFilterActionSelected(filter) {
-		console.log(filter);
 		this.onCloseFilter();
-		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getHistoricoPropostas(this.state.token, filter));
+		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getHistoricoPropostas(filter));
+	}
+
+	onClearFilterActionSelected() {
+		this.setState({errorState: false, listIsEmpty: false, loading: true}, this.getHistoricoPropostas());
 	}
 
 	onPropostaPress(data) {
 		this.props.navigator.push({component: PropostaDetalheScene, passProps: data});
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(PoliticoHistoricoPropostasScene);
 
 const styles = StyleSheet.create({
 	cell: {

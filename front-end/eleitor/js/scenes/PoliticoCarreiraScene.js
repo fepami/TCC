@@ -9,8 +9,10 @@ import {
 } from 'react-native';
 import Header from '../components/Header';
 import LoadingOverlay from '../components/LoadingOverlay';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
-export default class PoliticoCarreiraScene extends Component {
+class PoliticoCarreiraScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -25,30 +27,17 @@ export default class PoliticoCarreiraScene extends Component {
 		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
-	getCarreira(token) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				this.setState({carreiraInfo: jsonResponse, loading: false});
-			} else {
-				this.setState({errorState: true});
-			}
-		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/carreira?token=' + token);
-		request.send();
+	getCarreira() {
+		var options = {token: this.props.token};
+		ApiCall(`politicos/${this.props.politician_id}/carreira`, options, (jsonResponse) => {
+			this.setState({carreiraInfo: jsonResponse, loading: false});
+		}, (failedRequest) => {
+			this.setState({errorState: true});
+		});
 	}
 
 	componentDidMount() {
-		AsyncStorage.getItem('token', (err, result) => {
-			this.setState({token: result});
-			this.getCarreira(result);
-		});
+		this.getCarreira();
 	}
 
 	getCargoText() {
@@ -62,7 +51,7 @@ export default class PoliticoCarreiraScene extends Component {
 			return (<LoadingOverlay/>)
 		} else if (this.state.errorState) {
 			return (<Placeholder type='error' onPress={() => {
-				this.setState({errorState: false, loading: true}, this.getCarreira(this.state.token))}} />)
+				this.setState({errorState: false, loading: true}, this.getCarreira())}} />)
 		} else {
 			return this.state.carreiraInfo.map((item, ii) => (
 				<Text key={ii}>● {item}</Text>
@@ -93,6 +82,14 @@ export default class PoliticoCarreiraScene extends Component {
 		)
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(PoliticoCarreiraScene);
 
 const styles = StyleSheet.create({
 	cell: {

@@ -17,6 +17,9 @@ import FBSDK from 'react-native-fbsdk';
 import NavigationManager from '../navigation/NavigationManager';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import dismissKeyboard from 'dismissKeyboard';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
+import {setToken} from '../redux/actions/token';
 
 const {
 	LoginButton,
@@ -25,7 +28,7 @@ const {
 	GraphRequestManager,
 } = FBSDK;
 
-export default class LoginScene extends Component {
+class LoginScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -71,7 +74,7 @@ export default class LoginScene extends Component {
 							numberOfLines={1}
 							onChangeText={(text) => this.setState({emailText: text})}
 							onSubmitEditing={() => this.refs['password-input'].focus()}
-							value='marcela_teste@eleitor.com'
+							value={this.state.emailText}
 							/>	
 						<Text>Senha:</Text>
 						<TextInput 
@@ -87,7 +90,7 @@ export default class LoginScene extends Component {
 							numberOfLines={1}
 							onChangeText={(text) => this.setState({passwordText: text})}
 							onSubmitEditing={this.onLoginPress.bind(this)}
-							value='123'
+							value={this.state.passwordText}
 							/>	
 					</View>
 					<View style={styles.box}>
@@ -180,33 +183,23 @@ export default class LoginScene extends Component {
 	}
 
 	getLogin(type, email, param) {
-		var request = new XMLHttpRequest();
-		var _this = this;
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			_this.setState({loadingIndex: -10});
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				_this.saveCredentials(jsonResponse);
-			} else if (request.status === 404) {
+		var options = {};
+		options.email = email;
+		type === 'fb' ? option.profile_id = param : options.password = param;
+		ApiCall('login', options, (jsonResponse) => {
+			this.setState({loadingIndex: -10});
+			this.saveCredentials(jsonResponse);
+		}, (failedRequest) => {
+			this.setState({loadingIndex: -10});
+			if (failedRequest.status === 404) {
 				alert("Email ou senha incorreto.")
-			} else if (request.status === 418) {
+			} else if (failedRequest.status === 418) {
 				console.log("I'm a teapot! I should be brewing!")
-				_this.props.navigator.push({component: CadastroScene, passProps: _this.state.user});
+				this.props.navigator.push({component: CadastroScene, passProps: this.state.user});
 			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
+				alert('Erro: não foi possível conectar ao servidor.');
 			}
-		};
-
-		if (type === 'fb') {
-			request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login?email=' + email + '&profile_id=' + param);
-		} else {
-			request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/login?email=' + email + '&password=' + param);
-		}
-		request.send();
+		});
 	}
 
 	saveCredentials(jsonResponse) {
@@ -219,13 +212,31 @@ export default class LoginScene extends Component {
 			['gender', jsonResponse.gender], 
 			['picture', jsonResponse.photo_url ? jsonResponse.photo_url : this.state.user.picture ? this.state.user.picture : ''], 
 			['token', jsonResponse.token]
-		], this.props.navigator.replace({component: NavigationManager}));
+		], () => {
+			this.props.navigator.replace({component: NavigationManager});
+			this.props.setToken(jsonResponse.token);
+		});
+
 	}
 
 	onNewAccountPress() {
 		this.props.navigator.push({component: CadastroScene});
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+function mapDispatchToProps(dispatch) {
+	return {
+		setToken: token => dispatch(setToken(token))
+	}
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginScene);
 
 const styles = StyleSheet.create({
 	view: {

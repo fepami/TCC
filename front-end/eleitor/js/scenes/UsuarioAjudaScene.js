@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import Header from '../components/Header';
 import TouchableElement from '../components/TouchableElement';
+import TutorialScene from './TutorialScene';
 
 export default class UsuarioAjudaScene extends Component {
 	render(){
@@ -51,7 +52,7 @@ export default class UsuarioAjudaScene extends Component {
 	}
 
 	onTutorialPress() {
-
+		this.props.navigator.push({component: TutorialScene});
 	}
 }
 

@@ -18,9 +18,10 @@ import Header from '../components/Header';
 import ApprovalBar from '../components/ApprovalBar';
 import PoliticosListItem from '../components/PoliticosListItem';
 import PoliticoPerfilScene from './PoliticoPerfilScene';
-import {fakePolitico0, fakePolitico1, fakePolitico2} from '../fakeData';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
-export default class PropostaDetalheScene extends Component {
+class PropostaDetalheScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -38,49 +39,29 @@ export default class PropostaDetalheScene extends Component {
 		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
-	getProposta(token) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				this.setState({propostaInfo: jsonResponse[0], approval: jsonResponse[0].approval, user_vote: jsonResponse[0].user_vote, loading: false});
-			} else {
-				this.setState({errorState: true});
-			}
-		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas/' + this.props.proposal_id + '?token=' + token);
-		request.send();
+	getProposta() {
+		var options = {token: this.props.token};
+		ApiCall(`propostas/${this.props.proposal_id}`, options, (jsonResponse) => {
+			this.setState({propostaInfo: jsonResponse[0], approval: jsonResponse[0].approval, user_vote: jsonResponse[0].user_vote, loading: false});
+		}, (failedRequest) => {
+			this.setState({errorState: true});
+		});
 	}
 
 	postVoto(user_vote) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				this.setState({approval: jsonResponse[0].approval});
-			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
-			}
+		var options = {
+			token: this.props.token,
+			user_vote
 		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/propostas/' + this.props.proposal_id + '/votar?token=' + this.state.token + '&user_vote=' + user_vote);
-		request.send();
+		ApiCall(`propostas/${this.props.proposal_id}/votar`, options, (jsonResponse) => {
+			this.setState({approval: jsonResponse[0].approval});
+		}, (failedRequest) => {
+			alert('Erro: não foi possível conectar ao servidor.');
+		});
 	}
 
 	componentDidMount() {
-		AsyncStorage.getItem('token', (err, result) => {
-			this.setState({token: result});
-			this.getProposta(result);
-		});
+		this.getProposta();
 	}
 
 	renderIcon() {
@@ -108,7 +89,7 @@ export default class PropostaDetalheScene extends Component {
 			return (<LoadingOverlay/>)
 		} else if (this.state.errorState) {
 			return (<Placeholder type='error' onPress={() => {
-				this.setState({errorState: false, loading: true}, this.getProposta(this.state.token))}} />)
+				this.setState({errorState: false, loading: true}, this.getProposta())}} />)
 		} else {
 			let like_bgcolor = (this.state.user_vote === 1) ? 'limegreen' : 'white';
 			let likeIcon_color = (this.state.user_vote === 1) ? 'white' : 'limegreen';
@@ -177,6 +158,14 @@ export default class PropostaDetalheScene extends Component {
 		this.props.navigator.push({component: PoliticoPerfilScene, passProps: data});
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(PropostaDetalheScene);
 
 const styles = StyleSheet.create({
 	view: {

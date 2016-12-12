@@ -14,7 +14,8 @@ export default class SearchBar extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showCancel: false
+			showCancel: false,
+			searchText: ''
 		}
 		this.showCancel = this.showCancel.bind(this);
 		this.hideCancel = this.hideCancel.bind(this);
@@ -28,6 +29,10 @@ export default class SearchBar extends Component {
 		this.setState({showCancel: false});
 		dismissKeyboard();
 		this.refs['searchbar'].clear(0);
+		if (this.state.searchText != '') {
+			this.setState({searchText: ''})
+			this.props.onCancelSearch();
+		}
 	}
 
 	renderCancel() {
@@ -61,8 +66,9 @@ export default class SearchBar extends Component {
 						returnKeyType='search'
 						underlineColorAndroid='transparent'
 						numberOfLines={1}
+						onChangeText={(text) => this.setState({searchText: text})}
 						onFocus={this.showCancel}
-						onSubmitEditing={this.props.onSubmitSearch}
+						onSubmitEditing={() => this.props.onSubmitSearch(this.state.searchText)}
 						/>
 				</View>
 				{this.renderCancel()}

@@ -24,10 +24,13 @@
 		140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		168446A83AE14A6DABE623A4 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BF84254CC7142F0877F5093 /* Entypo.ttf */; };
+		1F14E1CB1DFDCAE9002877E9 /* HockeySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F14E1CA1DFDCAE9002877E9 /* HockeySDK.framework */; };
 		1F5621C51DD2C9E5007D4E84 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F5621C11DD2C9E5007D4E84 /* Bolts.framework */; };
 		1F5621C61DD2C9E5007D4E84 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F5621C21DD2C9E5007D4E84 /* FBSDKCoreKit.framework */; };
 		1F5621C71DD2C9E5007D4E84 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F5621C31DD2C9E5007D4E84 /* FBSDKLoginKit.framework */; };
 		1F5621C81DD2C9E5007D4E84 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F5621C41DD2C9E5007D4E84 /* FBSDKShareKit.framework */; };
+		1F9FF09D1DFDD0900097112E /* HockeySDKResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 1F9FF09C1DFDD0900097112E /* HockeySDKResources.bundle */; };
+		1FC9971B1DFDA45900B45C51 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 1FC9971A1DFDA45900B45C51 /* logo.png */; };
 		1FD873F71DD3958B00A6FA77 /* FacebookSDKStrings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 1FD873F61DD3958B00A6FA77 /* FacebookSDKStrings.bundle */; };
 		3469A450BC3447E1AF4E8E60 /* Foundation.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D8559A1EF32D42A79A344F98 /* Foundation.ttf */; };
 		550799423BB34AD29070237D /* libRCTFBSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B3E114038324E50923B441F /* libRCTFBSDK.a */; };
@@ -182,11 +185,14 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = eleitor/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		15502356E98F48138707C8FF /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
+		1F14E1CA1DFDCAE9002877E9 /* HockeySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HockeySDK.framework; path = "frameworks/HockeySDK-iOS/HockeySDK.embeddedframework/HockeySDK.framework"; sourceTree = "<group>"; };
 		1F4CA4B71DE7539600C7CBF8 /* eleitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = eleitor.entitlements; path = eleitor/eleitor.entitlements; sourceTree = "<group>"; };
 		1F5621C11DD2C9E5007D4E84 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Bolts.framework; path = frameworks/Bolts.framework; sourceTree = "<group>"; };
 		1F5621C21DD2C9E5007D4E84 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = frameworks/FBSDKCoreKit.framework; sourceTree = "<group>"; };
 		1F5621C31DD2C9E5007D4E84 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = frameworks/FBSDKLoginKit.framework; sourceTree = "<group>"; };
 		1F5621C41DD2C9E5007D4E84 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKShareKit.framework; path = frameworks/FBSDKShareKit.framework; sourceTree = "<group>"; };
+		1F9FF09C1DFDD0900097112E /* HockeySDKResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = HockeySDKResources.bundle; path = "frameworks/HockeySDK-iOS/HockeySDK.embeddedframework/HockeySDKResources.bundle"; sourceTree = "<group>"; };
+		1FC9971A1DFDA45900B45C51 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo.png; path = ../js/resources/image/logo.png; sourceTree = "<group>"; };
 		1FD873F61DD3958B00A6FA77 /* FacebookSDKStrings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = FacebookSDKStrings.bundle; path = frameworks/FacebookSDKStrings.bundle; sourceTree = "<group>"; };
 		1FD873F81DD395C000A6FA77 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		3B3E114038324E50923B441F /* libRCTFBSDK.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTFBSDK.a; sourceTree = "<group>"; };
@@ -239,6 +245,7 @@
 				8BB6F0901B70442097050A5B /* libRNSearchBar.a in Frameworks */,
 				550799423BB34AD29070237D /* libRCTFBSDK.a in Frameworks */,
 				FCAC82865C30486B9D4E3C62 /* libRNSVG.a in Frameworks */,
+				1F14E1CB1DFDCAE9002877E9 /* HockeySDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -383,6 +390,8 @@
 		1F5621B01DD2C848007D4E84 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1F9FF09C1DFDD0900097112E /* HockeySDKResources.bundle */,
+				1F14E1CA1DFDCAE9002877E9 /* HockeySDK.framework */,
 				1FD873F61DD3958B00A6FA77 /* FacebookSDKStrings.bundle */,
 				1F5621C11DD2C9E5007D4E84 /* Bolts.framework */,
 				1F5621C21DD2C9E5007D4E84 /* FBSDKCoreKit.framework */,
@@ -449,6 +458,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				1FC9971A1DFDA45900B45C51 /* logo.png */,
 				1F5621B01DD2C848007D4E84 /* Frameworks */,
 				13B07FAE1A68108700A75B9A /* eleitor */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -498,6 +508,7 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				1F14E1B51DFDC742002877E9 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -739,7 +750,9 @@
 				1005CA178B234DC9A667A091 /* FontAwesome.ttf in Resources */,
 				3469A450BC3447E1AF4E8E60 /* Foundation.ttf in Resources */,
 				6DB92E5CB7064F07B8AA179E /* Ionicons.ttf in Resources */,
+				1F9FF09D1DFDD0900097112E /* HockeySDKResources.bundle in Resources */,
 				A681FA8E35E24F9B8724505B /* MaterialIcons.ttf in Resources */,
+				1FC9971B1DFDA45900B45C51 /* logo.png in Resources */,
 				B8221A312A17477DAEA78882 /* Octicons.ttf in Resources */,
 				7452C5BB3CF1472999679DED /* Zocial.ttf in Resources */,
 				1FD873F71DD3958B00A6FA77 /* FacebookSDKStrings.bundle in Resources */,
@@ -762,6 +775,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/packager/react-native-xcode.sh";
+		};
+		1F14E1B51DFDC742002877E9 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "FILE=\"${SRCROOT}/HockeySDK-iOS/BuildAgent\"\nif [ -f \"$FILE\" ]; then\n\"$FILE\"\nfi";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -866,6 +892,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/frameworks",
+					"$(PROJECT_DIR)/frameworks/HockeySDK-iOS/HockeySDK.embeddedframework",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -902,6 +929,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/frameworks",
+					"$(PROJECT_DIR)/frameworks/HockeySDK-iOS/HockeySDK.embeddedframework",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",

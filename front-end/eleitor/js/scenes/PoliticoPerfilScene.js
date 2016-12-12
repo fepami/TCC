@@ -19,8 +19,10 @@ import Header from '../components/Header';
 import ApprovalBar from '../components/ApprovalBar';
 import PoliticoHistoricoPropostasScene from './PoliticoHistoricoPropostasScene';
 import PoliticoCarreiraScene from './PoliticoCarreiraScene';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
-export default class PoliticoPerfilScene extends Component {
+class PoliticoPerfilScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -43,67 +45,41 @@ export default class PoliticoPerfilScene extends Component {
 		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
-	getPolitico(token) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				this.setState({politicoInfo: jsonResponse[0], approval: jsonResponse[0].approval, user_vote: jsonResponse[0].user_vote, user_follow: jsonResponse[0].user_follow, loading: false});
-			} else {
-				this.setState({errorState: true});
-			}
-		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '?token=' + token);
-		request.send();
+	getPolitico() {
+		var options = {token: this.props.token};
+		ApiCall(`politicos/${this.props.politician_id}`, options, (jsonResponse) => {
+			this.setState({politicoInfo: jsonResponse[0], approval: jsonResponse[0].approval, user_vote: jsonResponse[0].user_vote, user_follow: jsonResponse[0].user_follow, loading: false});
+		}, (failedRequest) => {
+			this.setState({errorState: true});
+		});
 	}
 
 	postVoto(user_vote) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				this.setState({approval: jsonResponse[0].approval});
-			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
-			}
+		var options = {
+			token: this.props.token,
+			user_vote
 		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/votar?token=' + this.state.token + '&user_vote=' + user_vote);
-		request.send();
+		ApiCall(`politicos/${this.props.politician_id}/votar`, options, (jsonResponse) => {
+			this.setState({approval: jsonResponse[0].approval});
+		}, (failedRequest) => {
+			alert('Erro: não foi possível conectar ao servidor.');
+		});
 	}
 
 	postFollow(user_follow) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
-			}
+		var options = {
+			token: this.props.token,
+			user_follow
 		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/politicos/' + this.props.politician_id + '/seguir?token=' + this.state.token + '&user_follow=' + user_follow);
-		request.send();
+		ApiCall(`politicos/${this.props.politician_id}/seguir`, options, (jsonResponse) => {
+			// console.log('success');
+		}, (failedRequest) => {
+			alert('Erro: não foi possível conectar ao servidor.');
+		});
 	}
 
 	componentDidMount() {
-		AsyncStorage.getItem('token', (err, result) => {
-			this.setState({token: result});
-			this.getPolitico(result);
-		});
+		this.getPolitico();
 	}
 
 	getCargoEvigenciaText() {
@@ -131,7 +107,7 @@ export default class PoliticoPerfilScene extends Component {
 			return (<LoadingOverlay/>)
 		} else if (this.state.errorState) {
 			return (<Placeholder type='error' onPress={() => {
-				this.setState({errorState: false, loading: true}, this.getPolitico(this.state.token))}} />)
+				this.setState({errorState: false, loading: true}, this.getPolitico())}} />)
 		} else {
 			let like_bgcolor = (this.state.user_vote === 1) ? 'limegreen' : 'white';
 			let likeIcon_color = (this.state.user_vote === 1) ? 'white' : 'limegreen';
@@ -250,6 +226,14 @@ export default class PoliticoPerfilScene extends Component {
 		this.props.navigator.push({component: PoliticoCarreiraScene, passProps: this.props});
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(PoliticoPerfilScene);
 
 const styles = StyleSheet.create({
 	view: {

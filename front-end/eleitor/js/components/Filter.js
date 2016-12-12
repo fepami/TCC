@@ -16,10 +16,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Header from './Header';
 import TouchableElement from './TouchableElement';
 import FilterListTopic from './FilterListTopic';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
-export default class Filter extends Component {
+class Filter extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -40,30 +42,17 @@ export default class Filter extends Component {
 		this.props.changeFilterVisibility(false)
 	}
 
-	getFiltro(token) {
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = (e) => {
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			if (request.status === 200) {
-				const jsonResponse = JSON.parse(request.response);
-				this.setState({filterDataSource: jsonResponse, loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
-			} else {
-				this.setState({errorState: true});
-			}
-		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/filtro/' + this.props.type + '?token=' + token);
-		request.send();
+	getFiltro() {
+		var options = { token: this.props.token };
+		ApiCall(`filtro/${this.props.type}`, options, (jsonResponse) => {
+			this.setState({filterDataSource: jsonResponse, loading: false, listIsEmpty: (jsonResponse.length === 0) ? true : false});
+		}, (failedRequest) => {
+			this.setState({errorState: true});
+		});
 	}
 
 	componentDidMount() {
-		AsyncStorage.getItem('token', (err, result) => {
-			this.setState({token: result});
-			this.getFiltro(result);
-		});
+		this.getFiltro();
 	}
 
 	getFilterTopics() {
@@ -84,7 +73,7 @@ export default class Filter extends Component {
 			return (<Placeholder type='search' />)
 		} else if (this.state.errorState) {
 			return (<Placeholder type='error' onPress={() => {
-				this.setState({errorState: false, loading: true}, this.getFiltro(this.state.token))}} />)
+				this.setState({errorState: false, loading: true}, this.getFiltro())}} />)
 		} else {
 			return (
 				<View style={{flex: 1}}>
@@ -149,19 +138,29 @@ export default class Filter extends Component {
 	onClearActionSelected() {
 		this.setState({selectedOptions: []});
 		this.setState({selectedTopics: []});
+
+		this.props.onClearFilterActionSelected();
 	}
 
 	onFilterActionSelected() {
-		let filterText = '';
+		let filter = {};
 
 		this.state.selectedOptions.map((option, ii) => {
 			let topic = this.state.selectedTopics[ii];
-			filterText = filterText + '&' + topic + '=' + option;
+			filter[topic] = option;
 		});
 
-		this.props.onFilterActionSelected(filterText);
+		this.props.onFilterActionSelected(filter);
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(Filter);
 
 const styles = StyleSheet.create({
 	androidView: {

@@ -87,7 +87,7 @@ export default class UsuarioPerfilScene extends Component {
 				onPress: this.onPressConfiguracoes.bind(this)
 		}});
 
-		const imageSource = (this.state.pictureText) && (this.state.pictureText != '') && (this.state.pictureText != 'null') ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png');
+		const imageSource = (this.state.pictureText) && !['','null','undefined'].includes(this.state.pictureText) ? {uri: this.state.pictureText} : require('../resources/image/placeholder.png');
 		
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>

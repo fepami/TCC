@@ -1,19 +1,20 @@
 import React, {Component} from 'react';
 import {
+	AsyncStorage,
 	Navigator,
 	Platform
 } from 'react-native';
 import NavigationManager from './navigation/NavigationManager';
 import LoginScene from './scenes/LoginScene';
 
-export default class DefaultNavigator extends Component {
+class DefaultNavigator extends Component {
 	render(){
 		return(
 			<Navigator
 				ref='navigator'
 				style={{flex: 1, backgroundColor: '#2B2B2B'}}
 				//mudar de NavigationManager para login
-				initialRoute={{component: LoginScene}}
+				initialRoute={{component: this.props.initialRoute}}
 				// initialRoute={{component: NavigationManager}}
 				renderScene={this.renderScene}
 				configureScene={route => {
@@ -33,3 +34,5 @@ export default class DefaultNavigator extends Component {
 		return <route.component {...route.passProps} navigator={navigator} />
 	}
 }
+
+export default DefaultNavigator;

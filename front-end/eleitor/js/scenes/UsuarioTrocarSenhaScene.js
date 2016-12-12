@@ -16,8 +16,10 @@ import Header from '../components/Header';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import LoadingOverlay from '../components/LoadingOverlay';
 import SuccessOverlay from '../components/SuccessOverlay';
+import ApiCall from '../api/ApiCall';
+import {connect} from 'react-redux';
 
-export default class UsuarioTrocarSenhaScene extends Component {
+class UsuarioTrocarSenhaScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -30,18 +32,11 @@ export default class UsuarioTrocarSenhaScene extends Component {
 			loadingIndex: -10,
 			successIndex: -10
 		}
-		this.componentDidMount = this.componentDidMount.bind(this);
 		this.showSuccessOverlay = this.showSuccessOverlay.bind(this);
 	}
 
 	closeModal(){
 		this.props.changeModalVisibility(false);
-	}
-
-	componentDidMount() {
-		AsyncStorage.getItem('token', (err, result) => {
-			this.setState({token: result});
-		});
 	}
 
 	render(){
@@ -166,28 +161,18 @@ export default class UsuarioTrocarSenhaScene extends Component {
 	}
 
 	getTrocarSenha() {
-		var request = new XMLHttpRequest();
-		var _this = this;
-
-		request.onreadystatechange = (e) => {
-
-			if (request.readyState !== 4) {
-				return;
-			}
-
-			_this.setState({loadingIndex: -10});
-			if (request.status === 200) {
-				// alert("Nova senha salva com sucesso!");
-				_this.showSuccessOverlay();
-			} else if (request.status === 404) {
-				alert("Senha antiga incorreta.")
-			} else {
-				console.warn('Erro: não foi possível conectar ao servidor.');
-			}
+		var options = {
+			antiga: this.state.currentpwdText,
+			nova: this.state.newpwdText,
+			token: this.props.token
 		};
-
-		request.open('GET', 'http://ec2-52-67-189-113.sa-east-1.compute.amazonaws.com:3000/usuario/trocar?antiga=' + this.state.currentpwdText + '&nova=' + this.state.newpwdText + '&token=' + this.state.token);
-		request.send();			
+		ApiCall(`usuario/trocar`, options, (jsonResponse) => {
+			this.setState({loadingIndex: -10});
+			this.showSuccessOverlay();
+		}, (failedRequest) => {
+			this.setState({loadingIndex: -10});
+			alert('Erro: não foi possível conectar ao servidor.');
+		});
 		
 	}
 
@@ -199,6 +184,14 @@ export default class UsuarioTrocarSenhaScene extends Component {
 		}, 1500);
 	}
 }
+
+function mapStateToProps(store) {
+	return {
+		token: store.token.token
+	}
+}
+
+export default connect(mapStateToProps)(UsuarioTrocarSenhaScene);
 
 const styles = StyleSheet.create({
 	androidView: {
