@@ -141,8 +141,14 @@ app.get("/test_token", helpers.jwt_mw, function(req, res){
 
 
 
+const md5 = require("blueimp-md5")
 const aws = require('aws-sdk');
 const S3_BUCKET = 'eleitor';
+
+
+var config = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+var md5_key = config['md5_key']
+
 
 aws.config.update({
   region: 'sa-east-1',
@@ -150,11 +156,40 @@ aws.config.update({
 
 // s3-sa-east-1.amazonaws.com
 // s3.dualstack.sa-east-1.amazonaws.com
-app.get('/sign-s3', (req, res, next) => {
+// app.get('/sign-s3', (req, res, next) => {
+//   const s3 = new aws.S3();
+//   const file_name = req.query['file_name'];
+//   const file_type = req.query['file_type'];
+//   const s3Params = {
+//     Bucket: S3_BUCKET,
+//     Key: file_name,
+//     Expires: 60,
+//     ContentType: file_type,
+//     ACL: 'public-read'
+//   };
+
+//   s3.getSignedUrl('putObject', s3Params, (err, data) => {
+//     if(err){
+//       console.log(err);
+//       return next(err);
+//     }
+//     const returnData = {
+//       signedRequest: data,
+//       url: `https://${S3_BUCKET}.s3-sa-east-1.amazonaws.com/${file_name}`
+//     };
+//     return res.json(returnData);
+//   });
+// });
+
+
+app.get('/usuario/mudar_avatar', helpers.jwt_mw, (req, res, next) => {
   const s3 = new aws.S3();
-  const file_name = req.query['file_name'];
-  const file_type = req.query['file_type'];
-  const s3Params = {
+  var user_id = req.user['id'];
+
+	var user_code = md5(user_id, md5_key);
+	var file_name = `${user_code}.jpg`;
+  var file_type = 'binary/octet-stream';
+  var s3Params = {
     Bucket: S3_BUCKET,
     Key: file_name,
     Expires: 60,
@@ -163,17 +198,24 @@ app.get('/sign-s3', (req, res, next) => {
   };
 
   s3.getSignedUrl('putObject', s3Params, (err, data) => {
-    if(err){
-      console.log(err);
-      return next(err);
-    }
+    if(err){return next(err);}
+
+    var photo_url = `https://${S3_BUCKET}.s3-sa-east-1.amazonaws.com/${file_name}`
     const returnData = {
       signedRequest: data,
-      url: `https://${S3_BUCKET}.s3-sa-east-1.amazonaws.com/${file_name}`
+      url: photo_url
     };
-    return res.json(returnData);
+
+    var update_user_query = 'update user set ? where id=?';
+
+    mysql_handler(update_user_query, [{'photo_url': photo_url}, user_id], function(err, result){
+      if (err) {return next(err);}
+
+      return res.json(returnData);
+    });
   });
 });
+
 
 // app.get('/login/facebook', passport.authenticate('facebook', {'session': false, 'scope': 'email'}));
 // app.get('/login/facebook/return', passport.authenticate('facebook', {'session': false, 'scope': 'email'}), function(req, res){
