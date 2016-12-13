@@ -195,7 +195,7 @@ app.get('/usuario/mudar_avatar', helpers.jwt_mw, (req, res, next) => {
     Key: file_name,
     Expires: 60,
     ContentType: file_type,
-    ContentEncoding: 'base64',
+    // ContentEncoding: 'base64',
     ACL: 'public-read'
   };
 
