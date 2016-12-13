@@ -186,8 +186,10 @@ app.get('/usuario/mudar_avatar', helpers.jwt_mw, (req, res, next) => {
   const s3 = new aws.S3();
   var user_id = req.user['id'];
 
-	var user_code = md5(user_id, md5_key);
-	var file_name = `${user_code}.jpg`;
+	var user_subbucket = md5(user_id, md5_key);
+	var random = Date.now();
+
+	var file_name = `${user_subbucket}/${random}.jpg`;
   // var file_type = 'binary/octet-stream';
   var file_type = 'image/jpeg';
   var s3Params = {
