@@ -43,11 +43,47 @@ function get_age_from_birthday(dateString) {
 	return age;
 }
 
-
-
 const fs = require('fs');
+const config = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
+var app_email = config['app_email'];
+var app_email_pass = config['app_email_pass'];
+
+const nodemailer = require('nodemailer');
+var send_mail = function(mail_parameters, callback){
+	// var from = mail_parameters['from'];
+	// var to = mail_parameters['to'];
+	// var subject = mail_parameters['subject'];
+	// var text = mail_parameters['text'];
+
+	mail_parameters['from'] = "eleitor.app@gmail.com";
+
+	debug_print('creating transport!');
+  var smtpTransport = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: app_email,
+      pass: app_email_pass
+    }
+  });
+
+  // var smtpTransport = nodemailer.createTransport('smtps://eleitor.app@gmail.com:eleitorapp2016');
+
+	debug_print('sending mail....');
+  smtpTransport.sendMail(mail_parameters, function(err, response){
+  	debug_print(err);
+
+
+    if(err){return callback(err);}
+
+    return callback(null, response);
+  });
+}
+
+
+
+
+
 const jwt = require('jsonwebtoken');
-var config = JSON.parse(fs.readFileSync('config/config.json', 'utf8'));
 var token_secret = config['token_secret']
 
 function verify_token(token, callback) {
@@ -97,6 +133,8 @@ module.exports = {
 	'parse_null_bool_db': parse_null_bool_db,
 	'debug_print': debug_print,
 	'get_age_from_birthday': get_age_from_birthday,
+
+	'send_mail': send_mail,
 
 	'verify_token': verify_token,
 	'create_token': create_token,

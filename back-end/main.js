@@ -219,6 +219,27 @@ app.get('/usuario/mudar_avatar', helpers.jwt_mw, (req, res, next) => {
 });
 
 
+
+app.get("/test_mail", function(req, res){
+	var params = {
+		to: "eleitor.app@gmail.com",
+		subject: "test",
+		text: "Yay, hello!!"
+	}
+
+	helpers.send_mail(params, function(err){
+		if (err) {return res.json(err)}
+
+		return res.json('ok');
+	});
+});
+
+app.get("/usuario/esqueceu_senha", user_controller.forgot_password);
+
+
+
+
+
 // app.get('/login/facebook', passport.authenticate('facebook', {'session': false, 'scope': 'email'}));
 // app.get('/login/facebook/return', passport.authenticate('facebook', {'session': false, 'scope': 'email'}), function(req, res){
 // 	res.json({'token': req.user});

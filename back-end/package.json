@@ -10,6 +10,7 @@
     "jsonwebtoken": "^7.1.9",
     "moment": "^2.16.0",
     "mysql": "^2.5.4",
+    "nodemailer": "^2.7.0",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1"
   },

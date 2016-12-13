@@ -5,6 +5,7 @@ const mysql_handler = require("./mysql_handler").handler
 const cassandra_handler = require("./cassandra_handler").handler
 
 const bcrypt = require('bcryptjs');
+const md5 = require("blueimp-md5")
 
 const helpers = require("./helpers")
 
@@ -242,9 +243,51 @@ function update_password(req, res, next) {
 }
 
 
+var forgot_password = function(req, res){
+  user_email = req.query['email'];
+
+	var user_query = 'select id from user where email = ?';
+	mysql_handler(user_query, [user_email], function(err, users){
+	  if (err) {return next(err);}
+
+	  if (users.length !== 1) {
+	  	return next(`Mais do que um usuário com email: ${user_email}`);
+	  }
+
+	  var user_id = users[0]['id']
+
+	  var new_password = md5(Math.random(), Math.random());
+	  new_password = new_password.substring(0, 10);
+
+		var encrypted_pass = bcrypt.hashSync(new_password, 1);
+
+		var update_user_query = 'update user set ? where id=?';
+
+		mysql_handler(update_user_query, [{'password': encrypted_pass}, user_id], function(err, result){
+			if (err) {return next(err);}
+
+			var params = {
+				to: user_email,
+				// to: 'eleitor.app@gmail.com',
+				subject: "Esqueceu a senha? Que burro!",
+				text: `Sua nova senha eh: ${new_password}`
+			}
+
+			helpers.send_mail(params, function(err){
+				if (err) {return res.json(err)}
+
+				return res.json('ok');
+			});
+		});
+	});
+}
+
+
+
 module.exports = {
   'login': login,
   'create_user': create_user,
   'update_user': update_user,
   'update_password': update_password,
+  'forgot_password': forgot_password
 }
