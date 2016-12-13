@@ -228,9 +228,38 @@ app.get("/test_mail", function(req, res){
 	}
 
 	helpers.send_mail(params, function(err){
-		if (err) {return res.json(err)}
+		if (err) {return next(err)}
 
 		return res.json('ok');
+	});
+});
+
+
+app.get("/reportar_problema", helpers.jwt_mw, function(req, res, next){
+	var user_id = req.user['id'];
+	var report = req.query['report'];
+
+	var user_query = 'select email from user where id = ?';
+	mysql_handler(user_query, [user_id], function(err, result){
+	  if (err) {return next(err);}
+
+	  var user_email = result[0]['email'];
+
+	  var email_text = `<h2>Problema Reportado!</h2>`;
+	  email_text += `<p>Email para contato: ${user_email}</p>`;
+	  email_text += `<br/><p>${report}</p>`;
+
+		var params = {
+			to: "eleitor.app@gmail.com",
+			subject: "Reportar Problema",
+			html: email_text
+		}
+
+		helpers.send_mail(params, function(err){
+			if (err) {return next(err);}
+
+			return res.json('ok');
+		});
 	});
 });
 

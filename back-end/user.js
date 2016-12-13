@@ -268,7 +268,6 @@ var forgot_password = function(req, res){
 
 			var params = {
 				to: user_email,
-				// to: 'eleitor.app@gmail.com',
 				subject: "Esqueceu a senha? Que burro!",
 				text: `Sua nova senha eh: ${new_password}`
 			}
