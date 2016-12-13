@@ -193,32 +193,28 @@ function login(req, res, next) {
 }
 
 function update_user(req, res, next) {
-	var name = req.query['name'];
+	var parameter_keys = ['name', 'state', 'city', 'age', 'gender', 'photo_url']
+
 	// var email = req.query['email'];
-	var state = req.query['state'];
-	var city = req.query['city'];
-	var age = req.query['age'];
-	var gender =  req.query['gender'];
-	var photo_url =  req.query['photo_url'] || null;
+	var user_params = {};
+	parameter_keys.forEach(function(key){
+		if (req.query[key]) {
+			user_params[key] = req.query[key];
+		}
+	});
+
+	if (Object.keys(user_params).length === 0) {
+		return res.json('ok');
+	}
 
 	var user_id = req.user['id'];
-
-	var user_params = {
-		'name': name,
-		// 'email': email,
-		'state': state,
-		'city': city,
-		'age': age,
-		'gender': gender,
-		'photo_url': photo_url,
-	};
 
 	var update_user_query = 'update user set ? where id=?';
 
 	mysql_handler(update_user_query, [user_params, user_id], function(err, result){
 		if (err) {return next(err);}
 
-		return res.json('ok')
+		return res.json('ok');
 	});
 }
 
