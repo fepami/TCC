@@ -188,12 +188,14 @@ app.get('/usuario/mudar_avatar', helpers.jwt_mw, (req, res, next) => {
 
 	var user_code = md5(user_id, md5_key);
 	var file_name = `${user_code}.jpg`;
-  var file_type = 'binary/octet-stream';
+  // var file_type = 'binary/octet-stream';
+  var file_type = 'image/jpeg';
   var s3Params = {
     Bucket: S3_BUCKET,
     Key: file_name,
     Expires: 60,
     ContentType: file_type,
+    ContentEncoding: 'base64',
     ACL: 'public-read'
   };
 
