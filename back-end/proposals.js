@@ -37,7 +37,7 @@ var get_proposals_func = function(type){
 			prop.category,\
 			prop.ranking,\
 			prop.received_at,\
-			GROUP_CONCAT(pp.politician_id) as politician_ids,\
+			GROUP_CONCAT(distinct pp.politician_id) as politician_ids,\
 			COALESCE(APPROVAL_T.approval, 0.5) as approval,\
 			USER_VOTE_T.is_positive as user_vote\
 		from proposal prop\
@@ -47,10 +47,15 @@ var get_proposals_func = function(type){
 			) APPROVAL_T on APPROVAL_T.proposal_id=prop.id\
 		left join (select v.proposal_id, v.is_positive from proposal_vote v where v.user_id=?\
 			) USER_VOTE_T on USER_VOTE_T.proposal_id = prop.id\
-		left join (select pp.politician_id, pos.name, pp.location, pp.vote_code, pp.start_date, DATE_ADD(DATE_ADD(pp.start_date, INTERVAL pos.term_length YEAR), INTERVAL -1 DAY) as predicted_end_date \
-								from politician_position pp\
-								inner join position pos on pos.id = pp.position_id\
-								where pp.end_date is null AND pp.start_date is not null\
+		left join (\
+			select * \
+			from (\
+					select pp.politician_id, pos.name, pp.location, pp.vote_code, pp.start_date, DATE_ADD(DATE_ADD(pp.start_date, INTERVAL pos.term_length YEAR), INTERVAL -1 DAY) as predicted_end_date \
+					from politician_position pp\
+					inner join position pos on pos.id = pp.position_id\
+					where pp.end_date is null AND pp.start_date is not null\
+					order by pp.start_date asc\
+				) YAY_T group by politician_id\
 			) CUR_POS_T on CUR_POS_T.politician_id=pol.id\
 			';
 		query_for_props[1] = '';
@@ -178,8 +183,8 @@ var vote = function(req, res, next) {
 	var proposal_id = req.params['proposal_id'];
 	var user_id = req.user['id'];
 	var existing_vote_query = 'select\
-	  v.id as vote_id,\
-	  v.is_positive\
+		v.id as vote_id,\
+		v.is_positive\
 	from proposal_vote v\
 	where v.user_id = ? and v.proposal_id = ?;';
 
@@ -187,19 +192,19 @@ var vote = function(req, res, next) {
 		if (err) {return next(err);}
 		var update_ranking_query = 'UPDATE proposal p\
 			JOIN (\
-			  SELECT\
-			    @rank:=@rank+1 AS rank,\
-			    APPROVAL_T.approval AS approval,\
-			    APPROVAL_T.id AS id\
-			  FROM (\
-			    SELECT\
-			      pro.id,\
-			      COALESCE(avg(vote.is_positive), 0.5) AS approval\
-			    FROM proposal pro\
-			    LEFT join proposal_vote vote ON vote.proposal_id=pro.id\
-			    GROUP BY pro.id\
-			    ORDER BY approval DESC\
-			  ) AS APPROVAL_T, (SELECT @rank:=0) meh\
+				SELECT\
+					@rank:=@rank+1 AS rank,\
+					APPROVAL_T.approval AS approval,\
+					APPROVAL_T.id AS id\
+				FROM (\
+					SELECT\
+						pro.id,\
+						COALESCE(avg(vote.is_positive), 0.5) AS approval\
+					FROM proposal pro\
+					LEFT join proposal_vote vote ON vote.proposal_id=pro.id\
+					GROUP BY pro.id\
+					ORDER BY approval DESC\
+				) AS APPROVAL_T, (SELECT @rank:=0) meh\
 			) RANKED_T ON RANKED_T.id = p.id\
 			SET p.ranking = RANKED_T.rank;';
 
@@ -273,15 +278,15 @@ var vote = function(req, res, next) {
 }
 
 module.exports = {
-  'get_proposals': get_proposals_func(),
-  'get_ranking': get_proposals_func('ranking'),
-  'get_proposal': get_proposals_func(),
-  'get_politician_proposals': get_proposals_func('politician'),
-  'filtered_by_special_filter': get_proposals_func('special_filter'),
+	'get_proposals': get_proposals_func(),
+	'get_ranking': get_proposals_func('ranking'),
+	'get_proposal': get_proposals_func(),
+	'get_politician_proposals': get_proposals_func('politician'),
+	'filtered_by_special_filter': get_proposals_func('special_filter'),
 
 
 
 
 
-  'vote': vote,
+	'vote': vote,
 }

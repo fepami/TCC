@@ -33,6 +33,9 @@ function handler(query, params_or_callback, callback) {
 				}
 
 				connection.release();
+				// console.log('*** DEBUG ***');
+				// console.log(yay.sql.replace(/\t/g, '\n'));
+				// console.log('*** DEBUG ***');
 				params_or_callback(err, rows)
 			});
 		} else {
@@ -44,6 +47,9 @@ function handler(query, params_or_callback, callback) {
 				}
 
 				connection.release();
+				// console.log('*** DEBUG ***');
+				// console.log(yay.sql.replace(/\t/g, '\n'));
+				// console.log('*** DEBUG ***');
 				callback(err, rows)
 			});
 		}

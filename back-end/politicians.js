@@ -54,10 +54,15 @@ var get_politicians_func = function(type){
 								from politician_vote v\
 								where v.user_id=?\
 			) USER_VOTE_T on USER_VOTE_T.politician_id = pol.id\
-		left join (select pp.politician_id, pos.name, pp.location, pp.vote_code, pp.start_date, DATE_ADD(DATE_ADD(pp.start_date, INTERVAL pos.term_length YEAR), INTERVAL -1 DAY) as predicted_end_date \
-								from politician_position pp\
-								inner join position pos on pos.id = pp.position_id\
-								where pp.end_date is null AND pp.start_date is not null\
+		left join (\
+			select * \
+			from (\
+					select pp.politician_id, pos.name, pp.location, pp.vote_code, pp.start_date, DATE_ADD(DATE_ADD(pp.start_date, INTERVAL pos.term_length YEAR), INTERVAL -1 DAY) as predicted_end_date \
+					from politician_position pp\
+					inner join position pos on pos.id = pp.position_id\
+					where pp.end_date is null AND pp.start_date is not null\
+					order by pp.start_date asc\
+				) YAY_T group by politician_id\
 			) CUR_POS_T on CUR_POS_T.politician_id=pol.id\
 		left join (select pp.politician_id, pp.vote_code, pp.election_year\
 								from politician_position pp\
