@@ -96,3 +96,11 @@ CREATE TABLE position (
 	term_length int, # em anos ateh aparecer um cargo que precisa de ser em meses
 	PRIMARY KEY (id)
 );
+
+CREATE TABLE user_activity (
+	id int NOT NULL AUTO_INCREMENT,
+  user_id int NOT NULL,
+  created_at timestamp default current_timestamp NOT NULL,
+  description text NOT NULL,
+	PRIMARY KEY (id)
+);

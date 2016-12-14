@@ -288,6 +288,9 @@ app.get("/usuario/editar", helpers.jwt_mw, user_controller.update_user);
 app.get("/usuario/trocar", helpers.jwt_mw, user_controller.update_password);
 // /usuario/trocar?antigo=senhaAntiga&novo=senhaNova&token=asfsdfsdfs
 
+app.get("/usuario/atividades", helpers.jwt_mw, user_controller.user_activities);
+
+
 app.get("/politicos", helpers.jwt_mw, politicians_controller.get_politicians);
 app.get("/politicos/ranking", helpers.jwt_mw, politicians_controller.get_ranking);
 app.get("/politicos/eleicoes", helpers.jwt_mw, politicians_controller.get_election);

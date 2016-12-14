@@ -242,16 +242,40 @@ function update_password(req, res, next) {
 	});
 }
 
+function user_activities(req, res, next) {
+	var user_id = req.user['id'];
 
-var forgot_password = function(req, res){
+	var get_activities_query = 'select description, created_at from user_activity where user_id=?';
+	mysql_handler(get_activities_query, [user_id], function(err, user_activities){
+		if (err) {return next(err);}
+
+		var parsed_activities = [];
+		user_activities.forEach(function(activity){
+			parsed_activities.push({
+							'descricao': activity['description'],
+							'data': moment(activity['created_at']).format('lll'),
+						})
+
+		});
+
+		return res.json(parsed_activities)
+	});
+}
+
+
+var forgot_password = function(req, res, next){
   user_email = req.query['email'];
 
 	var user_query = 'select id from user where email = ?';
 	mysql_handler(user_query, [user_email], function(err, users){
 	  if (err) {return next(err);}
 
-	  if (users.length !== 1) {
-	  	return next(`Mais do que um usuário com email: ${user_email}`);
+	  if (users.length > 1) {
+	  	return next(`Mais do que um usuário com o email: ${user_email}`);
+	  }
+
+	  if (users.length === 0) {
+	  	return next(`Nenhum usuário com o email: ${user_email}`);
 	  }
 
 	  var user_id = users[0]['id']
@@ -260,9 +284,7 @@ var forgot_password = function(req, res){
 	  new_password = new_password.substring(0, 10);
 
 		var encrypted_pass = bcrypt.hashSync(new_password, 1);
-
 		var update_user_query = 'update user set ? where id=?';
-
 		mysql_handler(update_user_query, [{'password': encrypted_pass}, user_id], function(err, result){
 			if (err) {return next(err);}
 
@@ -288,5 +310,6 @@ module.exports = {
   'create_user': create_user,
   'update_user': update_user,
   'update_password': update_password,
-  'forgot_password': forgot_password
+  'forgot_password': forgot_password,
+  'user_activities': user_activities,
 }

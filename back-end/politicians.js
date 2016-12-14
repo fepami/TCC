@@ -204,34 +204,62 @@ var vote = function(req, res, next) {
 		var get_approval_query = 'select\
 			COALESCE(avg(is_positive), 0.5) as approval\
 		from politician_vote\
-		where politician_id = ?'
+		where politician_id = ?';
+
+		var get_politician_query = 'SELECT pol.name from politician pol where id=?';
 
 		var is_positive = helpers.parse_null_bool(req.query['user_vote']);
-		if (existing_vote.length > 0) {
-			var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive'])
-			var vote_id = existing_vote[0]['vote_id'];
-			if (is_positive === null) {
-				// delete
-				var delete_query = 'delete from politician_vote where id=?';
-				mysql_handler(delete_query, [vote_id], function(err){
-					if (err) {return next(err);}
-					mysql_handler(update_ranking_query, function(err){});
-					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-						if (err) {return next(err);}
-						return res.json(new_approval);
-					});
-				});
-			} else if (existing_is_positive !== is_positive) {
-				// update
-				var update_query = 'update politician_vote set is_positive = ? where id=?';
-				mysql_handler(update_query, [is_positive, vote_id], function(err){
-					if (err) {return next(err);					}
-					mysql_handler(update_ranking_query, function(err){});
-					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-						if (err) {return next(err);}
-						return res.json(new_approval);
-					});
 
+		mysql_handler(get_politician_query, [politician_id], function(err, politician){
+			if (err) {return next(err);}
+			var politician_name = politician[0]['name'];
+
+			if (existing_vote.length > 0) {
+				var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive']);
+				var vote_id = existing_vote[0]['vote_id'];
+				if (is_positive === null) {
+					// delete
+					var delete_query = 'delete from politician_vote where id=?';
+					mysql_handler(delete_query, [vote_id], function(err){
+						if (err) {return next(err);}
+						helpers.register_activity(user_id, `Retirou o seu voto ${helpers.humanize_is_positive(existing_is_positive)} para o politico ${politician_name}.`);
+						mysql_handler(update_ranking_query, function(err){});
+						mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+							if (err) {return next(err);}
+							return res.json(new_approval);
+						});
+					});
+				} else if (existing_is_positive !== is_positive) {
+					// update
+					var update_query = 'update politician_vote set is_positive = ? where id=?';
+					helpers.register_activity(user_id, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} no politico ${politician_name}.`);
+					mysql_handler(update_query, [is_positive, vote_id], function(err){
+						if (err) {return next(err);}
+						mysql_handler(update_ranking_query, function(err){});
+						mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+							if (err) {return next(err);}
+							return res.json(new_approval);
+						});
+
+					});
+				} else {
+					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+						if (err) {return next(err);}
+						return res.json(new_approval);
+					});
+				}
+			} else if (is_positive !== null){
+				// create
+				var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (?, ?, ?);';
+				mysql_handler(create_query, [user_id, politician_id, is_positive], function(err){
+					if (err) {return next(err);}
+					helpers.register_activity(user_id, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} no politico ${politician_name}.`);
+					mysql_handler(update_ranking_query, function(err){});
+					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
+						if (err) {return next(err);}
+						return res.json(new_approval);
+					});
+					// fazer o serviço de ranking de politico e propostas
 				});
 			} else {
 				mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
@@ -239,24 +267,7 @@ var vote = function(req, res, next) {
 					return res.json(new_approval);
 				});
 			}
-		} else if (is_positive !== null){
-			// create
-			var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (?, ?, ?);';
-			mysql_handler(create_query, [user_id, politician_id, is_positive], function(err){
-				if (err) {return next(err);}
-				mysql_handler(update_ranking_query, function(err){});
-				mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-					if (err) {return next(err);}
-					return res.json(new_approval);
-				});
-				// fazer o serviço de ranking de politico e propostas
-			});
-		} else {
-			mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
-				if (err) {return next(err);}
-				return res.json(new_approval);
-			});
-		}
+		});
 	});
 }
 
@@ -269,28 +280,37 @@ var follow = function(req, res, next) {
 	from politician_follow f\
 	where f.user_id = ? and f.politician_id = ?;';
 
-	mysql_handler(existing_follow_query, [user_id, politician_id], function(err, existing_follow){
+	var get_politician_query = 'SELECT pol.name from politician pol where id=?';
+
+	mysql_handler(get_politician_query, [politician_id], function(err, politician){
 		if (err) {return next(err);}
 
-		var follow = helpers.parse_bool(req.query['user_follow']);
-		if (existing_follow.length > 0 && !follow) {
-			// delete
-			var follow_id = existing_follow[0]['follow_id'];
-			var delete_query = 'delete from politician_follow where id=?';
-			mysql_handler(delete_query, [follow_id], function(err){
-				if (err) {return next(err);}
-				res.json('ok, delete');
-			});
-		} else if (existing_follow.length === 0 && follow) {
-			// create
-			var create_query = 'INSERT INTO politician_follow (user_id, politician_id) VALUES (?, ?);';
-			mysql_handler(create_query, [user_id, politician_id], function(err){
-				if (err) {return next(err);}
-				res.json('ok, create');
-			});
-		} else {
-			res.json('ok, do nothing');
-		}
+		var politician_name = politician[0]['name'];
+		mysql_handler(existing_follow_query, [user_id, politician_id], function(err, existing_follow){
+			if (err) {return next(err);}
+
+			var follow = helpers.parse_bool(req.query['user_follow']);
+			if (existing_follow.length > 0 && !follow) {
+				// delete
+				var follow_id = existing_follow[0]['follow_id'];
+				var delete_query = 'delete from politician_follow where id=?';
+				mysql_handler(delete_query, [follow_id], function(err){
+					if (err) {return next(err);}
+					helpers.register_activity(user_id, `Parou de seguir o politico ${politician_name}.`);
+					return res.json('ok, delete');
+				});
+			} else if (existing_follow.length === 0 && follow) {
+				// create
+				var create_query = 'INSERT INTO politician_follow (user_id, politician_id) VALUES (?, ?);';
+				mysql_handler(create_query, [user_id, politician_id], function(err){
+					if (err) {return next(err);}
+					helpers.register_activity(user_id, `Começou a seguir o politico ${politician_name}.`);
+					return res.json('ok, create');
+				});
+			} else {
+				return res.json('ok, do nothing');
+			}
+		});
 	});
 }
 

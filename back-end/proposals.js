@@ -208,28 +208,54 @@ var vote = function(req, res, next) {
 		from proposal_vote\
 		where proposal_id = ?'
 
-		var is_positive = helpers.parse_null_bool(req.query['user_vote']);
-		if (existing_vote.length > 0) {
-			var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive'])
-			var vote_id = existing_vote[0]['vote_id'];
-			if (is_positive === null) {
-				// delete
-				var delete_query = 'delete from proposal_vote where id=?';
-				mysql_handler(delete_query, [vote_id], function(err){
-					if (err) {return next(err);}
+		var get_proposal_query = 'SELECT prop.code from proposal prop where id=?';
 
-					mysql_handler(update_ranking_query, function(err){});
+		var is_positive = helpers.parse_null_bool(req.query['user_vote']);
+		mysql_handler(get_proposal_query, [proposal_id], function(err, proposal){
+			if (err) {return next(err);}
+			var proposal_code = proposal[0]['code'];
+
+			if (existing_vote.length > 0) {
+				var existing_is_positive = helpers.parse_null_bool_db(existing_vote[0]['is_positive']);
+				var vote_id = existing_vote[0]['vote_id'];
+				if (is_positive === null) {
+					// delete
+					var delete_query = 'delete from proposal_vote where id=?';
+					mysql_handler(delete_query, [vote_id], function(err){
+						if (err) {return next(err);}
+
+						helpers.register_activity(user_id, `Retirou o seu voto ${helpers.humanize_is_positive(existing_is_positive)} para a proposta ${proposal_code}.`);
+						mysql_handler(update_ranking_query, function(err){});
+						mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
+							if (err) {return next(err);}
+							return res.json(new_approval);
+						});
+					});
+				} else if (existing_is_positive !== is_positive) {
+					// update
+					var update_query = 'update proposal_vote set is_positive = ? where id=?';
+					mysql_handler(update_query, [is_positive, vote_id], function(err){
+						if (err) {return next(err);}
+						helpers.register_activity(user_id, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} na proposta ${proposal_code}.`);
+						mysql_handler(update_ranking_query, function(err){});
+						mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
+							if (err) {return next(err);}
+							return res.json(new_approval);
+						});
+					});
+				} else {
 					mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
 						if (err) {return next(err);}
 						return res.json(new_approval);
 					});
-				});
-
-			} else if (existing_is_positive !== is_positive) {
-				// update
-				var update_query = 'update proposal_vote set is_positive = ? where id=?';
-				mysql_handler(update_query, [is_positive, vote_id], function(err){
+				}
+			} else if (is_positive !== null){
+				// create
+				var create_query = 'INSERT INTO proposal_vote (user_id, proposal_id, is_positive) VALUES (?, ?, ?);';
+				mysql_handler(create_query, [user_id, proposal_id, is_positive], function(err){
 					if (err) {return next(err);}
+
+					helpers.register_activity(user_id, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} na proposta ${proposal_code}.`);
 					mysql_handler(update_ranking_query, function(err){});
 					mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
 						if (err) {return next(err);}
@@ -242,24 +268,7 @@ var vote = function(req, res, next) {
 					return res.json(new_approval);
 				});
 			}
-		} else if (is_positive !== null){
-			// create
-			var create_query = 'INSERT INTO proposal_vote (user_id, proposal_id, is_positive) VALUES (?, ?, ?);';
-			mysql_handler(create_query, [user_id, proposal_id, is_positive], function(err){
-				if (err) {return next(err);}
-
-				mysql_handler(update_ranking_query, function(err){});
-				mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
-					if (err) {return next(err);}
-					return res.json(new_approval);
-				});
-			});
-		} else {
-			mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
-				if (err) {return next(err);}
-				return res.json(new_approval);
-			});
-		}
+		});
 	});
 }
 

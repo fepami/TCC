@@ -1,3 +1,5 @@
+const mysql_handler = require("./mysql_handler").handler
+
 function parse_bool(value) {
 	return (value === 'true' || value === true || value === 1 || value === '1');
 }
@@ -24,6 +26,27 @@ function parse_null_bool_db(string_value) {
 	if (string_value === null) return null;
 
 	throw 'Valor inesperado do banco: ' + string_value;
+}
+
+var humanize_is_positive = function(is_positive){
+	if (is_positive === true) {
+		return 'positivo';
+	} else if (is_positive === false) {
+		return 'negativo';
+	} else {
+		return 'neutro';
+	}
+}
+
+var humanize_is_positive_adverb = function(is_positive){
+	if (is_positive === true) {
+		return 'positivamente';
+	} else if (is_positive === false) {
+		return 'negativamente';
+	} else {
+		// neutramente???
+		return 'negativamente';
+	}
 }
 
 function debug_print(string){
@@ -57,7 +80,7 @@ var send_mail = function(mail_parameters, callback){
 
 	mail_parameters['from'] = "eleitor.app@gmail.com";
 
-	debug_print('creating transport!');
+	// debug_print('creating transport!');
   var smtpTransport = nodemailer.createTransport({
     service: "Gmail",
     auth: {
@@ -66,18 +89,31 @@ var send_mail = function(mail_parameters, callback){
     }
   });
 
-  // var smtpTransport = nodemailer.createTransport('smtps://eleitor.app@gmail.com:eleitorapp2016');
-
-	debug_print('sending mail....');
+	// debug_print('sending mail....');
   smtpTransport.sendMail(mail_parameters, function(err, response){
-  	debug_print(err);
-
-
+  	// debug_print(err);
     if(err){return callback(err);}
 
     return callback(null, response);
   });
 }
+
+
+var register_activity = function(user_id, description){
+	var create_activity_query = 'INSERT INTO user_activity SET ?';
+
+	var activity_params = {
+		'user_id': user_id,
+		'description': description,
+	}
+
+	mysql_handler(create_activity_query, activity_params, function(err, result){
+		if (err) {
+			debug_print(`Erro ao criar registro de atividade do usuario (${user_id}): \n${err}`);
+		}
+	});
+}
+
 
 
 
@@ -97,7 +133,7 @@ function verify_token(token, callback) {
 }
 
 function create_token(user_info) {
-	return jwt.sign(user_info, token_secret, {'expiresIn' : '10m' });
+	return jwt.sign(user_info, token_secret, {'expiresIn' : '7d' });
 }
 
 
@@ -131,10 +167,14 @@ module.exports = {
   'format_null_bool': format_null_bool,
 	'parse_null_bool': parse_null_bool,
 	'parse_null_bool_db': parse_null_bool_db,
+	'humanize_is_positive': humanize_is_positive,
+	'humanize_is_positive_adverb': humanize_is_positive_adverb,
+
 	'debug_print': debug_print,
 	'get_age_from_birthday': get_age_from_birthday,
 
 	'send_mail': send_mail,
+	'register_activity': register_activity,
 
 	'verify_token': verify_token,
 	'create_token': create_token,
