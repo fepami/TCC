@@ -5,41 +5,47 @@ import {
 	View,
 	ScrollView,
 	TextInput,
-	Text
+	Text,
+	Platform
 } from 'react-native';
 import Header from '../components/Header';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ApiCall from '../api/ApiCall';
-import {connect} from 'react-redux';
 
-class UsuarioProblemaScene extends Component {
+export default class LoginEsqueciSenhaScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			text: '',
-			textError: false
+			emailText: '',
+			emailError: false
 		}
 	}
 	render(){
+		const deviceHeight = Platform.select({
+			ios: 28,
+			android: 35
+		})
+
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 					navigator={this.props.navigator}
-					title='Reportar um Problema' />
+					title='Esqueci a Senha' />
 				<KeyboardAwareScrollView style={{flex: 1}}>
 					<View style={styles.view}>
-						<Text>Encontrou um problema e não consegue resolvê-lo?</Text>
-						<Text/>
-						<Text style={{paddingBottom: 15}}>Não se preocupe, digite o seu problema no campo abaixo e tentaremos ao máximo solucioná-lo.</Text>	
+						<Text>Email:</Text>
 						<TextInput 
-							ref={'problem-input'}
-							style={[styles.input, {height: 90, borderColor: this.state.textError ? 'red' : 'lightgray'}]}
+							ref={'email-input'}
+							style={[styles.input, {height: deviceHeight, borderColor: this.state.emailError ? 'red' : 'lightgray'}]}
+							autoCapitalize='none'							
 							autoCorrect={false}
+							enablesReturnKeyAutomatically={true}
 							keyboardAppearance='default'
+							keyboardType='email-address'
+							returnKeyType='done'
 							underlineColorAndroid='transparent'
-							multiline={true}
-							numberOfLines={5}
-							onChangeText={(text) => this.setState({text: text})}
+							numberOfLines={1}
+							onChangeText={(text) => this.setState({emailText: text})}
 							onSubmitEditing={this.onPress.bind(this)}
 							/>
 						<View style={styles.box}>
@@ -54,46 +60,35 @@ class UsuarioProblemaScene extends Component {
 	}
 
 	onPress() {
-		let textError = false;
+		let emailError = false;
 
-		if (this.state.text === '') {
-			textError = true;
+		if (this.state.emailText === '') {
+			emailError = true;
 		}
 
-		this.setState({textError: textError}, () => {
-			if (!textError) {
-				this.callReportarProblema();
+		this.setState({emailError: emailError}, () => {
+			if (!emailError) {
+				this.callEsqueciAsenha();
 			}	
 		})
 	}
 
-	callReportarProblema(newPhotoURL) {
+	callEsqueciAsenha(newPhotoURL) {
 		var options = {
-			report: this.state.text,
-			token: this.props.token,
+			email: this.state.emailText,
 		};
-		ApiCall(`reportar_problema`, options, (jsonResponse) => {
-			Alert.alert('Enviado com sucesso!', 'Entraremos em contato assim que possível.');
-			this.refs['problem-input'].clear(0);
+		ApiCall(`usuario/esqueceu_senha`, options, (jsonResponse) => {
+			Alert.alert('Atenção', 'Uma nova senha foi enviada para o seu email.');
 		}, (failedRequest) => {
 			Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
 		});
 	}
 }
 
-function mapStateToProps(store) {
-	return {
-		token: store.token.token
-	}
-}
-
-export default connect(mapStateToProps)(UsuarioProblemaScene);
-
 const styles = StyleSheet.create({
 	view: {
 		padding: 15,
 		flexDirection: 'column',
-		flex: 1
 	},
 	input: {
 		marginVertical: 10, 
@@ -106,8 +101,7 @@ const styles = StyleSheet.create({
 		padding: 5
 	},
 	box: {
-		flex: 1,
-		height: 80,
+		paddingVertical: 15,
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center'
@@ -119,5 +113,5 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#33CCCC'
-	}
+	},
 })

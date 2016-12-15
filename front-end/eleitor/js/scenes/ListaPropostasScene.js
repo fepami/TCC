@@ -41,6 +41,9 @@ class ListaPropostasScene extends Component {
 	}
 
 	getPropostas(filter) {
+		if (this.state.filter && !filter) {
+			filter = this.state.filter;
+		}
 		var options = {
 			token: this.props.token,
 			...filter
@@ -71,12 +74,6 @@ class ListaPropostasScene extends Component {
 	componentDidMount() {
 		this.refresh();
 		this.props.navigator.refresh = this.refresh;
-	}
-
-	renderSearchBarIOS() {
-		return Platform.select({
-			ios: <SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)}/>
-		})
 	}
 
 	chooseFilterIcon() {
@@ -164,19 +161,23 @@ class ListaPropostasScene extends Component {
 	}
 
 	onSearchActionSelected(filter) {
+		this.setState({filter: {special_filter: filter}});
 		this.refresh({special_filter: filter});
 	}
 
 	onSearchActionCanceled() {
+		this.setState({filter: null});
 		this.refresh();
 	}
 
 	onFilterActionSelected(filter) {
+		this.setState({filter: filter});
 		this.onCloseFilter();
 		this.refresh(filter);
 	}
 
 	onClearFilterActionSelected() {
+		this.setState({filter: null});
 		this.refresh();
 	}
 

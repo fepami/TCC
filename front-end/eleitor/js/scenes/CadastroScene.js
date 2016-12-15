@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {
+	Alert,
 	StyleSheet,
 	View,
-	Modal,
 	Image,
 	Picker,
 	Text,
@@ -22,6 +22,7 @@ import dismissKeyboard from 'dismissKeyboard';
 import HomeScene from './HomeScene';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ApiCall from '../api/ApiCall';
+import UploadPhotoCall from '../api/UploadPhotoCall';
 import {connect} from 'react-redux';
 import {setToken} from '../redux/actions/token';
 import TutorialScene from './TutorialScene';
@@ -50,7 +51,9 @@ class CadastroScene extends Component {
 			fbIDText: this.props.id,
 			isUsingFB: this.props.id ? true : false,
 			loadingIndex: -10,
-			successIndex: -10
+			successIndex: -10,
+			uploadNewPhoto: false,
+			alreadyRegistered: false,
 		}
 
 		this.showPasswordFields = this.showPasswordFields.bind(this);
@@ -167,6 +170,7 @@ class CadastroScene extends Component {
 									autoCorrect={false}
 									enablesReturnKeyAutomatically={true}
 									keyboardAppearance='default'
+									keyboardType='email-address'
 									returnKeyType='next'
 									underlineColorAndroid='transparent'
 									numberOfLines={1}
@@ -240,10 +244,12 @@ class CadastroScene extends Component {
 
 	onChangePhotoPress() {
 		const options = {
-			title: 'Mudar de foto'
+			title: 'Escolher uma foto',
+			cancelButtonTitle: 'Cancelar',
+			takePhotoButtonTitle: 'Câmera',
+			chooseFromLibraryButtonTitle: 'Fotos',
+			quality: 0.3
 		};
-
-		console.log('onChangePhotoPress');
 		
 		ImagePicker.showImagePicker(options, (response) => {
 			console.log('Response = ', response);
@@ -256,7 +262,7 @@ class CadastroScene extends Component {
 				console.log('User tapped custom button: ', response.customButton);
 			} else {
 				// You can display the image using either data...
-				// const source = 'data:image/jpeg;base64,' + response.data;
+				const imageData = 'data:image/jpeg;base64,' + response.data;
 
 				// or a reference to the platform specific asset location
 				let source = '';
@@ -266,7 +272,7 @@ class CadastroScene extends Component {
 					source = response.uri;
 				}
 
-				this.setState({pictureText: source});
+				this.setState({pictureText: source, uploadNewPhoto: true, pictureData: response.data});
 			}
 		});
 	}
@@ -317,14 +323,18 @@ class CadastroScene extends Component {
 
 		this.setState({nameError: nameError, emailError: emailError, cityError: cityError, stateError: stateError, ageError: ageError, genderError: genderError, passwordError: passwordError,  password2Error: password2Error}, () => {
 			if (!nameError && !emailError && !cityError && !stateError && !ageError && !genderError && !passwordError && !password2Error && passwordTextMatch) {
-				this.getCadastro();
+				if (this.state.alreadyRegistered && this.state.uploadNewPhoto) {
+					this.putUploadPhoto(this.state.token)
+				} else {
+					this.getCadastro();
+				}
 			} else {
 				this.setState({loadingIndex: -10});
 			}
 		})
 	}
 
-	getCadastro() {
+	getCadastro(newPhotoURL) {
 		var options = {
 			name: this.state.nameText,
 			email: this.state.emailText,
@@ -332,20 +342,49 @@ class CadastroScene extends Component {
 			city: this.state.cityText,
 			age: this.state.ageText,
 			gender: this.state.genderText,
-			photo_url: this.state.pictureText
 		};
-		this.state.isUsingFB ? option.profile_id = this.state.fbIDText : options.password = this.state.passwordText;
+		if (this.state.uploadNewPhoto && newPhotoURL) {
+			options.photo_url = newPhotoURL;
+		} else {
+			options.photo_url = this.state.pictureText;
+		}
+		this.state.isUsingFB ? options.profile_id = this.state.fbIDText : options.password = this.state.passwordText;
 		ApiCall('login/cadastrar', options, (jsonResponse) => {
-			this.setState({loadingIndex: -10});
-			this.showSuccessOverlay(jsonResponse.token);
+			this.setState({alreadyRegistered: true, token: jsonResponse.token});
 			this.saveCredentials(jsonResponse);
+			if (this.state.uploadNewPhoto) {
+				this.putUploadPhoto(jsonResponse.token);
+			} else {
+				this.setState({loadingIndex: -10});
+				this.showSuccessOverlay(jsonResponse.token);
+			}
 		}, (failedRequest) => {
 			this.setState({loadingIndex: -10});
 			if (failedRequest.status === 400) {
-				alert("Email já cadastrado no sistema.")
+				Alert.alert('Erro', 'Email já cadastrado no sistema.')
 			} else {
-				alert('Erro: não foi possível conectar ao servidor.');
+				Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
 			}
+		});
+	}
+
+	putUploadPhoto(token) {
+		var options = {
+			token,
+		};
+		ApiCall(`usuario/mudar_avatar`, options, (jsonResponseAPI) => {
+			UploadPhotoCall(jsonResponseAPI.signedRequest, this.state.pictureText, () => {
+				const imageURI = jsonResponseAPI.url.replace('https', 'http');
+				AsyncStorage.setItem('picture', imageURI);
+				this.setState({loadingIndex: -10, uploadNewPhoto: false});
+				this.showSuccessOverlay(token);
+			}, (failedRequest) => {
+				this.setState({loadingIndex: -10});
+				Alert.alert('Erro', 'Você já está cadastrado, mas não foi possível enviar a sua foto ao servidor.');
+			});
+		}, (failedRequest) => {
+			this.setState({loadingIndex: -10});
+			Alert.alert('Erro', 'Você já está cadastrado, mas não foi possível enviar a sua foto ao servidor.');
 		});
 	}
 
@@ -366,7 +405,7 @@ class CadastroScene extends Component {
 		this.setState({successIndex: 10})
 		setTimeout(()=>{
 			this.setState({successIndex: -10});
-			this.props.navigator.replace({component: TutorialScene, passProps: {showButton: true}});
+			this.props.navigator.resetTo({component: TutorialScene, passProps: {showButton: true}});
 			this.props.setToken(token);
 		}, 1500);
 	}
@@ -387,7 +426,9 @@ function mapDispatchToProps(dispatch) {
 export default connect(mapStateToProps, mapDispatchToProps)(CadastroScene);
 
 const styles = StyleSheet.create({
-	view: {
+	androidView: {
+		paddingTop: -25
+	},view: {
 		padding: 15,
 		flexDirection: 'column',
 		flex: 1

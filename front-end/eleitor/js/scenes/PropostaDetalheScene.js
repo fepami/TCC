@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+	Alert,
 	StyleSheet,
 	View,
 	Image,
@@ -56,7 +57,7 @@ class PropostaDetalheScene extends Component {
 		ApiCall(`propostas/${this.props.proposal_id}/votar`, options, (jsonResponse) => {
 			this.setState({approval: jsonResponse[0].approval});
 		}, (failedRequest) => {
-			alert('Erro: não foi possível conectar ao servidor.');
+			Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
 		});
 	}
 

@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+	Alert,
 	StyleSheet,
 	View,
 	Modal,
@@ -22,6 +23,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import LoadingOverlay from '../components/LoadingOverlay';
 import SuccessOverlay from '../components/SuccessOverlay';
 import ApiCall from '../api/ApiCall';
+import UploadPhotoCall from '../api/UploadPhotoCall';
 import {connect} from 'react-redux';
 
 class UsuarioEditarScene extends Component {
@@ -40,7 +42,8 @@ class UsuarioEditarScene extends Component {
 			ageError: false,
 			genderError: false,
 			loadingIndex: -10,
-			successIndex: -10
+			successIndex: -10,
+			uploadNewPhoto: false
 		}
 		this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
 		this.showSuccessOverlay = this.showSuccessOverlay.bind(this);
@@ -102,7 +105,7 @@ class UsuarioEditarScene extends Component {
 											source={imageSource}/>
 									</View>
 									<TouchableElement onPress={() => this.onChangePhotoPress()} style={styles.line}>
-										<Text style={{color: 'black'}}>Mudar a foto</Text>
+										<Text style={{color: 'black'}}>Mudar de foto</Text>
 									</TouchableElement>
 								</View>
 							</View>	
@@ -128,7 +131,7 @@ class UsuarioEditarScene extends Component {
 								</View>	
 								<View style={{flexDirection: 'row'}} >
 									<Icon name='cake' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.ageError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+									<View style={[styles.picker, {flex: 2, height: deviceHeight, borderColor: this.state.ageError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 										<CustomPicker
 											ref={'age-picker'}
 											mode='dropdown'
@@ -138,7 +141,7 @@ class UsuarioEditarScene extends Component {
 										</CustomPicker>
 									</View>
 									<Icon name='wc' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.genderError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+									<View style={[styles.picker, {flex: 3, height: deviceHeight, borderColor: this.state.genderError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 										<CustomPicker
 											ref={'gender-picker'}
 											mode='dropdown'
@@ -153,7 +156,7 @@ class UsuarioEditarScene extends Component {
 								<Text style={{marginVertical: 10, fontWeight: 'bold'}}>Estado e Cidade em que vota:</Text>
 								<View style={{flexDirection: 'row'}} >
 									<Icon name='map' size={24} style={{alignSelf: 'center', marginRight: 10}} color='black' />	
-									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.stateError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+									<View style={[styles.picker, {flex: 2, height: deviceHeight, borderColor: this.state.stateError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 										<CustomPicker
 											ref={'state-picker'}
 											mode='dropdown'
@@ -165,7 +168,7 @@ class UsuarioEditarScene extends Component {
 										</CustomPicker>
 									</View>
 									<Icon name='location-on' size={24} style={{alignSelf: 'center', marginRight: 10, marginLeft: 20}} color='black' />	
-									<View style={[styles.picker, {height: deviceHeight, borderColor: this.state.cityError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
+									<View style={[styles.picker, {flex: 3, height: deviceHeight, borderColor: this.state.cityError ? 'red' : 'lightgray', paddingTop: devicePaddingTop}]}>
 										<CustomPicker
 											ref={'city-picker'}
 											mode='dropdown'
@@ -194,7 +197,11 @@ class UsuarioEditarScene extends Component {
 
 	onChangePhotoPress() {
 		const options = {
-			title: 'Mudar de foto'
+			title: 'Mudar de foto',
+			cancelButtonTitle: 'Cancelar',
+			takePhotoButtonTitle: 'Câmera',
+			chooseFromLibraryButtonTitle: 'Fotos',
+			quality: 0.3
 		};
 
 		console.log('onChangePhotoPress');
@@ -210,7 +217,7 @@ class UsuarioEditarScene extends Component {
 				console.log('User tapped custom button: ', response.customButton);
 			} else {
 				// You can display the image using either data...
-				// const source = 'data:image/jpeg;base64,' + response.data;
+				const imageData = 'data:image/jpeg;base64,' + response.data;
 
 				// or a reference to the platform specific asset location
 				let source = '';
@@ -220,7 +227,7 @@ class UsuarioEditarScene extends Component {
 					source = response.uri;
 				}
 
-				this.setState({pictureText: source});
+				this.setState({pictureText: source, uploadNewPhoto: true, pictureData: response.data});
 			}
 		});
 	}
@@ -253,31 +260,56 @@ class UsuarioEditarScene extends Component {
 
 		this.setState({nameError: nameError, cityError: cityError, stateError: stateError, ageError: ageError, genderError: genderError}, () => {
 			if (!nameError && !cityError && !stateError && !ageError && !genderError) {
-				this.getUpdateCadastro();
+				if (this.state.uploadNewPhoto) {
+					this.putUploadPhoto();
+				} else {
+					this.getUpdateCadastro();
+				}
 			} else {
 				this.setState({loadingIndex: -10});
 			}	
 		})
 	}
 
-	getUpdateCadastro() {
+	getUpdateCadastro(newPhotoURL) {
 		var options = {
 			name: this.state.nameText,
-			email: this.state.emailText,
 			state: this.state.stateText,
 			city: this.state.cityText,
 			age: this.state.ageText,
 			gender: this.state.genderText,
-			photo_url: this.state.pictureText,
 			token: this.props.token,
 		};
+		if (this.state.uploadNewPhoto && newPhotoURL) {
+			options.photo_url = newPhotoURL;
+		}
 		ApiCall(`usuario/editar`, options, (jsonResponse) => {
-			this.setState({loadingIndex: -10});
+			this.setState({loadingIndex: -10, uploadNewPhoto: false});
 			this.showSuccessOverlay();
 			this.saveCredentials();
 		}, (failedRequest) => {
+			this.setState({loadingIndex: -10, uploadNewPhoto: false});
+			Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+		});
+	}
+
+	putUploadPhoto() {
+		var options = {
+			token: this.props.token,
+		};
+		ApiCall(`usuario/mudar_avatar`, options, (jsonResponseAPI) => {
+			console.log(jsonResponseAPI);
+			UploadPhotoCall(jsonResponseAPI.signedRequest, this.state.pictureText, () => {
+				const imageURI = jsonResponseAPI.url.replace('https', 'http');
+				this.setState({pictureText: imageURI});
+				this.getUpdateCadastro(imageURI);
+			}, (failedRequest) => {
+				this.setState({loadingIndex: -10});
+				Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+			});
+		}, (failedRequest) => {
 			this.setState({loadingIndex: -10});
-			alert('Erro: não foi possível conectar ao servidor.');
+			Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
 		});
 	}
 

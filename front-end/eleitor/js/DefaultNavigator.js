@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {
 	AsyncStorage,
+	BackAndroid,
 	Navigator,
 	Platform
 } from 'react-native';
@@ -8,6 +9,23 @@ import NavigationManager from './navigation/NavigationManager';
 import LoginScene from './scenes/LoginScene';
 
 class DefaultNavigator extends Component {
+	componentDidMount() {
+        BackAndroid.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+    }
+
+    componentWillUnmount() {
+        BackAndroid.removeEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+    }
+
+    handleBackButton = () => {
+        const {navigator} = this.refs;
+        if (navigator && navigator.getCurrentRoutes().length > 1) {
+            navigator.pop();
+            return true;
+        }
+        return false;
+    }
+
 	render(){
 		return(
 			<Navigator

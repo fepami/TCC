@@ -41,6 +41,9 @@ class ListaPoliticosScene extends Component {
 	}
 
 	getPoliticos(filter) {
+		if (this.state.filter && !filter) {
+			filter = this.state.filter;
+		}
 		var options = {
 			token: this.props.token,
 			...filter
@@ -113,7 +116,7 @@ class ListaPoliticosScene extends Component {
 		// }
 		];
 
-		let title = this.props.type ? 'Ranking de Políticos' : 'Políticos';
+		let title = this.props.type === 'ranking' ? 'Ranking de Políticos' : this.props.type === 'eleicoes' ? 'Eleições' : 'Políticos';
 
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
@@ -138,19 +141,23 @@ class ListaPoliticosScene extends Component {
 	}
 
 	onSearchActionSelected(filter) {
+		this.setState({filter: {special_filter: filter}});
 		this.refresh({special_filter: filter});
 	}
 
 	onSearchActionCanceled() {
+		this.setState({filter: null});
 		this.refresh();
 	}
 
 	onFilterActionSelected(filter) {
+		this.setState({filter: filter});
 		this.onCloseFilter();
 		this.refresh(filter);
 	}
 
 	onClearFilterActionSelected() {
+		this.setState({filter: null});
 		this.refresh();
 	}
 

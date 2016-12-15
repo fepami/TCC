@@ -41,8 +41,11 @@ class SeguindoScene extends Component {
 	}
 
 	getSeguindo(filter) {
-		if (filter) {
+		if (filter || this.state.filter) {
 			this.setState({isUsingFilter: true});
+		}
+		if (this.state.filter && !filter) {
+			filter = this.state.filter;
 		}
 		var options = {
 			token: this.props.token,
@@ -70,12 +73,6 @@ class SeguindoScene extends Component {
 	componentDidMount() {
 		this.refresh();
 		this.props.navigator.refresh = this.refresh;
-	}
-
-	renderSearchBarIOS() {
-		return Platform.select({
-			ios: <SearchBarIOS onSubmitSearch={(event) => alert(event.nativeEvent.text)}/>
-		})
 	}
 
 	renderLoadingOrView() {
@@ -149,19 +146,23 @@ class SeguindoScene extends Component {
 	}
 
 	onSearchActionSelected(filter) {
+		this.setState({filter: {special_filter: filter}});
 		this.refresh({special_filter: filter});
 	}
 
 	onSearchActionCanceled() {
+		this.setState({filter: null});
 		this.refresh();
 	}
 
 	onFilterActionSelected(filter) {
+		this.setState({filter: filter});
 		this.onCloseFilter();
 		this.refresh(filter);
 	}
 
 	onClearFilterActionSelected() {
+		this.setState({filter: null});
 		this.refresh();
 	}
 	

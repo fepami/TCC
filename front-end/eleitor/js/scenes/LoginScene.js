@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+	Alert,
 	StyleSheet,
 	View,
 	Modal,
@@ -12,6 +13,7 @@ import {
 import TouchableElement from '../components/TouchableElement';
 import LoadingOverlay from '../components/LoadingOverlay';
 import CadastroScene from './CadastroScene';
+import LoginEsqueciSenhaScene from './LoginEsqueciSenhaScene';
 import HomeScene from './HomeScene';
 import FBSDK from 'react-native-fbsdk';
 import NavigationManager from '../navigation/NavigationManager';
@@ -32,8 +34,8 @@ class LoginScene extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			emailText: 'marcela_teste@eleitor.com',
-			passwordText: '123',
+			emailText: '',
+			passwordText: '',
 			emailError: false,
 			passwordError: false,
 			user: {},
@@ -53,7 +55,7 @@ class LoginScene extends Component {
 		return(
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<KeyboardAwareScrollView style={{flex: 1, backgroundColor: 'white', padding: 15}}>
-					<View style={{alignItems: 'center', paddingTop: 30}}>
+					<View style={{alignItems: 'center', paddingTop: 10}}>
 						<Image
 							style={styles.image}
 							source={require('../resources/image/logo.png')} />
@@ -96,17 +98,20 @@ class LoginScene extends Component {
 					<View style={styles.box}>
 						<View style={{flex: 1, flexDirection: 'column'}}>
 							<TouchableElement onPress={this.onLoginPress.bind(this)} style={styles.button}>
-								<Text>Entrar</Text>
+								<Text style={{fontWeight: 'bold', color: 'white'}}>Entrar</Text>
 							</TouchableElement>
 							<LoginButton
 								style={{flex: 1, height: 40, marginTop: 15}}
 								readPermissions={['public_profile', 'email', 'user_birthday']}
 								onLoginFinished={this.onFBLoginFinished.bind(this)}
-								onLogoutFinished={() => console.log("User logged out")}/>
+								onLogoutFinished={() => console.log('Usuário deslogado do Facebook')}/>
 							</View>
 					</View>	
 					<TouchableElement onPress={this.onNewAccountPress.bind(this)} style={{alignSelf: 'center', height: 40, justifyContent: 'center'}}>
-						<Text>Criar uma conta</Text>
+						<Text style={{color: 'blue'}}>Criar uma conta</Text>
+					</TouchableElement>
+					<TouchableElement onPress={this.onPasswordPress.bind(this)} style={{alignSelf: 'center', height: 40, justifyContent: 'center'}}>
+						<Text style={{color: 'blue'}}>Esqueci a senha</Text>
 					</TouchableElement>
 				</KeyboardAwareScrollView>
 				<LoadingOverlay style={{zIndex: this.state.loadingIndex, top: 0}}/>
@@ -116,13 +121,13 @@ class LoginScene extends Component {
 
 	onFBLoginFinished(error, result) {
 		if (error) {
-			alert('Erro de autenticação');
+			Alert.alert('Erro', 'Erro de autenticação com Facebook.');
 		} else if (result.isCancelled) {
-			alert('Login cancelado');
+			Alert.alert('Erro', 'Login com Facebook cancelado.');
 		} else {
 			var _responseInfoCallback = (error: ?Object, result: ?Object) => {
 				if (error) {
-					alert('Erro de autenticação');
+					Alert.alert('Erro', 'Erro de autenticação com Facebook.');
 				} else {
 					const age = this.getAge(result.birthday);
 					this.setState({loadingIndex: 10, user: {name: result.name, email: result.email, gender: (result.gender === 'female') ? 'Feminino' : 'Masculino', picture: result.picture.data.url, age: age, id: result.id}}, this.getLogin('fb', result.email, result.id));
@@ -185,19 +190,19 @@ class LoginScene extends Component {
 	getLogin(type, email, param) {
 		var options = {};
 		options.email = email;
-		type === 'fb' ? option.profile_id = param : options.password = param;
+		type === 'fb' ? options.profile_id = param : options.password = param;
 		ApiCall('login', options, (jsonResponse) => {
 			this.setState({loadingIndex: -10});
 			this.saveCredentials(jsonResponse);
 		}, (failedRequest) => {
 			this.setState({loadingIndex: -10});
 			if (failedRequest.status === 404) {
-				alert("Email ou senha incorreto.")
+				Alert.alert('Erro', 'Email ou senha incorreto.')
 			} else if (failedRequest.status === 418) {
 				console.log("I'm a teapot! I should be brewing!")
 				this.props.navigator.push({component: CadastroScene, passProps: this.state.user});
 			} else {
-				alert('Erro: não foi possível conectar ao servidor.');
+				Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
 			}
 		});
 	}
@@ -221,6 +226,10 @@ class LoginScene extends Component {
 
 	onNewAccountPress() {
 		this.props.navigator.push({component: CadastroScene});
+	}
+
+	onPasswordPress() {
+		this.props.navigator.push({component: LoginEsqueciSenhaScene});
 	}
 }
 
@@ -258,7 +267,8 @@ const styles = StyleSheet.create({
 		padding: 5
 	},
 	box: {
-		paddingVertical: 15,
+		paddingTop: 10,
+		paddingBottom: 15,
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center'
@@ -266,11 +276,10 @@ const styles = StyleSheet.create({
 	button: {
 		flex: 1,
 		height: 40,
-		borderColor: 'black',
-		borderWidth: 1,
 		borderRadius: 3,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
+		backgroundColor: '#33CCCC'
 	},
 	image: {
 		width: 150,

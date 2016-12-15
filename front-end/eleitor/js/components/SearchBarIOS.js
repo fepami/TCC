@@ -14,31 +14,42 @@ export default class SearchBar extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showCancel: false,
+			showButton: false,
+			hasSearched: false,
 			searchText: ''
 		}
-		this.showCancel = this.showCancel.bind(this);
-		this.hideCancel = this.hideCancel.bind(this);
+		this.showButton = this.showButton.bind(this);
+		this.hideButton = this.hideButton.bind(this);
+		this.clearInput = this.clearInput.bind(this);
 	}
 
-	showCancel() {
-		this.setState({showCancel: true});
+	showButton() {
+		this.setState({showButton: true});
 	}
 
-	hideCancel() {
-		this.setState({showCancel: false});
+	hideButton() {
+		this.setState({showButton: false, searchText: ''});
 		dismissKeyboard();
-		this.refs['searchbar'].clear(0);
-		if (this.state.searchText != '') {
-			this.setState({searchText: ''})
+		if (this.state.hasSearched) {
+			this.setState({hasSearched: false})
 			this.props.onCancelSearch();
 		}
 	}
 
-	renderCancel() {
-		if(this.state.showCancel === true) {
+	renderClearIcon() {
+		if(this.state.showButton === true) {
 			return(
-				<TouchableElement onPress={this.hideCancel} style={{height: 50, alignItems: 'center', justifyContent: 'center', marginRight: 10}}>
+				<TouchableElement onPress={this.clearInput} style={{alignItems: 'center', justifyContent: 'center'}}>
+					<Icon name='ios-close-circle-outline' size={20} style={{alignSelf: 'center', marginLeft: 10, marginRight: 10}} color='#525252' />
+				</TouchableElement>
+			)
+		}
+	}
+
+	renderButton() {
+		if(this.state.showButton === true) {
+			return(
+				<TouchableElement onPress={this.hideButton} style={{height: 50, alignItems: 'center', justifyContent: 'center', marginRight: 10}}>
 					<Text style={{alignSelf: 'center', color: 'white'}}>Cancelar</Text>
 				</TouchableElement>
 			)
@@ -53,26 +64,34 @@ export default class SearchBar extends Component {
 		return(
 			<View style={{backgroundColor: '#525252', flexDirection: 'row'}}>	
 				<View style={{margin: 10, height: 30, borderColor: '#525252', borderWidth: 1, borderRadius: 5, backgroundColor: 'white', flexDirection: 'row', flex: 1}}>	
-					<Icon name='ios-search-outline' size={20} style={{alignSelf: 'center', marginLeft: 10, marginRight: 3}} color='#525252' />
+					<Icon name='ios-search-outline' size={20} style={{alignSelf: 'center', marginLeft: 10, marginRight: 10}} color='#525252' />
 					<TextInput 
 						ref={'searchbar'}
 						style={{height: deviceHeight, flex: 1}}
 						placeholder='Buscar' 
 						autoCapitalize='none'
 						autoCorrect={false}
-						clearButtonMode='while-editing'
 						enablesReturnKeyAutomatically={true}
 						keyboardAppearance='default'
 						returnKeyType='search'
 						underlineColorAndroid='transparent'
 						numberOfLines={1}
 						onChangeText={(text) => this.setState({searchText: text})}
-						onFocus={this.showCancel}
-						onSubmitEditing={() => this.props.onSubmitSearch(this.state.searchText)}
+						onFocus={this.showButton}
+						onSubmitEditing={() => {
+							this.props.onSubmitSearch(this.state.searchText)
+							this.setState({hasSearched: true})
+						}}
+						value={this.state.searchText}
 						/>
+					{this.renderClearIcon()}
 				</View>
-				{this.renderCancel()}
+				{this.renderButton()}
 			</View>
 		)
+	}
+
+	clearInput() {
+		this.setState({searchText: ''})
 	}
 }

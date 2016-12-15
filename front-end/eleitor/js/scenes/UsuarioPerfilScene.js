@@ -13,6 +13,7 @@ import TouchableElement from '../components/TouchableElement';
 import Header from '../components/Header';
 import UsuarioConfiguracoesScene from './UsuarioConfiguracoesScene';
 import UsuarioEditarScene from './UsuarioEditarScene';
+import UsuarioAtividadeScene from './UsuarioAtividadeScene';
 
 export default class UsuarioPerfilScene extends Component {
 	constructor(props) {
@@ -151,7 +152,8 @@ export default class UsuarioPerfilScene extends Component {
 	}
 
 	onPressAtividades(){
-		// this.props.navigator.push({component: PoliticoPerfilScene, passProps: {nome: data.nome}});
+		const imageSource = (this.state.pictureText) && !['','null','undefined'].includes(this.state.pictureText) ? this.state.pictureText : null;
+		this.props.navigator.push({component: UsuarioAtividadeScene, passProps: {nome: this.state.nameText, email: this.state.emailText, foto_url: imageSource}});
 	}
 }
 

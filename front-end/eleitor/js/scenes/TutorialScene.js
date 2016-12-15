@@ -9,6 +9,7 @@ import {
 	StatusBar
 } from 'react-native';
 import Carousel from 'react-native-looped-carousel';
+import ViewPager from 'react-native-viewpager';
 import Header from '../components/Header';
 import TouchableElement from '../components/TouchableElement';
 import NavigationManager from '../navigation/NavigationManager';
@@ -25,13 +26,30 @@ const TABBAR_HEIGHT = Platform.select({
 		android: 0
 	})
 
+const PAGES = [
+	require('../resources/image/tutorial1.png'),
+	require('../resources/image/tutorial2.png'),
+	require('../resources/image/tutorial3.png'),
+	require('../resources/image/tutorial4.png'),
+	require('../resources/image/tutorial5.png')
+]
+const dataSource = new ViewPager.DataSource({
+	pageHasChanged: (p1, p2) => p1 !== p2,
+});
+
 export default class TutorialScene extends Component {
 	constructor(props) {
 		super(props);
+
 		this.state = {
-			showButton: this.props.showButton
+			showButton: this.props.showButton,
+			dataSource: dataSource.cloneWithPages(PAGES),
+			height: Dimensions.get('window').height - 30 - HEADER_HEIGHT - (this.props.showButton ? 70 : TABBAR_HEIGHT),
+			width: Dimensions.get('window').width
 		};
 		this.renderButton = this.renderButton.bind(this);
+		this.renderHeader = this.renderHeader.bind(this);
+		this.renderPage = this.renderPage.bind(this);
 	}
  
  	renderButton() {
@@ -46,55 +64,62 @@ export default class TutorialScene extends Component {
  		}
  	}
 
-	render() {
-		const button_tabbar_height = this.props.showButton ? 70 : TABBAR_HEIGHT;
-		const width = Dimensions.get('window').width;
-		const height = Dimensions.get('window').height - HEADER_HEIGHT - button_tabbar_height;
-		
-		return (
-			<View style={{ flex: 1, backgroundColor: 'black' }} onLayout={this._onLayoutDidChange}>
-				<Header
+ 	renderHeader() {
+ 		if (this.state.showButton) {
+ 			const noBack = {
+				icon: '',
+				onPress: this.doNothing.bind(this)
+			};
+ 			return (
+ 				<Header
+					navigator={this.props.navigator}
+					title='Tutorial' 
+					leftItem={noBack} />
+ 			)
+ 		} else {
+ 			return (
+ 				<Header
 					navigator={this.props.navigator}
 					title='Tutorial' />
-				<Carousel
-					style={{width: width, height: height}}
-					autoplay={false}
-					pageInfo={false}
-					pageStyle={{ backgroundColor: 'black' }}
-					bullets={true}
-					onAnimateNextPage={(p) => console.log(p)} >
-					<Image
-						style={{width: width, height: height -30, resizeMode: 'contain'}}
-						source={require('../resources/image/tutorial1.png')}/>
-					<Image
-						style={{width: width, height: height -30, resizeMode: 'contain'}}
-						source={require('../resources/image/tutorial2.png')}/>
-					<Image
-						style={{width: width, height: height -30, resizeMode: 'contain'}}
-						source={require('../resources/image/tutorial3.png')}/>
-					<Image
-						style={{width: width, height: height -30, resizeMode: 'contain'}}
-						source={require('../resources/image/tutorial4.png')}/>
-					<Image
-						style={{width: width, height: height -30, resizeMode: 'contain'}}
-						source={require('../resources/image/tutorial5.png')}/>
-				</Carousel>
+ 			)
+ 		}
+ 	}
+
+	render() {
+		return (
+			<View style={{ flex: 1, backgroundColor: 'black' }} onLayout={this._onLayoutDidChange}>
+				{this.renderHeader()}
+				<ViewPager
+					style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}
+					dataSource={this.state.dataSource}
+					renderPage={this.renderPage}
+					isLoop={false}
+					autoPlay={false}/>
 				{this.renderButton()}
 			</View>
 		);
 	}
 
-	onPress() {
-		this.props.navigator.replace({component: NavigationManager});
+	renderPage(data, pageID){
+		return(
+			<Image
+				style={{width: this.state.width, height: this.state.height, resizeMode: 'contain'}}
+				source={data}/>
+		)
 	}
+
+	onPress() {
+		this.props.navigator.resetTo({component: NavigationManager});
+	}
+
+	doNothing() {}
 }
 
 const styles = StyleSheet.create({
 	box: {
-		flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
 	},
 	button: {
 		flex: 1,

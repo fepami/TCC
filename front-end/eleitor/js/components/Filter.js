@@ -120,7 +120,6 @@ class Filter extends Component {
 	}
 
 	onSelectFilter(title, option) {
-		console.log(title + ' - ' + option);
 		let newSelectedOptions = this.state.selectedOptions;
 		let newSelectedTopics = this.state.selectedTopics;
 
@@ -147,7 +146,7 @@ class Filter extends Component {
 
 		this.state.selectedOptions.map((option, ii) => {
 			let topic = this.state.selectedTopics[ii];
-			filter[topic] = option;
+			filter[topic] ? (Array.isArray(filter[topic]) ? filter[topic].push(option) : filter[topic] = [filter[topic], option ]) : filter[topic] = option;
 		});
 
 		this.props.onFilterActionSelected(filter);

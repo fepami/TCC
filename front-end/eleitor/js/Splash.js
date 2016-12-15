@@ -11,6 +11,10 @@ import DefaultNavigator from './DefaultNavigator';
 import ApiCall from './api/ApiCall';
 import {setToken} from './redux/actions/token';
 import {connect} from 'react-redux';
+import FBSDK from 'react-native-fbsdk';
+const {
+  LoginManager,
+} = FBSDK;
 
 class Splash extends Component {
 	constructor(props) {
@@ -25,6 +29,7 @@ class Splash extends Component {
 				this.props.setToken(token);
 			}, (failedRequest) => {
 				this.setState({error: true});
+				LoginManager.logOut();
 				// status 418 = token expirado
 				// status 419 = token prestes a expirar, melhor relogar
 				// status 500 = erro

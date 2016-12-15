@@ -8,43 +8,37 @@ import {
 	Platform,
 	AsyncStorage
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import LoadingOverlay from '../components/LoadingOverlay';
 import ApiCall from '../api/ApiCall';
 import {connect} from 'react-redux';
 
-class PoliticoCarreiraScene extends Component {
+class UsuarioAtividadeScene extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			carreiraInfo: [],
+			arrayAtividades: [],
 			loading: true,
 			errorState: false
 		}
 		
-		this.getCarreira = this.getCarreira.bind(this);
-		this.getCargoText = this.getCargoText.bind(this);
+		this.getAtividade = this.getAtividade.bind(this);
 		this.renderLoadingOrView = this.renderLoadingOrView.bind(this);
 		this.componentDidMount = this.componentDidMount.bind(this);
 	}
 
-	getCarreira() {
+	getAtividade() {
 		var options = {token: this.props.token};
-		ApiCall(`politicos/${this.props.politician_id}/carreira`, options, (jsonResponse) => {
-			this.setState({carreiraInfo: jsonResponse, loading: false});
+		ApiCall(`usuario/atividades`, options, (jsonResponse) => {
+			this.setState({arrayAtividades: jsonResponse.reverse(), loading: false});
 		}, (failedRequest) => {
 			this.setState({errorState: true});
 		});
 	}
 
 	componentDidMount() {
-		this.getCarreira();
-	}
-
-	getCargoText() {
-		if (this.props.cargo) {
-			return(<Text>{this.props.cargo}</Text>)
-		} 
+		this.getAtividade();
 	}
 
 	renderLoadingOrView() {
@@ -52,10 +46,22 @@ class PoliticoCarreiraScene extends Component {
 			return (<LoadingOverlay/>)
 		} else if (this.state.errorState) {
 			return (<Placeholder type='error' onPress={() => {
-				this.setState({errorState: false, loading: true}, this.getCarreira())}} />)
+				this.setState({errorState: false, loading: true}, this.getAtividade())}} />)
 		} else {
-			return this.state.carreiraInfo.map((item, ii) => (
-				<Text key={ii} style={{paddingBottom: 5}}>● {item}</Text>
+			return this.state.arrayAtividades.map((item, ii) => (
+				<View  key={ii} style={{borderBottomWidth: 1, borderColor: 'black', paddingVertical: 10}}>
+					<Text style={styles.h1}>{item.data}:</Text>
+					<View style={{flexDirection: 'row'}}>
+						<Icon 
+							name={item.tipo === 'vote' ? item.valor === 1 ? 'md-thumbs-up' : item.valor === -1 ? 'md-thumbs-down' : 'ios-qr-scanner' : item.valor === 1 ? 'ios-star' : 'ios-star-outline'} 
+							color={item.tipo === 'vote' ? item.valor === 1 ? 'limegreen' : item.valor === -1 ? 'red' : 'black' : 'black'} 
+							size={24} 
+							style={{alignSelf: 'center', marginRight: 10}} />
+						<View style={{flex: 1, alignSelf: 'center'}}>
+							<Text>{item.descricao}</Text>
+						</View>
+					</View>
+				</View>
 			));
 		}
 	}
@@ -65,20 +71,19 @@ class PoliticoCarreiraScene extends Component {
 			<View style={{flex: 1, backgroundColor: 'white'}}>
 				<Header
 					navigator={this.props.navigator}
-					title='Carreira Politica' />
+					title='Atividades Recentes' />
 				<View style={styles.cell}>
 					<Image
 						style={styles.roundedimage}
-						source={{uri: this.props.foto_url}} />
+						source={this.props.foto_url ? {uri: this.props.foto_url} : require('../resources/image/placeholder.png')} />
 					<View style={styles.info}>
 						<Text style={styles.h1}>{this.props.nome}</Text>
-						{this.getCargoText()}
-						<Text>{this.props.partido}</Text>
+						<Text>{this.props.email}</Text>
 					</View>
 				</View>
 				<View style={{flex: 1, marginTop: 3, borderTopWidth: 1, borderColor: 'black'}}>
 					<ScrollView style={{flex: 1}}>
-						<View style={{flex: 1, paddingTop: 15, paddingHorizontal: 15}}>
+						<View style={{flex: 1, paddingTop: 5, paddingHorizontal: 15}}>
 							{this.renderLoadingOrView()}
 						</View>
 					</ScrollView>
@@ -94,7 +99,7 @@ function mapStateToProps(store) {
 	}
 }
 
-export default connect(mapStateToProps)(PoliticoCarreiraScene);
+export default connect(mapStateToProps)(UsuarioAtividadeScene);
 
 const styles = StyleSheet.create({
 	cell: {

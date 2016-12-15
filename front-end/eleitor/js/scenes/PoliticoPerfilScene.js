@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+	Alert,
 	StyleSheet,
 	View,
 	Image,
@@ -62,7 +63,7 @@ class PoliticoPerfilScene extends Component {
 		ApiCall(`politicos/${this.props.politician_id}/votar`, options, (jsonResponse) => {
 			this.setState({approval: jsonResponse[0].approval});
 		}, (failedRequest) => {
-			alert('Erro: não foi possível conectar ao servidor.');
+			Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
 		});
 	}
 
@@ -74,7 +75,7 @@ class PoliticoPerfilScene extends Component {
 		ApiCall(`politicos/${this.props.politician_id}/seguir`, options, (jsonResponse) => {
 			// console.log('success');
 		}, (failedRequest) => {
-			alert('Erro: não foi possível conectar ao servidor.');
+			Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
 		});
 	}
 

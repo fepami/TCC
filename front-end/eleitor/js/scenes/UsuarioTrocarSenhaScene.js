@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+	Alert,
 	StyleSheet,
 	View,
 	Modal,
@@ -55,7 +56,6 @@ class UsuarioTrocarSenhaScene extends Component {
 			show: 'always',
 			onActionSelected: this.onSavePress.bind(this)
 		}];
-		console.log(this.state.loadingIndex, ' zindex');
 
 		return(
 			<Modal 
@@ -171,7 +171,7 @@ class UsuarioTrocarSenhaScene extends Component {
 			this.showSuccessOverlay();
 		}, (failedRequest) => {
 			this.setState({loadingIndex: -10});
-			alert('Erro: não foi possível conectar ao servidor.');
+			Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
 		});
 		
 	}
