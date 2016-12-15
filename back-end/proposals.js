@@ -107,7 +107,7 @@ var get_proposals_func = function(type){
 						'descricao': prop['content'],
 						'categoria': prop['category'],
 						'approval': prop['approval'],
-						'user_vote': prop['user_vote'],
+						'user_vote': helpers.format_null_bool(prop['user_vote']),
 						'politicos': politicians_info,
 						'data': moment(prop['received_at']).format('LL'),
 						'codigo': prop['code'],
