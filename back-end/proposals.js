@@ -229,7 +229,7 @@ var vote = function(req, res, next) {
 					mysql_handler(delete_query, [vote_id], function(err){
 						if (err) {return next(err);}
 
-						helpers.register_activity(user_id, `Retirou o seu voto ${helpers.humanize_is_positive(existing_is_positive)} para a proposta ${proposal_code}.`);
+						helpers.register_activity(user_id, 'vote', is_positive, `Retirou o seu voto ${helpers.humanize_is_positive(existing_is_positive)} para a proposta ${proposal_code}.`);
 						mysql_handler(update_ranking_query, function(err){});
 						mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
 							if (err) {return next(err);}
@@ -241,7 +241,7 @@ var vote = function(req, res, next) {
 					var update_query = 'update proposal_vote set is_positive = ? where id=?';
 					mysql_handler(update_query, [is_positive, vote_id], function(err){
 						if (err) {return next(err);}
-						helpers.register_activity(user_id, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} na proposta ${proposal_code}.`);
+						helpers.register_activity(user_id, 'vote', is_positive, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} na proposta ${proposal_code}.`);
 						mysql_handler(update_ranking_query, function(err){});
 						mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
 							if (err) {return next(err);}
@@ -260,7 +260,7 @@ var vote = function(req, res, next) {
 				mysql_handler(create_query, [user_id, proposal_id, is_positive], function(err){
 					if (err) {return next(err);}
 
-					helpers.register_activity(user_id, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} na proposta ${proposal_code}.`);
+					helpers.register_activity(user_id, 'vote', is_positive, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} na proposta ${proposal_code}.`);
 					mysql_handler(update_ranking_query, function(err){});
 					mysql_handler(get_approval_query, [proposal_id], function(err, new_approval){
 						if (err) {return next(err);}

@@ -227,7 +227,7 @@ var vote = function(req, res, next) {
 					var delete_query = 'delete from politician_vote where id=?';
 					mysql_handler(delete_query, [vote_id], function(err){
 						if (err) {return next(err);}
-						helpers.register_activity(user_id, `Retirou o seu voto ${helpers.humanize_is_positive(existing_is_positive)} para o politico ${politician_name}.`);
+						helpers.register_activity(user_id, 'vote', is_positive, `Retirou o seu voto ${helpers.humanize_is_positive(existing_is_positive)} para o politico ${politician_name}.`);
 						mysql_handler(update_ranking_query, function(err){});
 						mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
 							if (err) {return next(err);}
@@ -237,7 +237,7 @@ var vote = function(req, res, next) {
 				} else if (existing_is_positive !== is_positive) {
 					// update
 					var update_query = 'update politician_vote set is_positive = ? where id=?';
-					helpers.register_activity(user_id, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} no politico ${politician_name}.`);
+					helpers.register_activity(user_id, 'vote', is_positive, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} no politico ${politician_name}.`);
 					mysql_handler(update_query, [is_positive, vote_id], function(err){
 						if (err) {return next(err);}
 						mysql_handler(update_ranking_query, function(err){});
@@ -258,7 +258,7 @@ var vote = function(req, res, next) {
 				var create_query = 'INSERT INTO politician_vote (user_id, politician_id, is_positive) VALUES (?, ?, ?);';
 				mysql_handler(create_query, [user_id, politician_id, is_positive], function(err){
 					if (err) {return next(err);}
-					helpers.register_activity(user_id, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} no politico ${politician_name}.`);
+					helpers.register_activity(user_id, 'vote', is_positive, `Votou ${helpers.humanize_is_positive_adverb(is_positive)} no politico ${politician_name}.`);
 					mysql_handler(update_ranking_query, function(err){});
 					mysql_handler(get_approval_query, [politician_id], function(err, new_approval){
 						if (err) {return next(err);}
@@ -301,7 +301,7 @@ var follow = function(req, res, next) {
 				var delete_query = 'delete from politician_follow where id=?';
 				mysql_handler(delete_query, [follow_id], function(err){
 					if (err) {return next(err);}
-					helpers.register_activity(user_id, `Parou de seguir o politico ${politician_name}.`);
+					helpers.register_activity(user_id, 'follow', follow, `Parou de seguir o politico ${politician_name}.`);
 					return res.json('ok, delete');
 				});
 			} else if (existing_follow.length === 0 && follow) {
@@ -309,7 +309,7 @@ var follow = function(req, res, next) {
 				var create_query = 'INSERT INTO politician_follow (user_id, politician_id) VALUES (?, ?);';
 				mysql_handler(create_query, [user_id, politician_id], function(err){
 					if (err) {return next(err);}
-					helpers.register_activity(user_id, `Começou a seguir o politico ${politician_name}.`);
+					helpers.register_activity(user_id, 'follow', follow, `Começou a seguir o politico ${politician_name}.`);
 					return res.json('ok, create');
 				});
 			} else {

@@ -245,7 +245,7 @@ function update_password(req, res, next) {
 function user_activities(req, res, next) {
 	var user_id = req.user['id'];
 
-	var get_activities_query = 'select description, created_at from user_activity where user_id=?';
+	var get_activities_query = 'select description, created_at, type, value from user_activity where user_id=?';
 	mysql_handler(get_activities_query, [user_id], function(err, user_activities){
 		if (err) {return next(err);}
 
@@ -254,6 +254,8 @@ function user_activities(req, res, next) {
 			parsed_activities.push({
 							'descricao': activity['description'],
 							'data': moment(activity['created_at']).format('lll'),
+							'tipo': activity['type'],
+							'valor': helpers.format_null_bool(activity['value']),
 						})
 
 		});

@@ -7,6 +7,7 @@ DROP TABLE proposal_vote;
 DROP TABLE proposal;
 DROP TABLE politician_position;
 DROP TABLE position;
+DROP TABLE user_activity;
 
 
 
@@ -102,5 +103,7 @@ CREATE TABLE user_activity (
   user_id int NOT NULL,
   created_at timestamp default current_timestamp NOT NULL,
   description text NOT NULL,
+  type varchar(15) NOT NULL,
+  value boolean,
 	PRIMARY KEY (id)
 );

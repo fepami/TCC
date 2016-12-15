@@ -99,12 +99,14 @@ var send_mail = function(mail_parameters, callback){
 }
 
 
-var register_activity = function(user_id, description){
+var register_activity = function(user_id, type, value, description){
 	var create_activity_query = 'INSERT INTO user_activity SET ?';
 
 	var activity_params = {
 		'user_id': user_id,
 		'description': description,
+		'type': type,
+		'value':value,
 	}
 
 	mysql_handler(create_activity_query, activity_params, function(err, result){
