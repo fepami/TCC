@@ -200,7 +200,7 @@ app.get('/usuario/mudar_avatar', helpers.jwt_mw, (req, res, next) => {
   var s3Params = {
     Bucket: S3_BUCKET,
     Key: file_name,
-    Expires: 60,
+    Expires: 120,
     ContentType: file_type,
     // ContentEncoding: 'base64',
     ACL: 'public-read'
