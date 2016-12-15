@@ -254,7 +254,7 @@ for proposal in proposals:
 	except Exception as e:
 		print proposal
 		import pdb; pdb.set_trace()
-		raise e
+		# raise e
 
 
 	proposal_id = cur.lastrowid
@@ -270,7 +270,7 @@ for proposal in proposals:
 		except Exception as e:
 			print proposal
 			import pdb; pdb.set_trace()
-			raise e
+			# raise e
 
 # raise Exception()
 db.commit()
