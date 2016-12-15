@@ -142,8 +142,13 @@ function create_token(user_info) {
 
 
 
+const moment = require('moment');
+moment.locale('pt-br');
 
 function jwt_mw(req, res, next) {
+	console.log(moment().format('DD/MM/YY h:mm:ss') + ': ' + req.get('host') + req.originalUrl);
+
+
 	var token = req.query['token'];
 
 	if (!token) {return next('Precisa do token!')}

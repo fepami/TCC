@@ -1,4 +1,5 @@
 const moment = require('moment');
+moment.locale('pt-br');
 
 const mysql = require('mysql');
 

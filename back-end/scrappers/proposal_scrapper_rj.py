@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from unidecode import unidecode
 import requests, subprocess, datetime
 import MySQLdb
-import os.path
+import os.path, re
 
 # sudo apt-get install python-mysqldb
 # sudo pip install unidecode
@@ -18,37 +18,6 @@ db = MySQLdb.connect(
 )
 cur = db.cursor(MySQLdb.cursors.DictCursor)
 
-
-def file_get_contents(filename):
-	with open(filename) as f:
-		return f.read()
-
-PROPOSALS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/proposals/'
-print PROPOSALS_DIR
-def get_txt_content(document_link, proposal_code):
-	formatted_code = proposal_code.replace(' ', '-')
-	file_name_pdf = '%s%s.pdf' % (PROPOSALS_DIR, formatted_code)
-	if not os.path.isfile(file_name_pdf):
-		print('* DOWNLOAD %s *') % proposal_code
-		r = requests.get(document_link, stream=True)
-		if r.status_code == 200:
-			with open(file_name_pdf, 'wb') as f:
-				for chunk in r:
-					f.write(chunk)
-
-	file_name_txt = '%s%s.txt' % (PROPOSALS_DIR, formatted_code)
-	if not os.path.isfile(file_name_txt):
-		command = 'pdftotext %s.pdf %s.txt' % (formatted_code, formatted_code)
-		process = subprocess.Popen(command.split(), cwd=PROPOSALS_DIR, stdout=subprocess.PIPE)
-		process.communicate()
-
-	try:
-		content = file_get_contents(file_name_txt)
-	except Exception as e:
-		print '** PDF CONVERT ERROR **'
-		return None
-
-	return content.decode('utf8')
 
 politicians_ids_dict = {}
 def get_author_ids(authors):
@@ -146,59 +115,17 @@ def get_category(subjects):
 	return None
 	raise Exception('Proposta sem categoria!')
 
-def get_status(proposal_node):
-	end_node = contrived_get_node(proposal_node, 'Encerramento:')
-	if end_node:
-		if 'PROMULGADO' in end_node.text:
-			return 'approved'
-
-		if 'RETIRADO PELO AUTOR' in end_node.text:
-			return 'canceled'
-
-	actions = []
-	end_node = contrived_get_node(proposal_node, 'Encaminhamento:')
-	if end_node:
-		actions.extend(end_node.get_text(separator='\n||\n').split('\n||\n'))
-
-	end_node = contrived_get_node(proposal_node, 'Deliberação:')
-	if end_node:
-		actions.extend(end_node.get_text(separator='\n||\n').split('\n||\n'))
-
-
-	REPROVAL_KEYWORDS = ['VETO']
-	APPROVAL_KEYWORDS = ['APROVADO', 'PROMULGACAO']
-	ACTION_KEYWORDS = APPROVAL_KEYWORDS + REPROVAL_KEYWORDS
-	def sort_actions_key(action):
-		if not any([x in action for x in ACTION_KEYWORDS]):
-			return datetime.datetime(1500, 1, 1)
-
-		match = re.search(r'\d{2}/\d{2}/\d{4}', action)
-		if not match:
-			return datetime.datetime(1500, 1, 1)
-
-		date = datetime.datetime.strptime(match.group(1), "%d/%m/%Y")
-
-		return date
-
-
-	print '-----------'
-
-	if printed:
-		import pdb; pdb.set_trace()
-
-	return 'ongoing'
-
 uncategorized_summary_and_subjects = []
-def get_proposals(post_data):
+def get_proposals():
 	cur.execute("SELECT code, YEAR(received_at) as year FROM proposal;")
 	existing_proposals_codes = {"%s %s" % (x['code'], x['year']) for x in cur.fetchall()}
 
-	r = requests.post("http://documentacao.camara.sp.gov.br/cgi-bin/wxis.exe/iah/scripts/", data=post_data)
+	r = requests.get("http://mail.camara.rj.gov.br/APL/Legislativos/scpro1316.nsf/Internet/LeiInt?OpenForm")
 	# print('**** RESPONSE ****')
 	soup = BeautifulSoup(r.text, 'html.parser')
 
 	# print(soup)
-	proposal_nodes = soup.select('.resultCol')
+	proposal_nodes = soup.select('table')[1].select('tr')[1:]
 	print len(proposal_nodes)
 	if not proposal_nodes:
 		raise Exception('Nenhuma proposta foi encontrada!')
@@ -222,68 +149,66 @@ def get_proposals(post_data):
 	for proposal_node in proposal_nodes:
 		proposal = {}
 
-		authors = contrived_get_node(proposal_node, 'Promovente:').text.split(' / ')
+		authors = proposal_node.select('td')[5].get_text().strip().replace('VEREADORA ', '').replace('VEREADOR ', '').replace('dr.', '').replace('professora ', '').replace('professor ', '').split(',')
+		code = proposal_node.select('td')[0].get_text()
+		summary = proposal_node.select('td')[3].get_text()
+		date_str = proposal_node.select('td')[4].get_text()
 
-		general_info_node = contrived_get_node(proposal_node, 'Projeto:')
-		code_and_date =  general_info_node.text.replace(u'\xa0', ' ').replace('   ', ' ').replace('  ', ' ').split(' ')
-		code = ' '.join(code_and_date[0:2])
-		date_obj = datetime.datetime.strptime(code_and_date[2], "%d/%m/%Y")
+		date_obj = datetime.datetime.strptime(date_str, "%m/%d/%Y")
 
-		# print '**********'
-		# print 'code: %s' % code
+		document_link = proposal_node.select('td')[0].select_one('a').get('href')
+		document_link = 'http://mail.camara.rj.gov.br' + document_link
 
-		# printed = False
-		# end_node = contrived_get_node(proposal_node, 'Encerramento:')
-		# if end_node:
-		# 	print '** Encerramento:'
-		# 	print end_node.get_text(separator='\n\n')
-		# 	printed = True
+		doc_req = requests.get(document_link)
+		doc_soup = BeautifulSoup(doc_req.text, 'html.parser')
+		# import pdb; pdb.set_trace()
 
-		# end_node = contrived_get_node(proposal_node, 'Encaminhamento:')
-		# if end_node:
-		# 	print '** Encaminhamento:'
-		# 	print end_node.get_text(separator='\n\n')
-		# 	printed = True
+		# initial_index = None
+		# end_index = None
+		# for i, child_node in enumerate(doc_soup.contents):
+		# 	tag = child_node.name
+		# 	if not tag:
+		# 		continue
 
-		# end_node = contrived_get_node(proposal_node, 'Deliberação:')
-		# if end_node:
-		# 	print '** Deliberação:'
-		# 	print end_node.get_text(separator='\n\n')
-		# 	printed = True
+		# 	align = child_node.get('align')
 
-		# print authors
-		# print '-----------'
+		# 	if tag=='div' and align=='right':
+		# 		initial_index = i
 
-		# if printed:
-		# 	import pdb; pdb.set_trace()
-		# continue
+		# 	if tag=='div' and align=='center' and initial_index is not None:
+		# 		end_index = i
+		# 		break
+
+		# content = '\n'.join([x.get_text() for x in doc_soup.contents[initial_index:end_index]])
+
+		regex = re.compile(r'D E C R E T A :(.*)Plenário Teotônio Villela,', re.DOTALL)
+		content = regex.search(doc_soup.get_text().encode('utf8'))
+
+		if not content:
+			regex = re.compile(r'D E C R E T A :(.*)JUSTIFICATIVA', re.DOTALL)
+			content = regex.search(doc_soup.get_text().encode('utf8'))
 
 
 
-		code_with_year = "%s %s" % (code, date_obj.year)
-		if code_with_year in existing_proposals_codes:
-			print 'Proposta já existe'
-			continue
+		content = content.groups(1)
+		# import pdb; pdb.set_trace()
 
-		document_link = general_info_node.a.get('href')
-		document_link = 'http://documentacao.camara.sp.gov.br' + document_link
 
-		summary = contrived_get_node(proposal_node, 'Ementa:').text
 
-		subjects = contrived_get_node(proposal_node, 'Assunto:').text.split(' / ')
-		category = get_category(subjects)
-		if category is None:
-			print 'Não foi possível categorizar'
-			print summary
-			print subjects
-			uncategorized_summary_and_subjects.append({'summary':summary, 'subjects':subjects})
-			# import pdb; pdb.set_trace()
-			continue
+		# subjects = contrived_get_node(proposal_node, 'Assunto:').text.split(' / ')
+		# category = get_category(subjects)
+		# if category is None:
+		# 	print 'Não foi possível categorizar'
+		# 	print summary
+		# 	print subjects
+		# 	uncategorized_summary_and_subjects.append({'summary':summary, 'subjects':subjects})
+		# 	# import pdb; pdb.set_trace()
+		# 	continue
 
-		elif category is False:
-			print 'Ignorar proposta'
-			# ignorar
-			continue
+		# elif category is False:
+		# 	print 'Ignorar proposta'
+		# 	# ignorar
+		# 	continue
 
 		politician_ids = get_author_ids(authors)
 		if not politician_ids:
@@ -296,17 +221,13 @@ def get_proposals(post_data):
 		# 	import pdb; pdb.set_trace()
 
 
-		content = get_txt_content(document_link, code)
-		if not content:
-			print 'Erro obtendo o conteudo da proposta'
-			continue
-
 		proposal['politician_ids'] = politician_ids
-		proposal['category'] = category
+		# proposal['category'] = category
+		proposal['category'] = None
 
 
 		proposal['received_at'] = date_obj
-		proposal['code'] = code.decode('utf8')
+		proposal['code'] = code
 		proposal['summary'] = summary
 		proposal['content'] = content
 
@@ -321,54 +242,7 @@ def get_proposals(post_data):
 
 
 
-post_data = [
-		('IsisScript','iah.xis'),
-	# ('environment','^d/iah/^c/inetpub/vhosts/camara.embratic.net/documentacao/iah/scripts/^b/inetpub/vhosts/camara.embratic.net/documentacao/bases/iah/^p/inetpub/vhosts/camara.embratic.net/documentacao/bases/iah/par/^siah.xis^v3.1.1'),
-	('avaibleFormats','^nstandard.pft^1Resumido^2Resumido^3Resumed'),
-	('avaibleFormats','^ndetalhado.pft^1Detalhado^2Datallado^3Detailed'),
-	('avaibleFormats','^nDEFAULT^fdetalhado.pft'),
-	('apperance','^earena@camara.sp.gov.br^rON^mON^apt'), # de alguma forma isso muda a ordenacao....
-	# ('helpInfo','^nHELP FORM^vhelp_form_lilacs.htm'),
-	# ('helpInfo','^nNOTE FORM F^vnote_form_proje.htm'),
-	# ('gizmoDecod',''),
-	# ('avaibleForms','F,A'),
-	# ('logoImage',''),
-	# ('logoURL',''),
-	# ('headerImage',''),
-	# ('headerURL',''),
-		('form','A'),
-	# ('pathImages','/iah/pt/image/'),
-		('navBar','ON'),
-		('hits','50'), # numero de propostas
-	('format','detalhado.pft'),
-		('lang','pt'),
-	# ('isisTotal','215'),
-	# ('isisFrom','215'),
-	# ('user','GUEST'),
-	# ('baseFeatures','^e^f'),
-	# ('related',''),
-		('nextAction','refine/resubmit'),
-		('base','proje'),
-		('conectSearch','init'),
-		('exprSearch','"PROJETO DE LEI"'),
-		('indexSearch','^nCm^LTipo de projeto^tshort^x/20^yDATABASE'),
-			# ('exprSearch','Abou Anni'),
-		# ('indexSearch','^nAu^LAutor do projeto^x/50^yDATABASE'),
-	# ('conectSearch','and'),
-	# ('exprSearch',''),
-	# ('indexSearch','^nTw^LTodos os campos^2Todos los campos^3All fields^yDATABASE^xALL '),
-	# ('conectSearch','and'),
-	# ('exprSearch',''),
-	# ('indexSearch','^nTw^LTodos os campos^2Todos los campos^3All fields^yDATABASE^xALL '),
-
-
-
-	# mudar de pagina
-	# ('Page10.x','1'),
-	# ('Page10.y','1'),
-]
-
-proposals = get_proposals(post_data)
+proposals = get_proposals()
 for proposal in proposals:
 	try:
 		insert_query_proposal = u"""
@@ -400,10 +274,6 @@ for proposal in proposals:
 
 # raise Exception()
 db.commit()
-
-import shutil, os
-shutil.rmtree(PROPOSALS_DIR)
-os.makedirs(PROPOSALS_DIR)
 
 # for summary_and_subjects_dict in uncategorized_summary_and_subjects:
 # 	print summary_and_subjects_dict['summary']
