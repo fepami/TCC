@@ -12,8 +12,15 @@ var _get_where_filters = function(req){
 
 	Object.keys(filter_params).forEach(function(param){
 		var filter_value = req.query[param];
-		if (req.query[param]) {
-			query_where_components.push(filter_params[param] + " = '" + filter_value + "'");
+		if (filter_value) {
+			if (filter_value.constructor === Array) {
+				filter_value = filter_value.map(function(value){return `'${value}'`});
+				filter_value = filter_value.join(',')
+			} else {
+				filter_value = `'${filter_value}'`;
+			}
+
+			query_where_components.push(filter_params[param] + " IN (" + filter_value + ")");
 		}
 	});
 

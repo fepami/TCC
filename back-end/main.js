@@ -104,6 +104,11 @@ var user_controller = require("./user.js");
 var filter_controller = require("./filter.js");
 
 app.get("/",(req,res) => {
+	helpers.debug_print(req.query['yay']);
+	return res.json(req.query['yay']);
+
+
+
 	if ('database' in req.query && 'execute_query' in req.query) {
 		var query_handler = null;
 		if (req.query['database'] == 'mysql') {
@@ -117,7 +122,7 @@ app.get("/",(req,res) => {
 			if (err) {
 				return res.json(err);
 			}
-			res.json(result);
+			return res.json(result);
 		});
 	}
 });
