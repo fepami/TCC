@@ -135,7 +135,7 @@ app.get("/test_token", helpers.jwt_mw, function(req, res){
 
 	var now = Math.floor(Date.now() / 1000);
 
-	if ((exp-now)*2 < exp-iat) {
+	if ((exp-now)*4 < exp-iat) {
 		res.status(419);
 	}
 

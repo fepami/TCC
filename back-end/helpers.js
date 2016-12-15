@@ -135,7 +135,7 @@ function verify_token(token, callback) {
 }
 
 function create_token(user_info) {
-	return jwt.sign(user_info, token_secret, {'expiresIn' : '7d' });
+	return jwt.sign(user_info, token_secret, {'expiresIn' : '14d' });
 }
 
 
