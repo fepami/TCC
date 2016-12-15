@@ -140,7 +140,7 @@ var get_proposals_func = function(type){
 				});
 			});
 		} else if (type === 'ranking') {
-			query_for_props[3] = 'order by prop.ranking limit 99';
+			query_for_props[3] = 'order by prop.ranking limit 10';
 
 			if (where_filters) {
 				query_for_props[1] = 'where ' + where_filters;
@@ -170,6 +170,7 @@ var get_proposals_func = function(type){
 			if (where_filters) {
 				query_for_props[1] = 'where ' + where_filters;
 			}
+			query_for_props[3] = 'limit 10';
 
 			mysql_handler(query_for_props.join('\n'), [user_id], function(err, proposals){
 				if (err) {return next(err)}

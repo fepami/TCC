@@ -128,6 +128,7 @@ var get_politicians_func = function(type){
 		var user_id = req.user['id'];
 		if (type === 'follow') {
 			query_for_polis[1] = 'inner join politician_follow f on f.politician_id = pol.id where f.user_id=?';
+			query_for_polis[2] = 'limit 10';
 
 			if (where_filters) {
 				query_for_polis[1] = query_for_polis[1] + ' AND ' + where_filters;
@@ -138,7 +139,7 @@ var get_politicians_func = function(type){
 				res.json(parse_politicians(politicians));
 			});
 		} else if (type === 'ranking') {
-			query_for_polis[2] = 'order by pol.ranking limit 99';
+			query_for_polis[2] = 'order by pol.ranking limit 10';
 
 			if (where_filters) {
 				query_for_polis[1] = 'where ' + where_filters;
@@ -150,6 +151,7 @@ var get_politicians_func = function(type){
 			});
 		} else if (type === 'election') {
 			query_for_polis[1] = 'where LAST_ELEC_T.election_year = 2016';
+			query_for_polis[2] = 'limit 10';
 
 			if (where_filters) {
 				query_for_polis[1] = query_for_polis[1] + ' AND ' + where_filters;
@@ -172,6 +174,7 @@ var get_politicians_func = function(type){
 			if (where_filters) {
 				query_for_polis[1] = 'where ' + where_filters;
 			}
+			query_for_polis[2] = 'limit 10';
 
 			mysql_handler(query_for_polis.join('\n'), [user_id, user_id], function(err, politicians){
 				if (err) {return next(err);}
@@ -347,6 +350,7 @@ var history = function(req, res, next) {
 			var pol_history = politician_history[i];
 
 			history = '';
+			helpers.debug_print(pol_history['was_elected']);
 			if (pol_history['was_elected']) {
 				history = 'Eleito ';
 			} else {
