@@ -292,7 +292,7 @@ var forgot_password = function(req, res, next){
 
 			var params = {
 				to: user_email,
-				subject: "Esqueceu a senha? Que burro!",
+				subject: "Esqueceu a senha?",
 				text: `Sua nova senha eh: ${new_password}`
 			}
 
