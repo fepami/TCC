@@ -38,7 +38,7 @@ function get_filter_options(type) {
 				filters.push(filter);
 			}
 
-			filters.push({'topic': 'Aprovação', 'options':['Melhores Aprovados', 'Piores Aprovados']});
+			// filters.push({'topic': 'Aprovação', 'options':['Melhores Aprovados', 'Piores Aprovados']});
 
 
 			return res.json(filters);
