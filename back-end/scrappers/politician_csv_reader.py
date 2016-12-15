@@ -214,9 +214,10 @@ FIELDNAMES_PER_START_YEAR = {
 # http://www.tse.jus.br/hotSites/pesquisas-eleitorais/candidatos_anos/2016.html
 
 POLITICIANS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/politicians/'
-# file_name = POLITICIANS_DIR + 'consulta_cand_2016_SP.csv'
 for file_name in os.listdir(POLITICIANS_DIR):
 	file_name = POLITICIANS_DIR + file_name
+	# file_name = POLITICIANS_DIR + 'consulta_cand_2016_SP.csv'
+	file_name = POLITICIANS_DIR + 'consulta_cand_2012_RJ.txt'
 	print(file_name)
 	year = int(re.match(r'.*_(\d{4})_.*', file_name).group(1))
 
@@ -239,8 +240,9 @@ for file_name in os.listdir(POLITICIANS_DIR):
 			location = portuguese_titleize(row['DESCRICAO_UE'])
 			print '.',
 
-			# if location in [u'São Paulo', u'Rio de Janeiro']:
-			if location in [u'São Paulo']:
+			if location in [u'São Paulo', u'Rio de Janeiro']:
+			# if location in [u'São Paulo']:
+			# if location in [u'Rio de Janeiro']:
 				print ''
 
 				name = row['NOME_CANDIDATO']
@@ -254,7 +256,12 @@ for file_name in os.listdir(POLITICIANS_DIR):
 					politician['date_of_birth'] = datetime.datetime.strptime(row['DATA_NASCIMENTO'], "%d/%m/%Y")
 					politician['email'] = row.get('NM_EMAIL')
 
-					politician['photo_url'] = 'http://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/2/%s' % row['SEQUENCIAL_CANDIDATO']
+					photo_url_code = 2 if year == 2016 else 1699
+					politician['photo_url'] = 'http://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/%s/%s' % (photo_url_code, row['SEQUENCIAL_CANDIDATO'])
+
+					# print politician['name']
+					# print politician['photo_url']
+					# import pdb; pdb.set_trace()
 
 					try:
 						if normalize_string(name) == 'fernando haddad':
